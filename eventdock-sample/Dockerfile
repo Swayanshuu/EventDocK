@@ -18,7 +18,7 @@ WORKDIR /app
 RUN addgroup -S linkpeer && adduser -S linkpeer -G linkpeer
 USER linkpeer:linkpeer
 
-COPY --from=builder /workspace/eventdock-sample/target/eventdock-sample-*.jar app.jar
+COPY --from=builder /workspace/eventdock-sample/target/eventdock-sample-0.1.0.jar app.jar
 
 EXPOSE 8081
 

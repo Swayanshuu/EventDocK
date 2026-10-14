@@ -19,7 +19,7 @@ public class EventDockProperties {
     /**
      * Base URL of the EventDock API service (e.g. http://localhost:8080).
      */
-    private String endpoint = "http://localhost:8080";
+    private String endpoint = "https://api.eventdock.swynx.dev";
 
     /**
      * Project ingestion API key (e.g. ed_live_...).
@@ -37,7 +37,8 @@ public class EventDockProperties {
     private String environment = "development";
 
     /**
-     * Minimum HTTP status code threshold to trigger diagnostic event capture. Default is 400.
+     * Minimum HTTP status code threshold to trigger diagnostic event capture.
+     * Default is 400.
      */
     private int minStatusCode = 400;
 
@@ -58,8 +59,7 @@ public class EventDockProperties {
             "/actuator",
             "/actuator/**",
             "/favicon.ico",
-            "/error"
-    ));
+            "/error"));
 
     private CaptureProperties capture = new CaptureProperties();
     private RedactionProperties redaction = new RedactionProperties();
@@ -68,7 +68,8 @@ public class EventDockProperties {
 
     public static class CaptureProperties {
         /**
-         * Capture HTTP request and response bodies. False by default for privacy and security.
+         * Capture HTTP request and response bodies. False by default for privacy and
+         * security.
          */
         private boolean bodyEnabled = false;
 
@@ -118,8 +119,7 @@ public class EventDockProperties {
                 "set-cookie",
                 "x-api-key",
                 "x-auth-token",
-                "x-eventdock-api-key"
-        ));
+                "x-eventdock-api-key"));
 
         /**
          * Sensitive JSON keys to redact when body capture is enabled.
@@ -134,8 +134,7 @@ public class EventDockProperties {
                 "cardNumber",
                 "cvv",
                 "ssn",
-                "privateKey"
-        ));
+                "privateKey"));
 
         public Set<String> getHeaders() {
             return headers;

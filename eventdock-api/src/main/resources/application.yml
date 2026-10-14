@@ -1,14 +1,14 @@
 server:
-  port: ${EVENTDOCK_SERVER_PORT:8080}
+  port: ${PORT:${EVENTDOCK_SERVER_PORT:8080}}
 
 spring:
   application:
     name: eventdock-api
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${EVENTDOCK_DB_HOST:localhost}:${EVENTDOCK_DB_PORT:5432}/${EVENTDOCK_DB_NAME:eventdock}}
-    username: ${SPRING_DATASOURCE_USERNAME:${EVENTDOCK_DB_USER:eventdock_user}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${EVENTDOCK_DB_PASSWORD:eventdock_secret_pass}}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${EVENTDOCK_DB_HOST:${PGHOST:localhost}}:${EVENTDOCK_DB_PORT:${PGPORT:5432}}/${EVENTDOCK_DB_NAME:${PGDATABASE:eventdock}}}
+    username: ${SPRING_DATASOURCE_USERNAME:${EVENTDOCK_DB_USER:${PGUSER:eventdock_user}}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${EVENTDOCK_DB_PASSWORD:${PGPASSWORD:eventdock_secret_pass}}}
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000

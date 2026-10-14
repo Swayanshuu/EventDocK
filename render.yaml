@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: eventdock-api
+    runtime: docker
+    dockerfilePath: eventdock-api/Dockerfile
+    dockerContext: .
+    plan: free
+    region: oregon
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: EVENTDOCK_BASE_URL
+        value: https://eventdock.swynx.dev
+      - key: EVENTDOCK_JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: eventdock-db
+          property: connectionString
+
+databases:
+  - name: eventdock-db
+    plan: free
+    region: oregon
+    databaseName: eventdock
+    user: eventdock_user
