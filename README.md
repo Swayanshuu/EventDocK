@@ -19,20 +19,20 @@
 
 ---
 
-## ⚡ Overview
+## Overview
 
 **EventDock** bridges the gap between backend runtime failures and developer resolution. Instead of sifting through massive, noisy log aggregators or trying to manually reconstruct broken HTTP payloads, developers simply add `eventdock-starter` to their Spring Boot microservices.
 
 When an unhandled HTTP 500 error, database deadlock, or unexpected exception occurs:
 
 1. **Automatic Capture**: Intercepts HTTP request metadata, headers, query parameters, bodies, and nested exception stack traces.
-2. **Automated PII & Secret Scrubbing**: Recursively sanitizes authorization headers, session cookies, JWTs, passwords, and sensitive keys *before* payloads leave your JVM.
+2. **Automated PII & Secret Scrubbing**: Recursively sanitizes authorization headers, session cookies, JWTs, passwords, and sensitive keys _before_ payloads leave your JVM.
 3. **Zero Ingestion Latency**: Dispatches diagnostic telemetry via an asynchronous non-blocking ring buffer, preventing thread exhaustion or API performance degradation.
 4. **1-Click Request Replay**: Safely re-executes captured failure payloads against local dev (`http://localhost:8080`) or staging environments with full SSRF guardrails.
 
 ---
 
-## 🔭 Architecture
+## Architecture
 
 ```
 +-------------------------------------------------------------------------+
@@ -67,21 +67,21 @@ When an unhandled HTTP 500 error, database deadlock, or unexpected exception occ
 
 ---
 
-## 📦 Monorepo Modules
+## Monorepo Modules
 
 EventDock is maintained as a cohesive Maven multi-module architecture:
 
-| Module | Technology | Description | Path |
-| :--- | :--- | :--- | :--- |
-| **`eventdock-starter`** | Spring Boot 3.4, Java 21 | Lightweight auto-configuring client starter library embedded into user microservices. | [`eventdock-starter/`](eventdock-starter) |
-| **`eventdock-api`** | Spring Boot 3.4, PostgreSQL | Core backend service for ingestion, tenant project management, and SSRF-safe request replay. | [`eventdock-api/`](eventdock-api) |
-| **`eventdock-dashboard`** | Flutter 3.x Web, Glassmorphism | Dark-mode developer web dashboard for real-time failure triage and waitlist landing page. | [`eventdock-dashboard/`](eventdock-dashboard) |
-| **`eventdock-cli`** | Java 21, Picocli | High-velocity terminal CLI tool for querying failures, inspecting stack traces, and triggering replays. | [`eventdock-cli/`](eventdock-cli) |
-| **`eventdock-sample`** | Spring Boot 3.4 (*LinkPeer*) | Reference application preconfigured with EventDock and simulated fault endpoints. | [`eventdock-sample/`](eventdock-sample) |
+| Module                    | Technology                     | Description                                                                                             | Path                                          |
+| :------------------------ | :----------------------------- | :------------------------------------------------------------------------------------------------------ | :-------------------------------------------- |
+| **`eventdock-starter`**   | Spring Boot 3.4, Java 21       | Lightweight auto-configuring client starter library embedded into user microservices.                   | [`eventdock-starter/`](eventdock-starter)     |
+| **`eventdock-api`**       | Spring Boot 3.4, PostgreSQL    | Core backend service for ingestion, tenant project management, and SSRF-safe request replay.            | [`eventdock-api/`](eventdock-api)             |
+| **`eventdock-dashboard`** | Flutter 3.x Web, Glassmorphism | Dark-mode developer web dashboard for real-time failure triage and waitlist landing page.               | [`eventdock-dashboard/`](eventdock-dashboard) |
+| **`eventdock-cli`**       | Java 21, Picocli               | High-velocity terminal CLI tool for querying failures, inspecting stack traces, and triggering replays. | [`eventdock-cli/`](eventdock-cli)             |
+| **`eventdock-sample`**    | Spring Boot 3.4 (_LinkPeer_)   | Reference application preconfigured with EventDock and simulated fault endpoints.                       | [`eventdock-sample/`](eventdock-sample)       |
 
 ---
 
-## 🚀 Quick Integration
+## Quick Integration
 
 Get EventDock running in your Spring Boot application in less than two minutes:
 
@@ -100,7 +100,7 @@ Get EventDock running in your Spring Boot application in less than two minutes:
 ```yaml
 eventdock:
   enabled: true
-  endpoint: "https://api.eventdock.swynx.dev"  # Or http://localhost:8080 for local dev
+  endpoint: "https://api.eventdock.swynx.dev" # Or http://localhost:8080 for local dev
   api-key: "${EVENTDOCK_API_KEY:ed_live_your_project_key_here}"
   service-name: "order-service"
   environment: "staging"
@@ -123,7 +123,7 @@ That's it. Zero custom exception handlers or servlet filters required. `eventdoc
 
 ---
 
-## 💻 Running the Full Stack Locally
+## Running the Full Stack Locally
 
 EventDock provides 1-click startup automation for local development:
 
@@ -143,12 +143,12 @@ EventDock provides 1-click startup automation for local development:
 
 ---
 
-## 🛡️ Security & SSRF Protection
+## Security & SSRF Protection
 
 EventDock is built with defense-in-depth principles:
 
 - **Hashed API Keys**: Ingestion API keys (`ed_live_...`) are stored in the database exclusively as SHA-256 hashes (`key_hash`). Plaintext keys are shown only once upon creation.
-- **Client-Side Sanitization**: Redaction happens inside your host JVM *before* network transport. Passwords and tokens never leave your network boundary.
+- **Client-Side Sanitization**: Redaction happens inside your host JVM _before_ network transport. Passwords and tokens never leave your network boundary.
 - **SSRF Replay Guardrails**:
   - DNS pre-resolution blocks loopbacks, link-local addresses (`169.254.169.254`), and cloud metadata endpoints unless explicitly overridden in developer mode.
   - Automatically disables HTTP redirect following (`HttpClient.Redirect.NEVER`).
@@ -157,7 +157,7 @@ EventDock is built with defense-in-depth principles:
 
 ---
 
-## 🖥️ Command-Line Interface (`eventdock-cli`)
+## Command-Line Interface (`eventdock-cli`)
 
 Inspect errors directly from your terminal:
 
@@ -187,7 +187,7 @@ eventdock replay <EVENT_UUID> --target http://localhost:8081
 
 ---
 
-## 📚 Comprehensive Documentation
+## Comprehensive Documentation
 
 Explore detailed architectural specifications and design guides:
 
@@ -200,13 +200,13 @@ Explore detailed architectural specifications and design guides:
 
 ---
 
-## 🌐 Community & Early Access
+## Community & Early Access
 
 Join developers triaging backend errors with zero overhead:
 
 - **Live Landing & Waitlist**: [https://eventdock.swynx.dev](https://eventdock.swynx.dev)
 - **Maven Central Repository**: [dev.swynx:eventdock-starter](https://central.sonatype.com/artifact/dev.swynx/eventdock-starter)
-- **Support & Inquiries**: `noreply@swynx.dev`
+- **Support & Inquiries**: [swynx.dev@gmail.com](mailto:swynx.dev@gmail.com)
 
 ---
 

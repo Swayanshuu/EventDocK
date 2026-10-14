@@ -1,0 +1,52 @@
+name: Publish EventDock Starter
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      auto_publish:
+        description: 'Auto-publish directly on Central Portal (true/false)'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  publish:
+    name: Publish to Maven Central
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21 LTS
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Import GPG Key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Configure Maven settings.xml
+        uses: s4u/maven-settings-action@v3.1.0
+        with:
+          servers: |
+            [{
+              "id": "central",
+              "username": "${{ secrets.CENTRAL_TOKEN_USER }}",
+              "password": "${{ secrets.CENTRAL_TOKEN_PASSWORD }}"
+            }]
+
+      - name: Deploy to Maven Central via Central Portal
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          mvn clean deploy -P release \
+            --batch-mode \
+            --no-transfer-progress \
+            -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}"
