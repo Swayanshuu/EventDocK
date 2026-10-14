@@ -46,7 +46,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/events", "/api/v1/events/ingest").permitAll()
 
                         // Operational endpoints and API docs
-                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/health", "/actuator/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**", "/swagger-ui.html").permitAll()
 
                         // Options preflight
