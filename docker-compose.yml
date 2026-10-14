@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: eventdock-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${EVENTDOCK_DB_NAME:-eventdock}
+      POSTGRES_USER: ${EVENTDOCK_DB_USER:-eventdock_user}
+      POSTGRES_PASSWORD: ${EVENTDOCK_DB_PASSWORD:-eventdock_secret_pass}
+    ports:
+      - "${EVENTDOCK_DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${EVENTDOCK_DB_USER:-eventdock_user} -d ${EVENTDOCK_DB_NAME:-eventdock}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - eventdock-net
+
+  eventdock-api:
+    build:
+      context: .
+      dockerfile: eventdock-api/Dockerfile
+    container_name: eventdock-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${EVENTDOCK_DB_NAME:-eventdock}
+      SPRING_DATASOURCE_USERNAME: ${EVENTDOCK_DB_USER:-eventdock_user}
+      SPRING_DATASOURCE_PASSWORD: ${EVENTDOCK_DB_PASSWORD:-eventdock_secret_pass}
+      EVENTDOCK_JWT_SECRET: ${EVENTDOCK_JWT_SECRET:-super_secret_jwt_signing_key_replace_for_production_min_32_bytes_long!}
+      EVENTDOCK_REPLAY_ALLOW_LOCAL_DEV: "true"
+      EVENTDOCK_REPLAY_ALLOWED_HOSTS: "eventdock-sample,localhost,127.0.0.1"
+    ports:
+      - "${EVENTDOCK_SERVER_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+    networks:
+      - eventdock-net
+
+  eventdock-dashboard:
+    build:
+      context: ./eventdock-dashboard
+      dockerfile: Dockerfile
+    container_name: eventdock-dashboard
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - eventdock-api
+    networks:
+      - eventdock-net
+
+  eventdock-sample:
+    build:
+      context: .
+      dockerfile: eventdock-sample/Dockerfile
+    container_name: eventdock-sample
+    restart: unless-stopped
+    depends_on:
+      - eventdock-api
+    environment:
+      EVENTDOCK_ENDPOINT: http://eventdock-api:8080
+      EVENTDOCK_API_KEY: ${SAMPLE_EVENTDOCK_API_KEY:-ed_live_sample_placeholder}
+      SERVER_PORT: 8081
+    ports:
+      - "${SAMPLE_APP_PORT:-8081}:8081"
+    networks:
+      - eventdock-net
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  eventdock-net:
+    driver: bridge

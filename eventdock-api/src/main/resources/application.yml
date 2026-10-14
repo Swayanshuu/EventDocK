@@ -1,0 +1,59 @@
+server:
+  port: ${EVENTDOCK_SERVER_PORT:8080}
+
+spring:
+  application:
+    name: eventdock-api
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${EVENTDOCK_DB_HOST:localhost}:${EVENTDOCK_DB_PORT:5432}/${EVENTDOCK_DB_NAME:eventdock}}
+    username: ${SPRING_DATASOURCE_USERNAME:${EVENTDOCK_DB_USER:eventdock_user}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${EVENTDOCK_DB_PASSWORD:eventdock_secret_pass}}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 10
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+eventdock:
+  base-url: ${EVENTDOCK_BASE_URL:https://eventdock.swynx.dev}
+  jwt:
+    secret: ${EVENTDOCK_JWT_SECRET:super_secret_jwt_signing_key_replace_for_production_min_32_bytes_long!}
+    expiration-minutes: ${EVENTDOCK_JWT_EXPIRATION_MINUTES:1440}
+  replay:
+    allow-local-dev: ${EVENTDOCK_REPLAY_ALLOW_LOCAL_DEV:true}
+    allowed-hosts: ${EVENTDOCK_REPLAY_ALLOWED_HOSTS:localhost,127.0.0.1,eventdock.swynx.dev,api.eventdock.swynx.dev,api-dev.linkpeer.internal,staging.linkpeer.internal}
+    timeout-seconds: ${EVENTDOCK_REPLAY_TIMEOUT_SECONDS:10}
+  limits:
+    max-event-payload-bytes: ${EVENTDOCK_MAX_EVENT_PAYLOAD_BYTES:65536}
+    max-stack-trace-chars: ${EVENTDOCK_MAX_STACK_TRACE_LENGTH:32768}
+  cors:
+    allowed-origins: ${EVENTDOCK_ALLOWED_ORIGINS:https://eventdock.swynx.dev,http://eventdock.swynx.dev,http://localhost:*,http://127.0.0.1:*,https://*.swynx.dev}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html

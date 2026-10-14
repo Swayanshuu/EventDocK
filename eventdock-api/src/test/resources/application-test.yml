@@ -1,0 +1,35 @@
+server:
+  port: 0
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:eventdock_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  flyway:
+    enabled: false
+
+eventdock:
+  base-url: http://localhost:8080
+  jwt:
+    secret: test_jwt_super_secret_signing_key_at_least_32_bytes_long_12345!
+    expiration-minutes: 60
+  replay:
+    allow-local-dev: true
+    allowed-hosts: localhost,127.0.0.1,api-dev.linkpeer.internal
+    timeout-seconds: 5
+  limits:
+    max-event-payload-bytes: 65536
+    max-stack-trace-chars: 32768
+  cors:
+    allowed-origins: "*"
