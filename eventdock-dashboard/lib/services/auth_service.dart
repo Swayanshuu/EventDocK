@@ -22,44 +22,29 @@ class AuthService extends ChangeNotifier {
   final String firebaseProjectId = 'eventdock-5cc21';
   final String firebaseAuthDomain = 'eventdock-5cc21.firebaseapp.com';
 
-  Future<void> signInWithToken(String token, {String? email}) async {
-    _token = token;
-    _userEmail = email ?? 'developer@eventdock.swynx.dev';
-    notifyListeners();
-  }
-
-  Future<void> signInWithGoogle({String? googleEmail, int? cliPort}) async {
+  /// Authenticate using official Google Sign-In via Firebase popup
+  Future<void> signInWithGoogle({int? cliPort}) async {
     if (kIsWeb) {
-      try {
-        final rawResult = await auth_interop.platformGoogleSignIn();
-        if (rawResult != null && rawResult.isNotEmpty) {
-          final data =
-              jsonDecode(rawResult) as Map<String, dynamic>;
-          _token = data['token'] as String?;
+      final rawResult = await auth_interop.platformGoogleSignIn();
+      if (rawResult != null && rawResult.isNotEmpty) {
+        final data = jsonDecode(rawResult) as Map<String, dynamic>;
+        final token = data['token'] as String?;
+        if (token != null && token.isNotEmpty) {
+          _token = token;
           _userEmail = data['email'] as String?;
           _userId = data['uid'] as String?;
           notifyListeners();
 
-          if (cliPort != null && _token != null) {
+          if (cliPort != null) {
             await _deliverCliCallback(cliPort);
           }
           return;
         }
-      } catch (e) {
-        debugPrint('[AuthService] Firebase Google Sign-In error: $e');
       }
+      throw Exception('Google Sign-In failed or was cancelled.');
     }
 
-    // Fallback for non-web or local dev preview
-    final email = googleEmail ?? 'developer@gmail.com';
-    _userEmail = email;
-    _token = 'dev_${email.split('@').first}';
-    _userId = 'google_${email.hashCode.abs()}';
-    notifyListeners();
-
-    if (cliPort != null) {
-      await _deliverCliCallback(cliPort);
-    }
+    throw Exception('Google Sign-In is only supported on web browsers.');
   }
 
   Future<void> _deliverCliCallback(int cliPort) async {
@@ -71,10 +56,6 @@ class AuthService extends ChangeNotifier {
     } catch (_) {
       // Best-effort callback to local CLI listener
     }
-  }
-
-  Future<void> signInWithFirebase(String email, String password) async {
-    await signInWithGoogle(googleEmail: email);
   }
 
   void signOut() {
