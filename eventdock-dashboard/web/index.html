@@ -51,6 +51,49 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <!-- Firebase SDKs for Web Authentication -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBulU64fSaScUBzVnjv6kk9EwapZOpik7U",
+      authDomain: "eventdock-5cc21.firebaseapp.com",
+      projectId: "eventdock-5cc21",
+      storageBucket: "eventdock-5cc21.firebasestorage.app",
+      messagingSenderId: "775460024919",
+      appId: "1:775460024919:web:c2772a2fd9b6905283a912",
+      measurementId: "G-G0EVX02YGK"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    window.eventdockGoogleSignIn = async function() {
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        const result = await firebase.auth().signInWithPopup(provider);
+        const user = result.user;
+        const token = await user.getIdToken();
+        return JSON.stringify({
+          token: token,
+          email: user.email,
+          uid: user.uid,
+          displayName: user.displayName || user.email
+        });
+      } catch (err) {
+        console.error('EventDock Firebase Google Sign-In Error:', err);
+        return null;
+      }
+    };
+
+    window.eventdockSignOut = async function() {
+      try {
+        await firebase.auth().signOut();
+      } catch (err) {
+        console.error('EventDock Firebase Sign-Out Error:', err);
+      }
+    };
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
