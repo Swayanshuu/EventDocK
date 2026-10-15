@@ -747,7 +747,6 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
         );
         break;
       case WaitlistWheelState.idle:
-      default:
         buttonContent = const Text(
           'Join Waitlist',
           style: TextStyle(
