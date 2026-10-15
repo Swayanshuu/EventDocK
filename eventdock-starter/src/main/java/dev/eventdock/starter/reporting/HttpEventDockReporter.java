@@ -31,7 +31,7 @@ public class HttpEventDockReporter implements EventDockReporter {
         this.properties = properties;
         this.objectMapper = objectMapper != null ? objectMapper : new ObjectMapper();
 
-        String baseEndpoint = properties.getEndpoint() != null ? properties.getEndpoint().strip() : "http://localhost:8080";
+        String baseEndpoint = properties.getEndpoint() != null ? properties.getEndpoint().strip() : "https://api.eventdock.swynx.dev";
         if (baseEndpoint.endsWith("/")) {
             baseEndpoint = baseEndpoint.substring(0, baseEndpoint.length() - 1);
         }

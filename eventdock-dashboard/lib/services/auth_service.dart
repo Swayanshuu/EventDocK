@@ -31,11 +31,16 @@ class AuthService extends ChangeNotifier {
   Future<void> signInWithGoogle({String? googleEmail, int? cliPort}) async {
     if (kIsWeb) {
       try {
-        final jsPromise = js_util.callMethod(js_util.globalThis, 'eventdockGoogleSignIn', []);
+        final jsPromise = js_util.callMethod(
+          js_util.globalThis,
+          'eventdockGoogleSignIn',
+          [],
+        );
         if (jsPromise != null) {
           final dynamic rawResult = await js_util.promiseToFuture(jsPromise);
           if (rawResult != null && rawResult.toString().isNotEmpty) {
-            final data = jsonDecode(rawResult.toString()) as Map<String, dynamic>;
+            final data =
+                jsonDecode(rawResult.toString()) as Map<String, dynamic>;
             _token = data['token'] as String?;
             _userEmail = data['email'] as String?;
             _userId = data['uid'] as String?;

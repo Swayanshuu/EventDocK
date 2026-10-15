@@ -16,11 +16,7 @@ class ApiService {
     const customApi = String.fromEnvironment('EVENTDOCK_API_URL');
     if (customApi.isNotEmpty) return customApi;
 
-    // When hosted on eventdock.swynx.dev, automatically use production API endpoint
-    if (Uri.base.host == 'eventdock.swynx.dev') {
-      return 'https://api.eventdock.swynx.dev/api/v1';
-    }
-    return 'http://localhost:8080/api/v1';
+    return 'https://api.eventdock.swynx.dev/api/v1';
   }
 
   Map<String, String> _headers() {

@@ -16,7 +16,7 @@ spring:
 
 eventdock:
   enabled: ${EVENTDOCK_ENABLED:true}
-  endpoint: ${EVENTDOCK_ENDPOINT:http://localhost:8080}
+  endpoint: ${EVENTDOCK_ENDPOINT:https://api.eventdock.swynx.dev}
   api-key: ${EVENTDOCK_API_KEY:ed_live_sample_demo_key}
   service-name: LinkPeer
   environment: local-dev

@@ -205,7 +205,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                 child: SelectableText(
                   'eventdock:\n'
                   '  api-key: "$rawKey"\n'
-                  '  endpoint: "http://localhost:8080"\n',
+                  '  endpoint: "https://api.eventdock.swynx.dev"\n',
                   style: const TextStyle(fontFamily: 'monospace', fontSize: 12, color: AppTheme.textPrimary),
                 ),
               ),
