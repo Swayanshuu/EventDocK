@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:js_util' as js_util;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'auth_interop.dart' as auth_interop;
 
 class AuthService extends ChangeNotifier {
   static final AuthService _instance = AuthService._internal();
@@ -31,26 +31,19 @@ class AuthService extends ChangeNotifier {
   Future<void> signInWithGoogle({String? googleEmail, int? cliPort}) async {
     if (kIsWeb) {
       try {
-        final jsPromise = js_util.callMethod(
-          js_util.globalThis,
-          'eventdockGoogleSignIn',
-          [],
-        );
-        if (jsPromise != null) {
-          final dynamic rawResult = await js_util.promiseToFuture(jsPromise);
-          if (rawResult != null && rawResult.toString().isNotEmpty) {
-            final data =
-                jsonDecode(rawResult.toString()) as Map<String, dynamic>;
-            _token = data['token'] as String?;
-            _userEmail = data['email'] as String?;
-            _userId = data['uid'] as String?;
-            notifyListeners();
+        final rawResult = await auth_interop.platformGoogleSignIn();
+        if (rawResult != null && rawResult.isNotEmpty) {
+          final data =
+              jsonDecode(rawResult) as Map<String, dynamic>;
+          _token = data['token'] as String?;
+          _userEmail = data['email'] as String?;
+          _userId = data['uid'] as String?;
+          notifyListeners();
 
-            if (cliPort != null && _token != null) {
-              await _deliverCliCallback(cliPort);
-            }
-            return;
+          if (cliPort != null && _token != null) {
+            await _deliverCliCallback(cliPort);
           }
+          return;
         }
       } catch (e) {
         debugPrint('[AuthService] Firebase Google Sign-In error: $e');
@@ -86,9 +79,7 @@ class AuthService extends ChangeNotifier {
 
   void signOut() {
     if (kIsWeb) {
-      try {
-        js_util.callMethod(js_util.globalThis, 'eventdockSignOut', []);
-      } catch (_) {}
+      auth_interop.platformSignOut();
     }
     _token = null;
     _userEmail = null;

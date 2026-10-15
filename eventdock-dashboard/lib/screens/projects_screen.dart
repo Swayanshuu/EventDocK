@@ -107,12 +107,16 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                 Navigator.pop(ctx);
                 try {
                   final p = await ApiService().createProject(nameCtrl.text.trim(), descCtrl.text.trim(), retention);
+                  if (!mounted) return;
                   _loadProjects();
                   // Automatically generate initial ingestion key for the new project
                   final key = await ApiService().createApiKey(p.id, 'Default App Ingestion Key');
+                  if (!mounted) return;
                   _showNewProjectKeyDialog(p, key.rawKey);
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                  }
                 }
               },
               child: const Text('Create Project'),
@@ -133,7 +137,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: AppTheme.status2xx.withOpacity(0.2),
+                color: AppTheme.status2xx.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.check, color: AppTheme.status2xx, size: 20),
@@ -281,7 +285,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                         const SizedBox(height: 4),
                         Text(
                           'Select a project to inspect failure events and manage replays',
-                          style: TextStyle(color: AppTheme.textMuted.withOpacity(0.9), fontSize: 13),
+                          style: TextStyle(color: AppTheme.textMuted.withValues(alpha: 0.9), fontSize: 13),
                         ),
                         const SizedBox(height: 14),
                         SizedBox(
@@ -315,7 +319,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                               const SizedBox(height: 4),
                               Text(
                                 'Select a project to inspect diagnostic failure events and manage replays',
-                                style: TextStyle(color: AppTheme.textMuted.withOpacity(0.9), fontSize: 14),
+                                style: TextStyle(color: AppTheme.textMuted.withValues(alpha: 0.9), fontSize: 14),
                               ),
                             ],
                           ),
@@ -341,9 +345,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                       margin: const EdgeInsets.only(bottom: 24),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppTheme.status5xx.withOpacity(0.12),
+                        color: AppTheme.status5xx.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppTheme.status5xx.withOpacity(0.3)),
+                        border: Border.all(color: AppTheme.status5xx.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         children: [
@@ -360,7 +364,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.folder_open_rounded, size: 64, color: AppTheme.textMuted.withOpacity(0.4)),
+                                Icon(Icons.folder_open_rounded, size: 64, color: AppTheme.textMuted.withValues(alpha: 0.4)),
                                 const SizedBox(height: 16),
                                 const Text('No projects registered yet', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                                 const SizedBox(height: 8),
@@ -436,11 +440,11 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                         ),
                                         Row(
                                           children: [
-                                            Icon(Icons.history_toggle_off_rounded, size: 14, color: AppTheme.textMuted.withOpacity(0.8)),
+                                            Icon(Icons.history_toggle_off_rounded, size: 14, color: AppTheme.textMuted.withValues(alpha: 0.8)),
                                             const SizedBox(width: 6),
                                             Text(
                                               'Retention: ${p.retentionDays} days',
-                                              style: TextStyle(color: AppTheme.textMuted.withOpacity(0.8), fontSize: 12),
+                                              style: TextStyle(color: AppTheme.textMuted.withValues(alpha: 0.8), fontSize: 12),
                                             ),
                                           ],
                                         ),

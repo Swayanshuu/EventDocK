@@ -84,7 +84,7 @@ class _AuthScreenState extends State<AuthScreen> {
               border: Border.all(color: AppTheme.cardBorder, width: 1),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -115,9 +115,9 @@ class _AuthScreenState extends State<AuthScreen> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withOpacity(0.12),
+                      color: AppTheme.primary.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
+                      border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [
@@ -141,9 +141,9 @@ class _AuthScreenState extends State<AuthScreen> {
                     margin: const EdgeInsets.only(bottom: 16),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppTheme.status5xx.withOpacity(0.12),
+                      color: AppTheme.status5xx.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppTheme.status5xx.withOpacity(0.3)),
+                      border: Border.all(color: AppTheme.status5xx.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       _errorMessage!,

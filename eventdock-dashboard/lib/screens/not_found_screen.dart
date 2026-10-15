@@ -23,7 +23,7 @@ class NotFoundScreen extends StatelessWidget {
                 border: Border.all(color: AppTheme.cardBorder),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     blurRadius: 24,
                     offset: const Offset(0, 10),
                   ),
@@ -38,9 +38,9 @@ class NotFoundScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppTheme.status4xx.withOpacity(0.12),
+                      color: AppTheme.status4xx.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppTheme.status4xx.withOpacity(0.3)),
+                      border: Border.all(color: AppTheme.status4xx.withValues(alpha: 0.3)),
                     ),
                     child: const Text(
                       '404 • ROUTE NOT FOUND',

@@ -90,8 +90,8 @@ class WaitlistService {
           },
           body: jsonEncode({
             'email': cleanEmail,
-            if (cleanName != null) 'name': cleanName,
-            if (cleanCompany != null) 'company': cleanCompany,
+            'name': ?cleanName,
+            'company': ?cleanCompany,
           }),
         );
 
@@ -228,7 +228,7 @@ class WaitlistService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': email,
-          if (name != null) 'name': name,
+          'name': ?name,
         }),
       );
 

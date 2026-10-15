@@ -73,9 +73,12 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
               Navigator.pop(ctx);
               try {
                 await ApiService().deleteProject(widget.project.id);
+                if (!mounted) return;
                 widget.onProjectDeleted();
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+                }
               }
             },
             child: const Text('Permanently Delete'),
@@ -164,9 +167,9 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
             constraints: const BoxConstraints(maxWidth: 600),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppTheme.status5xx.withOpacity(0.06),
+              color: AppTheme.status5xx.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppTheme.status5xx.withOpacity(0.3)),
+              border: Border.all(color: AppTheme.status5xx.withValues(alpha: 0.3)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -184,7 +184,7 @@ class _ProjectDashboardScreenState extends State<ProjectDashboardScreen> {
       child: ListTile(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         selected: isSelected,
-        selectedTileColor: AppTheme.primary.withOpacity(0.12),
+        selectedTileColor: AppTheme.primary.withValues(alpha: 0.12),
         leading: Icon(icon, size: 18, color: isSelected ? AppTheme.primary : AppTheme.textMuted),
         title: Text(
           label,

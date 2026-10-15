@@ -215,7 +215,7 @@ class _EventInboxViewState extends State<EventInboxView> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.verified_rounded, size: 60, color: AppTheme.status2xx.withOpacity(0.6)),
+                                Icon(Icons.verified_rounded, size: 60, color: AppTheme.status2xx.withValues(alpha: 0.6)),
                                 const SizedBox(height: 16),
                                 const Text('No API failures detected', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 8),
@@ -327,7 +327,7 @@ class _EventInboxViewState extends State<EventInboxView> {
             final event = _events[index - 1];
             return InkWell(
               onTap: () => _openEventDetail(event.id),
-              hoverColor: AppTheme.primary.withOpacity(0.04),
+              hoverColor: AppTheme.primary.withValues(alpha: 0.04),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 child: Row(
