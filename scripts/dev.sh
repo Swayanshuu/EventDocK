@@ -21,4 +21,4 @@ mvn clean install -DskipTests
 echo "EventDock is ready for local development."
 echo "To run API:        cd eventdock-api && mvn spring-boot:run"
 echo "To run Dashboard:  cd eventdock-dashboard && flutter run -d chrome"
-echo "To run Sample App: cd eventdock-sample && mvn spring-boot:run"
+echo "To run CLI:        cd eventdock-cli && mvn package -DskipTests"

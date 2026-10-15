@@ -12,15 +12,6 @@ if ($conn8080) {
     }
 }
 
-# Kill port 8081 (Sample)
-$conn8081 = Get-NetTCPConnection -LocalPort 8081 -State Listen -ErrorAction SilentlyContinue
-if ($conn8081) {
-    foreach ($c in $conn8081) {
-        Write-Host "Stopping EventDock Sample on port 8081 (PID: $($c.OwningProcess))..." -ForegroundColor Cyan
-        Stop-Process -Id $c.OwningProcess -Force -ErrorAction SilentlyContinue
-    }
-}
-
 # Close any cmd windows titled EventDock
 Get-Process cmd -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -like "*EventDock*" } | ForEach-Object {
     Write-Host "Closing window: $($_.MainWindowTitle)" -ForegroundColor Cyan
