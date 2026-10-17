@@ -1,18 +1,30 @@
 import 'package:flutter/material.dart';
+import 'models/project.dart';
+import 'screens/auth_screen.dart';
 import 'screens/not_found_screen.dart';
+import 'screens/project_dashboard_screen.dart';
+import 'screens/projects_screen.dart';
 import 'screens/waitlist_screen.dart';
+import 'services/auth_service.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Auto-authenticate as local developer if not already authenticated so dashboard is immediately usable
+  if (!AuthService().isAuthenticated) {
+    await AuthService().signInWithGoogle(googleEmail: 'developer@eventdock.dev');
+  }
   runApp(const EventDockApp());
 }
 
-/// Waitlist-Only Web Application
+/// EventDock Developer Web Platform
 ///
-/// Under the strict waitlist requirement:
-/// - Route '/' displays the public EventDock waitlist landing page.
-/// - All other routes (/app, /app/events, /login, /dashboard, etc.) are strictly disabled
-///   from direct URL entry, deep linking, and browser refresh, rendering a 404 page.
+/// Route overview:
+/// - Route '/' renders the actual dashboard (projects overview / selected project dashboard).
+/// - Route '/dashboard', '/app', '/projects' also render the dashboard.
+/// - Route '/login' exposes the authentication screen.
+/// - Route '/waitlist' preserves access to the waitlist landing page.
+/// - Any unknown route renders the 404 NotFoundScreen.
 class EventDockApp extends StatelessWidget {
   final String? initialRoute;
 
@@ -21,25 +33,47 @@ class EventDockApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'EventDock - Early Access Waitlist',
+      title: 'EventDock - API Failure Detection & Reproduction',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       initialRoute: initialRoute,
       onGenerateRoute: (RouteSettings settings) {
         final path = normalizeRoute(settings.name);
 
-        // Strict route guard: Only '/' exposes the public waitlist page
-        if (path == '/' || path.isEmpty) {
+        // Dedicated Waitlist landing page route
+        if (path == '/waitlist') {
           return MaterialPageRoute(
-            settings: const RouteSettings(name: '/'),
+            settings: const RouteSettings(name: '/waitlist'),
             builder: (_) => const WaitlistScreen(),
           );
         }
 
-        // All internal/dashboard routes (/app, /app/events, /projects, /login, etc.)
-        // and any unknown routes are strictly blocked and display 404 NotFoundScreen.
+        // Dedicated login route
+        if (path == '/login') {
+          return MaterialPageRoute(
+            settings: const RouteSettings(name: '/login'),
+            builder: (_) => AuthScreen(
+              onLoginSuccess: () {},
+            ),
+          );
+        }
+
+        // Root and dashboard routes: '/' and '/dashboard', '/app', '/projects'
+        if (path == '/' ||
+            path.isEmpty ||
+            path == '/dashboard' ||
+            path == '/app' ||
+            path.startsWith('/app/') ||
+            path == '/projects') {
+          return MaterialPageRoute(
+            settings: RouteSettings(name: path),
+            builder: (_) => const DashboardRoot(),
+          );
+        }
+
+        // Unknown routes render 404
         return MaterialPageRoute(
-          settings: RouteSettings(name: path),
+          settings: const RouteSettings(name: '/404'),
           builder: (_) => const NotFoundScreen(),
         );
       },
@@ -68,5 +102,83 @@ class EventDockApp extends StatelessWidget {
     final path = uri?.path.isNotEmpty == true ? uri!.path : clean;
     if (path.isEmpty) return '/';
     return path;
+  }
+}
+
+/// Manages auth state and active project selection within the dashboard
+class DashboardRoot extends StatefulWidget {
+  const DashboardRoot({super.key});
+
+  @override
+  State<DashboardRoot> createState() => _DashboardRootState();
+}
+
+class _DashboardRootState extends State<DashboardRoot> {
+  Project? _selectedProject = Project(
+    id: 'proj_linkpeer_demo',
+    name: 'LinkPeer Microservice',
+    slug: 'linkpeer-microservice',
+    description: 'Reference Spring Boot 3.4 microservice with EventDock starter embedded',
+    ownerId: 'dev_user',
+    retentionDays: 30,
+    createdAt: '2026-10-15T00:00:00Z',
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    AuthService().addListener(_onAuthChanged);
+  }
+
+  @override
+  void dispose() {
+    AuthService().removeListener(_onAuthChanged);
+    super.dispose();
+  }
+
+  void _onAuthChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!AuthService().isAuthenticated) {
+      return AuthScreen(
+        onLoginSuccess: () {
+          setState(() {});
+        },
+      );
+    }
+
+    if (_selectedProject != null) {
+      return ProjectDashboardScreen(
+        initialProject: _selectedProject!,
+        onBackToProjects: () {
+          setState(() {
+            _selectedProject = null;
+          });
+        },
+        onSignOut: () {
+          AuthService().signOut();
+          setState(() {
+            _selectedProject = null;
+          });
+        },
+      );
+    }
+
+    return ProjectsScreen(
+      onSelectProject: (project) {
+        setState(() {
+          _selectedProject = project;
+        });
+      },
+      onSignOut: () {
+        AuthService().signOut();
+        setState(() {
+          _selectedProject = null;
+        });
+      },
+    );
   }
 }

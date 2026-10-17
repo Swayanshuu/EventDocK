@@ -1,0 +1,328 @@
+import 'package:flutter/material.dart';
+import '../models/project.dart';
+import '../theme/app_theme.dart';
+
+class DashboardTopBar extends StatelessWidget {
+  final Project project;
+  final List<Project> allProjects;
+  final ValueChanged<Project> onProjectSelected;
+  final VoidCallback onRefresh;
+  final VoidCallback? onSwitchProject;
+  final VoidCallback? onToggleSidebar;
+  final bool isSidebarCollapsed;
+
+  const DashboardTopBar({
+    super.key,
+    required this.project,
+    required this.allProjects,
+    required this.onProjectSelected,
+    required this.onRefresh,
+    this.onSwitchProject,
+    this.onToggleSidebar,
+    this.isSidebarCollapsed = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth >= 1100;
+    final isTablet = screenWidth >= 768 && screenWidth < 1100;
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 28 : 16,
+        vertical: 16,
+      ),
+      decoration: const BoxDecoration(
+        color: AppTheme.sidebar,
+        border: Border(
+          bottom: BorderSide(color: AppTheme.cardBorder, width: 1),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Sidebar Toggle Button (Linear / Stripe style)
+          if (onToggleSidebar != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Tooltip(
+                message: isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar',
+                child: InkWell(
+                  onTap: onToggleSidebar,
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    height: 42,
+                    width: 42,
+                    decoration: BoxDecoration(
+                      color: AppTheme.cardSecondary,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppTheme.cardBorder),
+                    ),
+                    child: Icon(
+                      isSidebarCollapsed
+                          ? Icons.view_sidebar_rounded
+                          : Icons.view_sidebar_outlined,
+                      size: 18,
+                      color: isSidebarCollapsed
+                          ? AppTheme.heroOrange
+                          : AppTheme.textMuted,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // Left: Search Bar with Keyboard Chip
+          Expanded(
+            flex: isDesktop ? 5 : 4,
+            child: Container(
+              height: 42,
+              constraints: const BoxConstraints(maxWidth: 420),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                color: AppTheme.cardSecondary,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.cardBorder),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.search_rounded, size: 18, color: AppTheme.textMuted),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      'Search anything...',
+                      style: TextStyle(
+                        color: AppTheme.textMuted,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppTheme.sidebar,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: AppTheme.cardBorder),
+                    ),
+                    child: const Text(
+                      '⌘K',
+                      style: TextStyle(
+                        color: AppTheme.textSubtle,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 16),
+
+          // Right Controls: Date Pill + Project Switcher + Export Button + Notification
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Date Filter Pill (like in Shopeers)
+              if (isDesktop) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppTheme.cardSecondary,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppTheme.cardBorder),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.calendar_today_rounded, size: 13, color: AppTheme.textMuted),
+                      SizedBox(width: 8),
+                      Text(
+                        'Last 30 days',
+                        style: TextStyle(
+                          color: AppTheme.textPrimary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+              ],
+
+              // Project Selector Dropdown (with tooltip 'Switch project' for test compliance)
+              PopupMenuButton<Project>(
+                tooltip: 'Switch project',
+                color: AppTheme.card,
+                elevation: 12,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: const BorderSide(color: AppTheme.cardBorder),
+                ),
+                offset: const Offset(0, 48),
+                onSelected: onProjectSelected,
+                itemBuilder: (context) {
+                  final projectsList = allProjects.isNotEmpty ? allProjects : [project];
+                  return [
+                    const PopupMenuItem<Project>(
+                      enabled: false,
+                      height: 28,
+                      child: Text(
+                        'PROJECTS',
+                        style: TextStyle(
+                          color: AppTheme.textMuted,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
+                    const PopupMenuDivider(height: 1),
+                    ...projectsList.map((p) {
+                      final isCurrent = p.id == project.id;
+                      return PopupMenuItem<Project>(
+                        value: p,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.folder_outlined,
+                              size: 16,
+                              color: isCurrent ? AppTheme.heroOrange : AppTheme.textMuted,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                p.name,
+                                style: TextStyle(
+                                  color: isCurrent ? AppTheme.heroOrange : AppTheme.textPrimary,
+                                  fontSize: 13,
+                                  fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (isCurrent)
+                              const Icon(
+                                Icons.check_rounded,
+                                size: 16,
+                                color: AppTheme.heroOrange,
+                              ),
+                          ],
+                        ),
+                      );
+                    }),
+                    if (onSwitchProject != null) ...[
+                      const PopupMenuDivider(height: 1),
+                      PopupMenuItem<Project>(
+                        enabled: true,
+                        onTap: onSwitchProject,
+                        child: Row(
+                          children: const [
+                            Icon(Icons.dashboard_customize_outlined, size: 16, color: AppTheme.textMuted),
+                            SizedBox(width: 10),
+                            Text(
+                              'All Projects...',
+                              style: TextStyle(
+                                color: AppTheme.textMuted,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ];
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppTheme.cardSecondary,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppTheme.cardBorder),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.folder_rounded, size: 14, color: AppTheme.heroOrange),
+                      const SizedBox(width: 6),
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: isTablet ? 110 : 150),
+                        child: Text(
+                          project.name,
+                          style: const TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.unfold_more_rounded, size: 14, color: AppTheme.textMuted),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              // Export Button (Primary Solid Orange, from Shopeers reference)
+              ElevatedButton.icon(
+                onPressed: onRefresh,
+                icon: const Icon(Icons.download_rounded, size: 14),
+                label: const Text('Export'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.heroOrange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              // Notification Icon Button
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppTheme.cardSecondary,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.cardBorder),
+                ),
+                child: Stack(
+                  children: [
+                    const Center(
+                      child: Icon(Icons.notifications_none_rounded, size: 18, color: AppTheme.textMuted),
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.heroOrange,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
