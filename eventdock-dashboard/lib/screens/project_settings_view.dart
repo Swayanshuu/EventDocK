@@ -203,6 +203,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
               Navigator.pop(ctx);
               try {
                 await ApiService().deleteProject(widget.project.id);
+                if (!mounted) return;
                 widget.onProjectDeleted();
               } catch (e) {
                 if (mounted) {

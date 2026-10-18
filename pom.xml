@@ -38,7 +38,6 @@
     <modules>
         <module>eventdock-starter</module>
         <module>eventdock-api</module>
-        <module>eventdock-sample</module>
         <module>eventdock-cli</module>
     </modules>
 

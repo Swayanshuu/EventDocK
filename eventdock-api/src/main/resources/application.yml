@@ -30,6 +30,10 @@ spring:
 
 eventdock:
   base-url: ${EVENTDOCK_BASE_URL:https://eventdock.swynx.dev}
+  auth:
+    firebase:
+      project-id: ${FIREBASE_PROJECT_ID:eventdock-5cc21}
+      mock-enabled: ${FIREBASE_MOCK_ENABLED:true}
   jwt:
     secret: ${EVENTDOCK_JWT_SECRET:super_secret_jwt_signing_key_replace_for_production_min_32_bytes_long!}
     expiration-minutes: ${EVENTDOCK_JWT_EXPIRATION_MINUTES:1440}

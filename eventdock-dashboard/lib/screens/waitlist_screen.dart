@@ -289,8 +289,8 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
   Widget _buildNavBar(bool isMobile) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.5),
-        border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.08))),
+        color: Colors.black.withValues(alpha: 0.5),
+        border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.08))),
       ),
       padding: EdgeInsets.symmetric(
         horizontal: isMobile ? 16 : 36,
@@ -320,9 +320,9 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
-              color: const Color(0xFFFF7043).withOpacity(0.12),
+              color: const Color(0xFFFF7043).withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFFF7043).withOpacity(0.35)),
+              border: Border.all(color: const Color(0xFFFF7043).withValues(alpha: 0.35)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -361,12 +361,12 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.06),
+            color: Colors.white.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: Colors.white.withOpacity(0.18)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF7043).withOpacity(0.15),
+                color: const Color(0xFFFF7043).withValues(alpha: 0.15),
                 blurRadius: 16,
                 spreadRadius: -2,
               ),
@@ -417,24 +417,24 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Colors.white.withOpacity(0.14),
-                Colors.white.withOpacity(0.04),
+                Colors.white.withValues(alpha: 0.14),
+                Colors.white.withValues(alpha: 0.04),
               ],
             ),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: Colors.white.withOpacity(0.20),
+              color: Colors.white.withValues(alpha: 0.20),
               width: 1.3,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF7043).withOpacity(0.25),
+                color: const Color(0xFFFF7043).withValues(alpha: 0.25),
                 blurRadius: 60,
                 spreadRadius: -10,
                 offset: const Offset(0, 16),
               ),
               BoxShadow(
-                color: Colors.black.withOpacity(0.85),
+                color: Colors.black.withValues(alpha: 0.85),
                 blurRadius: 50,
                 offset: const Offset(0, 24),
               ),
@@ -476,9 +476,9 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
                           margin: const EdgeInsets.only(bottom: 18),
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                           decoration: BoxDecoration(
-                            color: AppTheme.status5xx.withOpacity(0.14),
+                            color: AppTheme.status5xx.withValues(alpha: 0.14),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: AppTheme.status5xx.withOpacity(0.4)),
+                            border: Border.all(color: AppTheme.status5xx.withValues(alpha: 0.4)),
                           ),
                           child: Row(
                             children: [
@@ -542,15 +542,15 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
   Widget _buildInlineInputBar() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.65),
+        color: Colors.black.withValues(alpha: 0.65),
         borderRadius: BorderRadius.circular(100),
         border: Border.all(
-          color: Colors.white.withOpacity(0.22),
+          color: Colors.white.withValues(alpha: 0.22),
           width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.5),
+            color: Colors.black.withValues(alpha: 0.5),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
@@ -593,9 +593,9 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.65),
+            color: Colors.black.withValues(alpha: 0.65),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withOpacity(0.22)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
           child: TextFormField(
@@ -621,9 +621,9 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.65),
+              color: Colors.black.withValues(alpha: 0.65),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white.withOpacity(0.18)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
             child: TextFormField(
@@ -644,9 +644,9 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.65),
+              color: Colors.black.withValues(alpha: 0.65),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white.withOpacity(0.18)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
             child: TextFormField(
@@ -747,7 +747,6 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
         );
         break;
       case WaitlistWheelState.idle:
-      default:
         buttonContent = const Text(
           'Join Waitlist',
           style: TextStyle(
@@ -813,9 +812,9 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.04),
+            color: Colors.white.withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(100),
-            border: Border.all(color: Colors.white.withOpacity(0.12)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -847,12 +846,12 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
           height: 72,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFFFF7043).withOpacity(0.15),
+            color: const Color(0xFFFF7043).withValues(alpha: 0.15),
             shape: BoxShape.circle,
-            border: Border.all(color: const Color(0xFFFF7043).withOpacity(0.45)),
+            border: Border.all(color: const Color(0xFFFF7043).withValues(alpha: 0.45)),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF7043).withOpacity(0.35),
+                color: const Color(0xFFFF7043).withValues(alpha: 0.35),
                 blurRadius: 30,
               ),
             ],
@@ -887,9 +886,9 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.06),
+            color: Colors.white.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.white.withOpacity(0.12)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
           ),
           child: Text(
             _isAlreadyJoined
@@ -929,7 +928,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
             foreground: Paint()
               ..style = PaintingStyle.stroke
               ..strokeWidth = isMobile ? 1.5 : 2.0
-              ..color = Colors.white.withOpacity(0.12),
+              ..color = Colors.white.withValues(alpha: 0.12),
           ),
         ),
       ),
@@ -990,9 +989,9 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
                   width: isMobile ? double.infinity : 260,
                   padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.04),
+                    color: Colors.white.withValues(alpha: 0.04),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withOpacity(0.12)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1000,7 +999,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFF7043).withOpacity(0.15),
+                          color: const Color(0xFFFF7043).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(f['icon'] as IconData, color: const Color(0xFFFF7043), size: 20),
@@ -1051,9 +1050,9 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
           width: double.infinity,
           padding: EdgeInsets.all(isMobile ? 18 : 28),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.04),
+            color: Colors.white.withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.white.withOpacity(0.12)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1087,7 +1086,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
     return Container(
       padding: const EdgeInsets.only(top: 24, bottom: 20),
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.08))),
+        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.08))),
       ),
       child: isMobile
           ? Column(
@@ -1227,7 +1226,7 @@ class _GlowRibbonPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // 1. Top Center Amber Flare
     final topFlare = Paint()
-      ..color = const Color(0xFFFF7043).withOpacity(0.28)
+      ..color = const Color(0xFFFF7043).withValues(alpha: 0.28)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 100);
 
     canvas.drawOval(
@@ -1241,7 +1240,7 @@ class _GlowRibbonPainter extends CustomPainter {
 
     // 2. Right Nebula Ray
     final rightNebula = Paint()
-      ..color = const Color(0xFFFFAB40).withOpacity(0.22)
+      ..color = const Color(0xFFFFAB40).withValues(alpha: 0.22)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 120);
 
     canvas.drawCircle(
@@ -1260,9 +1259,9 @@ class _GlowRibbonPainter extends CustomPainter {
         Offset(size.width * 0.85, size.height * 0.12),
         [
           Colors.transparent,
-          const Color(0xFFFF7043).withOpacity(0.9),
+          const Color(0xFFFF7043).withValues(alpha: 0.9),
           const Color(0xFFFFD54F),
-          const Color(0xFFFF7043).withOpacity(0.6),
+          const Color(0xFFFF7043).withValues(alpha: 0.6),
           Colors.transparent,
         ],
         [0.0, 0.35, 0.6, 0.85, 1.0],
@@ -1421,7 +1420,7 @@ class _WheelTickUntickPainter extends CustomPainter {
     if (state == WaitlistWheelState.spinning) {
       // Background subtle track
       final trackPaint = Paint()
-        ..color = primaryColor.withOpacity(0.2)
+        ..color = primaryColor.withValues(alpha: 0.2)
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth * 0.8;
       canvas.drawCircle(center, radius, trackPaint);

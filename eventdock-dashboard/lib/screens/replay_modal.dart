@@ -103,7 +103,7 @@ class _ReplayModalState extends State<ReplayModal> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary.withOpacity(0.15),
+                    color: AppTheme.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(Icons.replay_rounded, color: AppTheme.primary, size: 20),
@@ -173,7 +173,7 @@ class _ReplayModalState extends State<ReplayModal> {
                     const SizedBox(height: 6),
                     Text(
                       'SSRF protection enforced. Only approved local/staging destinations are permitted.',
-                      style: TextStyle(color: AppTheme.textMuted.withOpacity(0.8), fontSize: 11),
+                      style: TextStyle(color: AppTheme.textMuted.withValues(alpha: 0.8), fontSize: 11),
                     ),
                     const SizedBox(height: 16),
 
@@ -182,9 +182,9 @@ class _ReplayModalState extends State<ReplayModal> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppTheme.status4xx.withOpacity(0.12),
+                          color: AppTheme.status4xx.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppTheme.status4xx.withOpacity(0.3)),
+                          border: Border.all(color: AppTheme.status4xx.withValues(alpha: 0.3)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,9 +244,9 @@ class _ReplayModalState extends State<ReplayModal> {
                         margin: const EdgeInsets.only(bottom: 16),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppTheme.status5xx.withOpacity(0.12),
+                          color: AppTheme.status5xx.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppTheme.status5xx.withOpacity(0.3)),
+                          border: Border.all(color: AppTheme.status5xx.withValues(alpha: 0.3)),
                         ),
                         child: Text(_errorMessage!, style: const TextStyle(color: AppTheme.status5xx, fontSize: 13)),
                       ),
@@ -274,8 +274,8 @@ class _ReplayModalState extends State<ReplayModal> {
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                   decoration: BoxDecoration(
                                     color: _latestResult!.outcome == 'SUCCESS'
-                                        ? AppTheme.status2xx.withOpacity(0.2)
-                                        : AppTheme.status5xx.withOpacity(0.2),
+                                        ? AppTheme.status2xx.withValues(alpha: 0.2)
+                                        : AppTheme.status5xx.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(

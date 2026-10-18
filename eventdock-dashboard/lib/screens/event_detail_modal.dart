@@ -266,9 +266,9 @@ class _EventDetailModalState extends State<EventDetailModal> {
                                   margin: const EdgeInsets.only(bottom: 20),
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: AppTheme.status5xx.withOpacity(0.08),
+                                    color: AppTheme.status5xx.withValues(alpha: 0.08),
                                     borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: AppTheme.status5xx.withOpacity(0.25)),
+                                    border: Border.all(color: AppTheme.status5xx.withValues(alpha: 0.25)),
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,

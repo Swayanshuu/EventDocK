@@ -78,10 +78,13 @@ class _ApiKeysViewState extends State<ApiKeysView> {
               Navigator.pop(ctx);
               try {
                 final generated = await ApiService().createApiKey(widget.project.id, nameCtrl.text.trim());
+                if (!mounted) return;
                 _fetchKeys();
                 _showKeyCreatedDialog(generated.rawKey);
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                }
               }
             },
             child: const Text('Generate Key'),
@@ -177,9 +180,12 @@ class _ApiKeysViewState extends State<ApiKeysView> {
               Navigator.pop(ctx);
               try {
                 await ApiService().revokeApiKey(widget.project.id, key.id);
+                if (!mounted) return;
                 _fetchKeys();
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                }
               }
             },
             child: const Text('Revoke Key'),
@@ -297,8 +303,8 @@ class _ApiKeysViewState extends State<ApiKeysView> {
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
                                         color: k.revoked
-                                            ? AppTheme.status5xx.withOpacity(0.12)
-                                            : AppTheme.status2xx.withOpacity(0.12),
+                                            ? AppTheme.status5xx.withValues(alpha: 0.12)
+                                            : AppTheme.status2xx.withValues(alpha: 0.12),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Icon(
@@ -320,8 +326,8 @@ class _ApiKeysViewState extends State<ApiKeysView> {
                                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                                 decoration: BoxDecoration(
                                                   color: k.revoked
-                                                      ? AppTheme.status5xx.withOpacity(0.2)
-                                                      : AppTheme.status2xx.withOpacity(0.2),
+                                                      ? AppTheme.status5xx.withValues(alpha: 0.2)
+                                                      : AppTheme.status2xx.withValues(alpha: 0.2),
                                                   borderRadius: BorderRadius.circular(4),
                                                 ),
                                                 child: Text(

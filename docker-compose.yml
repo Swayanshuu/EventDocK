@@ -62,23 +62,6 @@ services:
     networks:
       - eventdock-net
 
-  eventdock-sample:
-    build:
-      context: .
-      dockerfile: eventdock-sample/Dockerfile
-    container_name: eventdock-sample
-    restart: unless-stopped
-    depends_on:
-      - eventdock-api
-    environment:
-      EVENTDOCK_ENDPOINT: http://eventdock-api:8080
-      EVENTDOCK_API_KEY: ${SAMPLE_EVENTDOCK_API_KEY:-ed_live_sample_placeholder}
-      SERVER_PORT: 8081
-    ports:
-      - "${SAMPLE_APP_PORT:-8081}:8081"
-    networks:
-      - eventdock-net
-
 volumes:
   postgres_data:
     driver: local

@@ -18,7 +18,7 @@ import java.nio.file.Paths;
 public class CliConfig {
 
     @Builder.Default
-    private String apiUrl = "http://localhost:8080";
+    private String apiUrl = "https://api.eventdock.swynx.dev";
 
     private String token;
     private String userEmail;

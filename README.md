@@ -73,19 +73,34 @@ EventDock is maintained as a cohesive Maven multi-module architecture:
 
 | Module                    | Technology                     | Description                                                                                             | Path                                          |
 | :------------------------ | :----------------------------- | :------------------------------------------------------------------------------------------------------ | :-------------------------------------------- |
-| **`eventdock-starter`**   | Spring Boot 3.4, Java 21       | Lightweight auto-configuring client starter library embedded into user microservices.                   | [`eventdock-starter/`](eventdock-starter)     |
+| **`eventdock-starter`**   | Spring Boot 3.4, Java 21       | Lightweight auto-configuring client starter library embedded into user microservices (Published to Maven Central). | [`eventdock-starter/`](eventdock-starter)     |
 | **`eventdock-api`**       | Spring Boot 3.4, PostgreSQL    | Core backend service for ingestion, tenant project management, and SSRF-safe request replay.            | [`eventdock-api/`](eventdock-api)             |
 | **`eventdock-dashboard`** | Flutter 3.x Web, Glassmorphism | Dark-mode developer web dashboard for real-time failure triage and waitlist landing page.               | [`eventdock-dashboard/`](eventdock-dashboard) |
 | **`eventdock-cli`**       | Java 21, Picocli               | High-velocity terminal CLI tool for querying failures, inspecting stack traces, and triggering replays. | [`eventdock-cli/`](eventdock-cli)             |
-| **`eventdock-sample`**    | Spring Boot 3.4 (_LinkPeer_)   | Reference application preconfigured with EventDock and simulated fault endpoints.                       | [`eventdock-sample/`](eventdock-sample)       |
 
 ---
 
-## Quick Integration
+## Adding EventDock Starter to Your Spring Boot Application
 
-Get EventDock running in your Spring Boot application in less than two minutes:
+`eventdock-starter` is officially published to **Maven Central**. You can add it directly to any Spring Boot 3.x project running on Java 17 or Java 21:
 
-### 1. Add Maven Dependency
+### 1. Artifact Coordinates
+
+- **Group ID**: `dev.swynx`
+- **Artifact ID**: `eventdock-starter`
+- **Latest Version**: `0.1.0`
+- **Direct Repository URL**: [https://repo1.maven.org/maven2/dev/swynx/eventdock-starter/0.1.0/](https://repo1.maven.org/maven2/dev/swynx/eventdock-starter/0.1.0/)
+- **Central Sonatype Portal**: [https://central.sonatype.com/artifact/dev.swynx/eventdock-starter/0.1.0](https://central.sonatype.com/artifact/dev.swynx/eventdock-starter/0.1.0)
+
+> [!NOTE]
+> **Maven Central vs Third-Party Indexers (like MVNRepository)**:
+> The artifact is fully published and immediately resolvable from the primary Maven Central canonical repository (`repo1.maven.org`). Third-party directory mirrors like `mvnrepository.com` run scheduled crawlers that may take 24–48 hours to update their web search listings. However, Maven and Gradle fetch directly from `repo1.maven.org` and will resolve the dependency right away!
+
+---
+
+### 2. Dependency Declaration
+
+#### Apache Maven (`pom.xml`):
 
 ```xml
 <dependency>
@@ -95,42 +110,132 @@ Get EventDock running in your Spring Boot application in less than two minutes:
 </dependency>
 ```
 
-### 2. Configure `application.yml`
+#### Gradle (Groovy DSL `build.gradle`):
+
+```groovy
+dependencies {
+    implementation 'dev.swynx:eventdock-starter:0.1.0'
+}
+```
+
+#### Gradle (Kotlin DSL `build.gradle.kts`):
+
+```kotlin
+dependencies {
+    implementation("dev.swynx:eventdock-starter:0.1.0")
+}
+```
+
+---
+
+### 3. Configuration (`application.yml` or `application.properties`)
+
+Create or update your `src/main/resources/application.yml`:
 
 ```yaml
 eventdock:
+  # Enable or disable the starter (useful for disabling in local unit tests)
   enabled: true
-  endpoint: "https://api.eventdock.swynx.dev" # Or http://localhost:8080 for local dev
-  api-key: "${EVENTDOCK_API_KEY:ed_live_your_project_key_here}"
+
+  # EventDock cloud ingestion endpoint (default) or self-hosted API
+  endpoint: "https://api.eventdock.swynx.dev"
+
+  # Your project ingestion API key generated from the dashboard (ed_live_...)
+  api-key: "${EVENTDOCK_API_KEY}"
+
+  # Logical identifier for your service
   service-name: "order-service"
-  environment: "staging"
-  min-status-code: 500
-  capture-client-errors: false
+
+  # Environment tag attached to telemetry (e.g. production, staging, dev)
+  environment: "${SPRING_PROFILES_ACTIVE:production}"
+
+  # Status code threshold to capture (default: 400 captures client and server errors)
+  min-status-code: 400
+  capture-client-errors: true
   capture-server-errors: true
+
+  # Request body capture parameters
+  capture:
+    body-enabled: true
+    max-body-length: 4096
+    max-stack-trace-frames: 35
+
+  # In-JVM secret scrubbing rules (scrubbed BEFORE network transmission)
   redaction:
     headers:
       - "authorization"
       - "cookie"
       - "x-api-key"
+      - "set-cookie"
     body-fields:
       - "password"
       - "secret"
       - "token"
       - "creditCard"
+      - "ssn"
+
+  # Asynchronous non-blocking queue (zero thread latency impact)
+  queue:
+    capacity: 500
+    batch-size: 20
+    flush-interval-ms: 500
 ```
 
-That's it. Zero custom exception handlers or servlet filters required. `eventdock-starter` automatically hooks into Spring MVC error dispatchers.
+Or using `application.properties`:
+
+```properties
+eventdock.enabled=true
+eventdock.endpoint=https://api.eventdock.swynx.dev
+eventdock.api-key=${EVENTDOCK_API_KEY}
+eventdock.service-name=order-service
+eventdock.environment=production
+eventdock.min-status-code=400
+eventdock.capture-client-errors=true
+eventdock.capture-server-errors=true
+```
 
 ---
 
-## Running the Full Stack Locally
+### 4. Zero Custom Code Required
 
-EventDock provides 1-click startup automation for local development:
+`eventdock-starter` uses standard Spring Boot auto-configuration (`@AutoConfiguration`). When included on the classpath:
+- It automatically registers the non-blocking servlet filter to buffer and capture requests safely.
+- It attaches an MVC exception resolver to capture root causes and stack traces on unexpected failures.
+- It begins asynchronous background dispatch to EventDock with zero ingestion latency and automatic PII sanitization.
+- No `@EnableEventDock` or manual bean configuration is required!
+
+---
+
+### 5. Verifying Your Setup
+
+To test that your application is reporting errors to EventDock:
+
+1. Add a temporary test controller endpoint to your application:
+   ```java
+   @RestController
+   public class DiagnosticTestController {
+       @GetMapping("/test-eventdock-failure")
+       public String triggerFailure() {
+           throw new IllegalStateException("EventDock verification test exception");
+       }
+   }
+   ```
+2. Start your application and curl the endpoint:
+   ```bash
+   curl -i http://localhost:8080/test-eventdock-failure
+   ```
+3. Open your project on [https://eventdock.swynx.dev](https://eventdock.swynx.dev) or inspect via CLI (`eventdock events`) to see the captured event with sanitized payload, headers, and full stack trace.
+
+---
+
+## Running the Platform Locally
+
+For contributors running the full EventDock backend platform locally:
 
 ### One-Command Launch (Windows PowerShell)
 
 ```powershell
-# Compiles starter, launches API (8080), Sample (8081), and opens Dashboard:
+# Compiles starter, launches API (8080), and opens Dashboard:
 .\run-all.ps1
 ```
 
@@ -182,7 +287,7 @@ eventdock projects
 eventdock events --project <PROJECT_UUID> --status 500
 
 # Replay a specific failure against your local machine
-eventdock replay <EVENT_UUID> --target http://localhost:8081
+eventdock replay <EVENT_UUID> --target http://localhost:8080/api/endpoint
 ```
 
 ---

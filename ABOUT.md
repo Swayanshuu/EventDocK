@@ -3,11 +3,10 @@
 ## 1. What is EventDock?
 
 **EventDock** is an enterprise-grade developer platform engineered to detect, inspect, and reproduce API failures in Spring Boot applications. It combines:
-1. A lightweight, non-blocking Spring Boot Starter (`eventdock-starter`) that automatically observes HTTP failures, extracts exceptions, sanitizes sensitive data, and reports diagnostic events.
+1. A lightweight, non-blocking Spring Boot Starter (`eventdock-starter`, published to Maven Central) that automatically observes HTTP failures, extracts exceptions, sanitizes sensitive data, and reports diagnostic events.
 2. A scalable Spring Boot 3.4.x backend (`eventdock-api`) powered by PostgreSQL, Spring Data JPA, Hibernate, Flyway, and Firebase Auth for identity.
 3. An interactive developer CLI (`eventdock-cli`) built with Picocli for terminal inspection and controlled request replay.
 4. A responsive developer dashboard (`eventdock-dashboard`) built with Flutter Web for real-time failure triage, formatted stack trace inspection, and SSRF-safe request reproduction.
-5. A reference application (`eventdock-sample`, LinkPeer) demonstrating practical integration and resilient behavior.
 
 ---
 
@@ -133,16 +132,6 @@ eventdock/
 │       └── resources/
 │           ├── application.yml
 │           └── db/migration/V1__init_schema.sql
-├── eventdock-sample/                   # Demonstration Spring Boot app (LinkPeer)
-│   ├── Dockerfile
-│   ├── pom.xml
-│   └── src/
-│       ├── main/java/dev/eventdock/sample/
-│       │   ├── LinkPeerSampleApplication.java
-│       │   ├── controller/DemoController.java
-│       │   ├── dto/PostRequest.java
-│       │   └── exception/DatabaseConnectionException.java
-│       └── test/DemoControllerTest.java
 ├── eventdock-cli/                      # Picocli developer CLI
 │   ├── pom.xml
 │   └── src/
@@ -171,9 +160,8 @@ eventdock/
 
 | Module | Primary Responsibility | Key Classes / Packages |
 | :--- | :--- | :--- |
-| `eventdock-starter` | Client SDK installed in Spring Boot apps. Observes failures, sanitizes headers/payloads, and dispatches events via bounded async queue. | `EventDockRequestFilter`, `EventDockExceptionObserver`, `SensitiveDataRedactor`, `AsyncEventQueue`, `HttpEventDockReporter` |
+| `eventdock-starter` | Client SDK installed in Spring Boot apps (Published on Maven Central). Observes failures, sanitizes headers/payloads, and dispatches events via bounded async queue. | `EventDockRequestFilter`, `EventDockExceptionObserver`, `SensitiveDataRedactor`, `AsyncEventQueue`, `HttpEventDockReporter` |
 | `eventdock-api` | Central backend. Manages Firebase user identity, project CRUD, API keys, event persistence, and SSRF-safe request replay. | `FirebaseAuthFilter`, `ApiKeyAuthenticationFilter`, `EventService`, `ReplayService`, `ProjectService` |
-| `eventdock-sample` | Reference Spring Boot application (LinkPeer). Demonstrates starter configuration, demo failure routes (`/demo/fail`), and graceful offline operation. | `LinkPeerSampleApplication`, `DemoController` |
 | `eventdock-cli` | Command-line tool for developers. Authenticates sessions, inspects error stack traces, and triggers replays directly from terminal. | `EventDockCliApplication`, `EventsCommand`, `ReplayCommand`, `LoginCommand` |
 | `eventdock-dashboard` | Flutter Web single-page application. Provides real-time failure inbox, stack trace inspector, replay interface, and API key management. | `RootNavigator`, `EventInboxView`, `EventDetailModal`, `ReplayModal`, `ApiKeysView` |
 
@@ -323,33 +311,31 @@ cd ..\eventdock-dashboard
 flutter run -d chrome
 ```
 
-### Step 5: Run Sample Application (LinkPeer)
-```powershell
-cd ..\eventdock-sample
-mvn spring-boot:run
-```
-Sample app runs on `http://localhost:8081`.
-
 ---
 
 ## 14. How to Test the Complete Workflow
 
-1. Open the Flutter Dashboard at `http://localhost:3000` (or the Flutter Chrome window).
-2. Sign in with Firebase email or click "Sign in with Firebase ID Token" using `dev_shibu`.
-3. Create a project called **LinkPeer Staging**.
+1. Open the Flutter Dashboard at `http://localhost:3000` (or `https://eventdock.swynx.dev`).
+2. Sign in with Google.
+3. Create a project.
 4. Navigate to **API Keys** and click **Generate New Key**. Copy the raw key (`ed_live_...`).
-5. Open `eventdock-sample/src/main/resources/application.yml` and paste the API key under `eventdock.api-key: "ed_live_..."`.
-6. Restart `eventdock-sample` or start it.
-7. Trigger a failure in terminal:
-   ```bash
-   curl -i http://localhost:8081/demo/fail
+5. In your Spring Boot application's `pom.xml`, include the published dependency:
+   ```xml
+   <dependency>
+       <groupId>dev.swynx</groupId>
+       <artifactId>eventdock-starter</artifactId>
+       <version>0.1.0</version>
+   </dependency>
    ```
-   Notice that LinkPeer returns HTTP 500 with a response header `X-Request-Id: <uuid>`.
-8. Switch to the EventDock Dashboard:
-   - The failure appears immediately in the **Event Inbox**.
-   - Click the event to view the full sanitized stack trace (`DatabaseConnectionException: PostgreSQL connection timeout`).
-   - Click **Replay Request**, set destination to `http://localhost:8081`, and click **Execute Replay Now**.
-   - Observe the replay outcome, duration, and response recorded.
+6. Add the API key and endpoint to your `application.yml`:
+   ```yaml
+   eventdock:
+     enabled: true
+     endpoint: "https://api.eventdock.swynx.dev"
+     api-key: "ed_live_..."
+     service-name: "my-service"
+   ```
+7. Start your service, trigger an unhandled failure (e.g. HTTP 500), and inspect the sanitized stack trace in the EventDock dashboard!
 
 ---
 

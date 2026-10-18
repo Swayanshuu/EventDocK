@@ -23,8 +23,8 @@ public class OpenApiConfig {
                         .contact(new Contact().name("EventDock Team").url("https://eventdock.dev"))
                         .license(new License().name("Apache 2.0").url("https://www.apache.org/licenses/LICENSE-2.0")))
                 .servers(java.util.List.of(
-                        new io.swagger.v3.oas.models.servers.Server().url("http://localhost:8080").description("Local Development Server"),
-                        new io.swagger.v3.oas.models.servers.Server().url("https://api.eventdock.swynx.dev").description("Production Gateway")
+                        new io.swagger.v3.oas.models.servers.Server().url("https://api.eventdock.swynx.dev").description("Production Gateway"),
+                        new io.swagger.v3.oas.models.servers.Server().url("http://localhost:8080").description("Local Development Server")
                 ))
                 .addSecurityItem(new SecurityRequirement().addList("FirebaseAuth"))
                 .addSecurityItem(new SecurityRequirement().addList("ApiKeyAuth"))

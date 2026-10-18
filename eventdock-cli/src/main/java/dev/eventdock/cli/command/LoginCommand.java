@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Command(name = "login", description = "Authenticate CLI session using Google Sign-In")
 public class LoginCommand implements Callable<Integer> {
 
-    @Option(names = {"--url"}, description = "EventDock API Base URL", defaultValue = "http://localhost:8080")
+    @Option(names = {"--url"}, description = "EventDock API Base URL", defaultValue = "https://api.eventdock.swynx.dev")
     private String apiUrl;
 
     @Option(names = {"--web-url"}, description = "EventDock Dashboard URL", defaultValue = "https://eventdock.swynx.dev")

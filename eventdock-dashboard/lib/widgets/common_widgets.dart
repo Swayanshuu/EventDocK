@@ -102,13 +102,13 @@ class StatusBadge extends StatelessWidget {
     Color fg;
 
     if (statusCode >= 500) {
-      bg = AppTheme.status5xx.withOpacity(0.12);
+      bg = AppTheme.status5xx.withValues(alpha: 0.12);
       fg = AppTheme.status5xx;
     } else if (statusCode >= 400) {
-      bg = AppTheme.status4xx.withOpacity(0.12);
+      bg = AppTheme.status4xx.withValues(alpha: 0.12);
       fg = AppTheme.status4xx;
     } else if (statusCode >= 200) {
-      bg = AppTheme.status2xx.withOpacity(0.12);
+      bg = AppTheme.status2xx.withValues(alpha: 0.12);
       fg = AppTheme.status2xx;
     } else {
       bg = AppTheme.cardSecondary;
@@ -120,7 +120,7 @@ class StatusBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: fg.withOpacity(0.35), width: 1),
+        border: Border.all(color: fg.withValues(alpha: 0.35), width: 1),
       ),
       child: Text(
         statusCode > 0 ? '$statusCode' : 'ERR',
@@ -163,7 +163,7 @@ class MethodBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.cardSecondary,
         borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: fg.withOpacity(0.3), width: 1),
+        border: Border.all(color: fg.withValues(alpha: 0.3), width: 1),
       ),
       child: Text(
         m,
