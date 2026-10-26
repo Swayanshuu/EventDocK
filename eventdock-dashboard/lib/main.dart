@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'models/project.dart';
 import 'screens/auth_screen.dart';
 import 'screens/not_found_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'screens/project_dashboard_screen.dart';
 import 'screens/projects_screen.dart';
 import 'screens/waitlist_screen.dart';
+import 'screens/welcome_screen.dart';
 import 'services/auth_service.dart';
+import 'services/desktop_window_service.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await DesktopWindowService.initializeDesktopWindow();
   // Auto-authenticate as local developer if not already authenticated so dashboard is immediately usable
   if (!AuthService().isAuthenticated) {
     await AuthService().signInWithGoogle(googleEmail: 'developer@eventdock.dev');
@@ -40,11 +44,41 @@ class EventDockApp extends StatelessWidget {
       onGenerateRoute: (RouteSettings settings) {
         final path = normalizeRoute(settings.name);
 
+        // Dedicated Welcome entry route
+        if (path == '/welcome') {
+          return MaterialPageRoute(
+            settings: const RouteSettings(name: '/welcome'),
+            builder: (ctx) => WelcomeScreen(
+              onGetStarted: () {
+                Navigator.pushReplacementNamed(ctx, '/login');
+              },
+              onSignIn: () {
+                Navigator.pushReplacementNamed(ctx, '/login');
+              },
+            ),
+          );
+        }
+
         // Dedicated Waitlist landing page route
         if (path == '/waitlist') {
           return MaterialPageRoute(
             settings: const RouteSettings(name: '/waitlist'),
             builder: (_) => const WaitlistScreen(),
+          );
+        }
+
+        // Dedicated onboarding route
+        if (path == '/onboarding') {
+          return MaterialPageRoute(
+            settings: const RouteSettings(name: '/onboarding'),
+            builder: (_) => OnboardingScreen(
+              onComplete: (project) {
+                AuthService().completeOnboarding();
+              },
+              onSignOut: () {
+                AuthService().signOut();
+              },
+            ),
           );
         }
 
@@ -146,6 +180,22 @@ class _DashboardRootState extends State<DashboardRoot> {
       return AuthScreen(
         onLoginSuccess: () {
           setState(() {});
+        },
+      );
+    }
+
+    if (AuthService().needsOnboarding) {
+      return OnboardingScreen(
+        onComplete: (project) {
+          setState(() {
+            _selectedProject = project;
+          });
+        },
+        onSignOut: () {
+          AuthService().signOut();
+          setState(() {
+            _selectedProject = null;
+          });
         },
       );
     }

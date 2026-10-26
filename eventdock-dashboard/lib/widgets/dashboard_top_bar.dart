@@ -9,6 +9,7 @@ class DashboardTopBar extends StatelessWidget {
   final VoidCallback onRefresh;
   final VoidCallback? onSwitchProject;
   final VoidCallback? onToggleSidebar;
+  final VoidCallback? onCreateProject;
   final bool isSidebarCollapsed;
 
   const DashboardTopBar({
@@ -19,6 +20,7 @@ class DashboardTopBar extends StatelessWidget {
     required this.onRefresh,
     this.onSwitchProject,
     this.onToggleSidebar,
+    this.onCreateProject,
     this.isSidebarCollapsed = false,
   });
 
@@ -51,6 +53,9 @@ class DashboardTopBar extends StatelessWidget {
                 child: InkWell(
                   onTap: onToggleSidebar,
                   borderRadius: BorderRadius.circular(10),
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  hoverColor: AppTheme.cardSecondary.withValues(alpha: 0.6),
                   child: Container(
                     height: 42,
                     width: 42,
@@ -216,6 +221,27 @@ class DashboardTopBar extends StatelessWidget {
                         ),
                       );
                     }),
+                    if (onCreateProject != null) ...[
+                      const PopupMenuDivider(height: 1),
+                      PopupMenuItem<Project>(
+                        enabled: true,
+                        onTap: onCreateProject,
+                        child: Row(
+                          children: const [
+                            Icon(Icons.add_rounded, size: 16, color: AppTheme.heroOrange),
+                            SizedBox(width: 10),
+                            Text(
+                              'New Project...',
+                              style: TextStyle(
+                                color: AppTheme.heroOrange,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     if (onSwitchProject != null) ...[
                       const PopupMenuDivider(height: 1),
                       PopupMenuItem<Project>(

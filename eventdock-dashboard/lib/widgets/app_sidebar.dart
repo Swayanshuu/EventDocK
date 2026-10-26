@@ -31,6 +31,7 @@ class AppSidebar extends StatelessWidget {
       duration: const Duration(milliseconds: 240),
       curve: Curves.easeInOutCubic,
       width: width,
+      clipBehavior: Clip.antiAlias,
       decoration: const BoxDecoration(
         color: AppTheme.sidebar,
         border: Border(
@@ -53,6 +54,9 @@ class AppSidebar extends StatelessWidget {
                       child: InkWell(
                         onTap: onToggleCollapse,
                         borderRadius: BorderRadius.circular(8),
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        hoverColor: AppTheme.cardSecondary,
                         child: Container(
                           width: 36,
                           height: 36,
@@ -85,13 +89,6 @@ class AppSidebar extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: AppTheme.heroOrange,
                                 borderRadius: BorderRadius.circular(8),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: AppTheme.heroOrangeGlow,
-                                    blurRadius: 8,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
                               ),
                               child: const Center(
                                 child: Icon(
@@ -122,6 +119,9 @@ class AppSidebar extends StatelessWidget {
                         child: InkWell(
                           onTap: onToggleCollapse,
                           borderRadius: BorderRadius.circular(8),
+                          splashColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          hoverColor: AppTheme.cardSecondary,
                           child: Container(
                             width: 30,
                             height: 30,
@@ -162,8 +162,8 @@ class AppSidebar extends StatelessWidget {
                   icon: Icons.error_outline_rounded,
                   badgeText: totalFailures > 0 ? '$totalFailures' : null,
                   badgeColor: totalFailures > 0
-                      ? AppTheme.heroOrange.withOpacity(0.18)
-                      : const Color(0xFF22C55E).withOpacity(0.18),
+                      ? AppTheme.heroOrange.withValues(alpha: 0.18)
+                      : const Color(0xFF22C55E).withValues(alpha: 0.18),
                   badgeTextColor:
                       totalFailures > 0 ? AppTheme.heroOrange : const Color(0xFF22C55E),
                 ),
@@ -197,7 +197,7 @@ class AppSidebar extends StatelessWidget {
                   isCollapsed ? MainAxisAlignment.center : MainAxisAlignment.spaceBetween,
               children: [
                 Tooltip(
-                  message: '${AuthService().userEmail ?? "developer"} (Dev Mode)',
+                  message: '${AuthService().userEmail ?? "developer"} (${AuthService().currentOrganization.name})',
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -205,7 +205,7 @@ class AppSidebar extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             radius: 14,
-                            backgroundColor: AppTheme.heroOrange.withOpacity(0.2),
+                            backgroundColor: AppTheme.heroOrange.withValues(alpha: 0.2),
                             child: const Text(
                               'ED',
                               style: TextStyle(
@@ -247,12 +247,14 @@ class AppSidebar extends StatelessWidget {
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const Text(
-                                'Dev Mode',
-                                style: TextStyle(
-                                  color: AppTheme.textMuted,
-                                  fontSize: 9,
+                              Text(
+                                AuthService().currentOrganization.name,
+                                style: const TextStyle(
+                                  color: AppTheme.heroOrange,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
                                 ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
@@ -265,6 +267,9 @@ class AppSidebar extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.logout_rounded, size: 16, color: AppTheme.textMuted),
                     tooltip: 'Sign out',
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    hoverColor: AppTheme.cardSecondary.withValues(alpha: 0.6),
                     onPressed: onSignOut,
                   ),
               ],
@@ -290,6 +295,11 @@ class AppSidebar extends StatelessWidget {
       child: InkWell(
         onTap: () => onTabSelected(index),
         borderRadius: BorderRadius.circular(10),
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        hoverColor: isSelected
+            ? AppTheme.cardSecondary
+            : AppTheme.cardSecondary.withValues(alpha: 0.5),
         child: Container(
           padding: EdgeInsets.symmetric(
             horizontal: isCollapsed ? 0 : 12,

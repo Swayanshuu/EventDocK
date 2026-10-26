@@ -3,6 +3,7 @@ import '../models/project.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_sidebar.dart';
+import '../widgets/create_project_dialog.dart';
 import '../widgets/dashboard_top_bar.dart';
 import 'api_keys_view.dart';
 import 'dashboard_overview_view.dart';
@@ -116,21 +117,50 @@ class _ProjectDashboardScreenState extends State<ProjectDashboardScreen> {
                       _loadFailureCount();
                     },
                     onSwitchProject: widget.onBackToProjects,
+                    onCreateProject: () {
+                      CreateProjectDialog.show(
+                        context,
+                        onProjectCreated: (created) {
+                          setState(() {
+                            _project = created;
+                            if (!_allProjects.any((p) => p.id == created.id)) {
+                              _allProjects = [created, ..._allProjects];
+                            }
+                          });
+                          _loadFailureCount();
+                        },
+                      );
+                    },
                     onToggleSidebar: () {
                       setState(() => _isSidebarCollapsed = !_isSidebarCollapsed);
                     },
                     isSidebarCollapsed: _isSidebarCollapsed,
                   ),
 
-                  // Main Tab Content with Smooth Fade Transition
+                  // Main Tab Content with Solid Dark Background
                   Expanded(
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 220),
-                      switchInCurve: Curves.easeOut,
-                      switchOutCurve: Curves.easeIn,
-                      child: KeyedSubtree(
-                        key: ValueKey<int>(_selectedNavIndex),
-                        child: _buildCurrentView(),
+                    child: Container(
+                      color: AppTheme.background,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 150),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeIn,
+                        layoutBuilder: (currentChild, previousChildren) {
+                          return Stack(
+                            alignment: Alignment.topLeft,
+                            children: <Widget>[
+                              ...previousChildren,
+                              if (currentChild != null) currentChild,
+                            ],
+                          );
+                        },
+                        child: Container(
+                          key: ValueKey<int>(_selectedNavIndex),
+                          color: AppTheme.background,
+                          width: double.infinity,
+                          height: double.infinity,
+                          child: _buildCurrentView(),
+                        ),
                       ),
                     ),
                   ),
@@ -148,11 +178,15 @@ class _ProjectDashboardScreenState extends State<ProjectDashboardScreen> {
     return InkWell(
       onTap: () => setState(() => _selectedNavIndex = index),
       borderRadius: BorderRadius.circular(999),
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      hoverColor: AppTheme.cardSecondary.withValues(alpha: 0.5),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.pillActive : Colors.transparent,
+          color: isSelected ? AppTheme.cardSecondary : Colors.transparent,
           borderRadius: BorderRadius.circular(999),
+          border: isSelected ? Border.all(color: AppTheme.cardBorder) : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -160,13 +194,13 @@ class _ProjectDashboardScreenState extends State<ProjectDashboardScreen> {
             Icon(
               icon,
               size: 14,
-              color: isSelected ? AppTheme.pillActiveText : AppTheme.textMuted,
+              color: isSelected ? AppTheme.heroOrange : AppTheme.textMuted,
             ),
             const SizedBox(width: 4),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppTheme.pillActiveText : AppTheme.textMuted,
+                color: isSelected ? AppTheme.textPrimary : AppTheme.textMuted,
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),

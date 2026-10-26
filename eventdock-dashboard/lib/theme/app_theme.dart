@@ -38,13 +38,17 @@ class AppTheme {
   // Pill Navigation & Controls
   static const Color pillBackground = Color(0xFF1F1F27);
   static const Color pillBorder = Color(0xFF2D2D38);
-  static const Color pillActive = Color(0xFFFFFFFF);
-  static const Color pillActiveText = Color(0xFF0C0C0E);
+  static const Color pillActive = Color(0xFF1D202A);
+  static const Color pillActiveText = Color(0xFFF6F7FA);
 
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
       scaffoldBackgroundColor: background,
+      splashFactory: NoSplash.splashFactory,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      hoverColor: cardSecondary.withValues(alpha: 0.5),
       colorScheme: const ColorScheme.dark(
         primary: heroCoral,
         secondary: cardSecondary,
@@ -52,6 +56,19 @@ class AppTheme {
         error: status5xx,
         onPrimary: Colors.white,
         onSurface: textPrimary,
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: cardSecondary,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: cardBorder, width: 1),
+        ),
+        textStyle: const TextStyle(
+          color: textPrimary,
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+        ),
+        waitDuration: const Duration(milliseconds: 300),
       ),
       cardColor: card,
       cardTheme: const CardThemeData(
