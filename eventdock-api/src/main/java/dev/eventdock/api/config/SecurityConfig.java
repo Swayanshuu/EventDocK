@@ -47,7 +47,7 @@ public class SecurityConfig {
 
                         // Operational endpoints and API docs
                         .requestMatchers("/health", "/actuator/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/", "/docs", "/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**", "/swagger-ui.html").permitAll()
 
                         // Options preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
