@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../models/notification_item.dart';
 import '../models/project.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_sidebar.dart';
+import '../widgets/command_palette_dialog.dart';
 import '../widgets/create_project_dialog.dart';
 import '../widgets/dashboard_top_bar.dart';
+import '../widgets/export_dialog.dart';
 import 'api_keys_view.dart';
 import 'dashboard_overview_view.dart';
 import 'event_inbox_view.dart';
@@ -32,6 +36,37 @@ class _ProjectDashboardScreenState extends State<ProjectDashboardScreen> {
   int _selectedNavIndex = 0; // 0: Overview, 1: Failures (Inbox), 2: API Keys, 3: Settings
   bool _isSidebarCollapsed = false;
   int _totalFailures = 4;
+  List<NotificationItem> _notifications = NotificationItem.getInitialNotifications();
+
+  void _openCommandPalette() {
+    CommandPaletteDialog.show(
+      context: context,
+      currentProject: _project,
+      allProjects: _allProjects,
+      onNavigate: (idx) => setState(() => _selectedNavIndex = idx),
+      onSelectProject: _onProjectChanged,
+      onExport: () => ExportDialog.show(context, _project),
+      onToggleSidebar: () => setState(() => _isSidebarCollapsed = !_isSidebarCollapsed),
+      onRefresh: () {
+        _loadProjects();
+        _loadFailureCount();
+      },
+      onCreateProject: () {
+        CreateProjectDialog.show(
+          context,
+          onProjectCreated: (created) {
+            setState(() {
+              _project = created;
+              if (!_allProjects.any((p) => p.id == created.id)) {
+                _allProjects = [created, ..._allProjects];
+              }
+            });
+            _loadFailureCount();
+          },
+        );
+      },
+    );
+  }
 
   @override
   void initState() {
@@ -81,12 +116,19 @@ class _ProjectDashboardScreenState extends State<ProjectDashboardScreen> {
     final isDesktop = screenWidth >= 1000;
     final isCollapsed = _isSidebarCollapsed;
 
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      body: SafeArea(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+    return CallbackShortcuts(
+      bindings: <ShortcutActivator, VoidCallback>{
+        const SingleActivator(LogicalKeyboardKey.keyK, meta: true): _openCommandPalette,
+        const SingleActivator(LogicalKeyboardKey.keyK, control: true): _openCommandPalette,
+      },
+      child: Focus(
+        autofocus: true,
+        child: Scaffold(
+          backgroundColor: AppTheme.background,
+          body: SafeArea(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
             // Left: Premium SaaS Sidebar Navigation
             AppSidebar(
               project: _project,
@@ -135,6 +177,30 @@ class _ProjectDashboardScreenState extends State<ProjectDashboardScreen> {
                       setState(() => _isSidebarCollapsed = !_isSidebarCollapsed);
                     },
                     isSidebarCollapsed: _isSidebarCollapsed,
+                    onNavigate: (idx) => setState(() => _selectedNavIndex = idx),
+                    notifications: _notifications,
+                    onMarkAllNotificationsRead: () {
+                      setState(() {
+                        for (final n in _notifications) {
+                          n.isRead = true;
+                        }
+                      });
+                    },
+                    onNotificationTap: (item) {
+                      setState(() {
+                        item.isRead = true;
+                        if (item.severity == NotificationSeverity.critical || item.route != null) {
+                          _selectedNavIndex = 1; // jump to Event Inbox
+                        }
+                      });
+                    },
+                    onNotificationDismiss: (item) {
+                      setState(() {
+                        _notifications.removeWhere((n) => n.id == item.id);
+                      });
+                    },
+                    onOpenSearch: _openCommandPalette,
+                    onOpenExport: () => ExportDialog.show(context, _project),
                   ),
 
                   // Main Tab Content with Solid Dark Background
@@ -170,7 +236,9 @@ class _ProjectDashboardScreenState extends State<ProjectDashboardScreen> {
           ],
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 
   Widget _buildMobileTab(int index, String label, IconData icon) {

@@ -98,6 +98,25 @@
         console.error('EventDock Firebase Sign-Out Error:', err);
       }
     };
+
+    window.eventdockDownloadFile = function(filename, content, mimeType) {
+      try {
+        const blob = new Blob([content], { type: mimeType || 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 150);
+      } catch (err) {
+        console.error('EventDock Download Error:', err);
+      }
+    };
   </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>

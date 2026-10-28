@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import '../models/notification_item.dart';
 import '../models/project.dart';
 import '../theme/app_theme.dart';
+import 'command_palette_dialog.dart';
+import 'export_dialog.dart';
+import 'notifications_panel.dart';
 
 class DashboardTopBar extends StatelessWidget {
   final Project project;
@@ -11,6 +15,14 @@ class DashboardTopBar extends StatelessWidget {
   final VoidCallback? onToggleSidebar;
   final VoidCallback? onCreateProject;
   final bool isSidebarCollapsed;
+  final ValueChanged<int>? onNavigate;
+  final List<NotificationItem>? notifications;
+  final VoidCallback? onMarkAllNotificationsRead;
+  final ValueChanged<NotificationItem>? onNotificationTap;
+  final ValueChanged<NotificationItem>? onNotificationDismiss;
+  final VoidCallback? onOpenSearch;
+  final VoidCallback? onOpenExport;
+  final VoidCallback? onOpenNotifications;
 
   const DashboardTopBar({
     super.key,
@@ -22,6 +34,14 @@ class DashboardTopBar extends StatelessWidget {
     this.onToggleSidebar,
     this.onCreateProject,
     this.isSidebarCollapsed = false,
+    this.onNavigate,
+    this.notifications,
+    this.onMarkAllNotificationsRead,
+    this.onNotificationTap,
+    this.onNotificationDismiss,
+    this.onOpenSearch,
+    this.onOpenExport,
+    this.onOpenNotifications,
   });
 
   @override
@@ -78,50 +98,74 @@ class DashboardTopBar extends StatelessWidget {
               ),
             ),
 
-          // Left: Search Bar with Keyboard Chip
+          // Left: Interactive Search Bar & Command Palette Trigger
           Expanded(
             flex: isDesktop ? 5 : 4,
-            child: Container(
-              height: 42,
-              constraints: const BoxConstraints(maxWidth: 420),
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              decoration: BoxDecoration(
-                color: AppTheme.cardSecondary,
+            child: Tooltip(
+              message: 'Search pages, projects, endpoints (⌘K / Ctrl+K)',
+              child: InkWell(
+                onTap: () {
+                  if (onOpenSearch != null) {
+                    onOpenSearch!();
+                  } else {
+                    CommandPaletteDialog.show(
+                      context: context,
+                      currentProject: project,
+                      allProjects: allProjects,
+                      onNavigate: onNavigate ?? (_) {},
+                      onSelectProject: onProjectSelected,
+                      onExport: () => ExportDialog.show(context, project),
+                      onToggleSidebar: onToggleSidebar ?? () {},
+                      onRefresh: onRefresh,
+                      onCreateProject: onCreateProject,
+                    );
+                  }
+                },
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppTheme.cardBorder),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.search_rounded, size: 18, color: AppTheme.textMuted),
-                  const SizedBox(width: 10),
-                  const Expanded(
-                    child: Text(
-                      'Search anything...',
-                      style: TextStyle(
-                        color: AppTheme.textMuted,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                hoverColor: AppTheme.cardSecondary.withValues(alpha: 0.8),
+                child: Container(
+                  height: 42,
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  decoration: BoxDecoration(
+                    color: AppTheme.cardSecondary,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppTheme.cardBorder),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppTheme.sidebar,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppTheme.cardBorder),
-                    ),
-                    child: const Text(
-                      '⌘K',
-                      style: TextStyle(
-                        color: AppTheme.textSubtle,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.search_rounded, size: 18, color: AppTheme.heroOrange),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Text(
+                          'Search anything... (⌘K / Ctrl+K)',
+                          style: TextStyle(
+                            color: AppTheme.textMuted,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppTheme.sidebar,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: AppTheme.cardBorder),
+                        ),
+                        child: const Text(
+                          '⌘K',
+                          style: TextStyle(
+                            color: AppTheme.textSubtle,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -298,9 +342,15 @@ class DashboardTopBar extends StatelessWidget {
 
               const SizedBox(width: 10),
 
-              // Export Button (Primary Solid Orange, from Shopeers reference)
+              // Export Button (Downloads real JSON/CSV telemetry file)
               ElevatedButton.icon(
-                onPressed: onRefresh,
+                onPressed: () {
+                  if (onOpenExport != null) {
+                    onOpenExport!();
+                  } else {
+                    ExportDialog.show(context, project);
+                  }
+                },
                 icon: const Icon(Icons.download_rounded, size: 14),
                 label: const Text('Export'),
                 style: ElevatedButton.styleFrom(
@@ -316,34 +366,66 @@ class DashboardTopBar extends StatelessWidget {
 
               const SizedBox(width: 10),
 
-              // Notification Icon Button
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppTheme.cardSecondary,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppTheme.cardBorder),
-                ),
-                child: Stack(
-                  children: [
-                    const Center(
-                      child: Icon(Icons.notifications_none_rounded, size: 18, color: AppTheme.textMuted),
-                    ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
+              // Notification Icon Button with Live Unread Badge & Interactive Panel
+              Builder(
+                builder: (notifContext) {
+                  final activeNotifs = notifications ?? [];
+                  final unreadCount = activeNotifs.where((n) => !n.isRead).length;
+
+                  return Tooltip(
+                    message: unreadCount > 0 ? 'Notifications ($unreadCount unread)' : 'Notifications',
+                    child: InkWell(
+                      onTap: () {
+                        if (onOpenNotifications != null) {
+                          onOpenNotifications!();
+                        } else {
+                          NotificationsPanel.show(
+                            context: notifContext,
+                            notifications: activeNotifs,
+                            onMarkAllRead: onMarkAllNotificationsRead ?? () {},
+                            onNotificationTap: onNotificationTap ?? (_) {},
+                            onNotificationDismiss: onNotificationDismiss ?? (_) {},
+                            onViewAllEvents: () => onNavigate?.call(1),
+                          );
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(10),
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      hoverColor: AppTheme.cardSecondary.withValues(alpha: 0.8),
                       child: Container(
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                          color: AppTheme.heroOrange,
-                          shape: BoxShape.circle,
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: AppTheme.cardSecondary,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppTheme.cardBorder),
+                        ),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            const Center(
+                              child: Icon(Icons.notifications_none_rounded, size: 18, color: AppTheme.textMuted),
+                            ),
+                            if (unreadCount > 0)
+                              Positioned(
+                                top: 6,
+                                right: 6,
+                                child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: const BoxDecoration(
+                                    color: AppTheme.heroOrange,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ],
           ),

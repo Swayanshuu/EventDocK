@@ -7,6 +7,7 @@ class AppTheme {
   static const Color shell = Color(0xFF101217);          // Main content container
   static const Color surface = Color(0xFF14161C);        // Primary surface
   static const Color card = Color(0xFF161820);           // Card background
+  static const Color cardBackground = card;              // Card surface alias
   static const Color cardSecondary = Color(0xFF1D202A);  // Card interior / nested tiles
   static const Color cardBorder = Color(0xFF242733);     // Subtle 1px borders
   static const Color cardBorderLight = Color(0xFF2E3242);// Slightly elevated border
