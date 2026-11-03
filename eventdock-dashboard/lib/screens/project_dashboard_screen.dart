@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../models/notification_item.dart';
 import '../models/project.dart';
-import '../services/auth_service.dart';
+import '../services/api_service.dart';
 import '../theme/app_theme.dart';
-import '../widgets/common_widgets.dart';
-import 'event_inbox_view.dart';
+import '../widgets/app_sidebar.dart';
+import '../widgets/command_palette_dialog.dart';
+import '../widgets/create_project_dialog.dart';
+import '../widgets/dashboard_top_bar.dart';
+import '../widgets/export_dialog.dart';
 import 'api_keys_view.dart';
+import 'dashboard_overview_view.dart';
+import 'event_inbox_view.dart';
 import 'project_settings_view.dart';
 
 class ProjectDashboardScreen extends StatefulWidget {
@@ -25,200 +32,279 @@ class ProjectDashboardScreen extends StatefulWidget {
 
 class _ProjectDashboardScreenState extends State<ProjectDashboardScreen> {
   late Project _project;
-  int _selectedNavIndex = 0; // 0: Inbox, 1: API Keys, 2: Settings
+  List<Project> _allProjects = [];
+  int _selectedNavIndex = 0; // 0: Overview, 1: Failures (Inbox), 2: API Keys, 3: Settings
+  bool _isSidebarCollapsed = false;
+  int _totalFailures = 4;
+  List<NotificationItem> _notifications = NotificationItem.getInitialNotifications();
+
+  void _openCommandPalette() {
+    CommandPaletteDialog.show(
+      context: context,
+      currentProject: _project,
+      allProjects: _allProjects,
+      onNavigate: (idx) => setState(() => _selectedNavIndex = idx),
+      onSelectProject: _onProjectChanged,
+      onExport: () => ExportDialog.show(context, _project),
+      onToggleSidebar: () => setState(() => _isSidebarCollapsed = !_isSidebarCollapsed),
+      onRefresh: () {
+        _loadProjects();
+        _loadFailureCount();
+      },
+      onCreateProject: () {
+        CreateProjectDialog.show(
+          context,
+          onProjectCreated: (created) {
+            setState(() {
+              _project = created;
+              if (!_allProjects.any((p) => p.id == created.id)) {
+                _allProjects = [created, ..._allProjects];
+              }
+            });
+            _loadFailureCount();
+          },
+        );
+      },
+    );
+  }
 
   @override
   void initState() {
     super.initState();
     _project = widget.initialProject;
+    _allProjects = [_project];
+    _loadProjects();
+    _loadFailureCount();
+  }
+
+  Future<void> _loadProjects() async {
+    try {
+      final list = await ApiService().getProjects();
+      if (mounted && list.isNotEmpty) {
+        setState(() {
+          _allProjects = list;
+          if (!list.any((p) => p.id == _project.id)) {
+            _allProjects = [widget.initialProject, ...list];
+          }
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _loadFailureCount() async {
+    try {
+      final res = await ApiService().getEvents(_project.id);
+      final events = (res['events'] as List<dynamic>?) ?? [];
+      if (mounted) {
+        setState(() {
+          _totalFailures = events.length;
+        });
+      }
+    } catch (_) {}
+  }
+
+  void _onProjectChanged(Project p) {
+    setState(() {
+      _project = p;
+    });
+    _loadFailureCount();
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth >= 900;
+    final isDesktop = screenWidth >= 1000;
+    final isCollapsed = _isSidebarCollapsed;
 
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: isDesktop
-          ? null
-          : AppBar(
-              title: Text(_project.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              bottom: const PreferredSize(
-                preferredSize: Size.fromHeight(1),
-                child: Divider(height: 1, color: AppTheme.cardBorder),
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  tooltip: 'All Projects',
-                  onPressed: widget.onBackToProjects,
-                ),
-              ],
+    return CallbackShortcuts(
+      bindings: <ShortcutActivator, VoidCallback>{
+        const SingleActivator(LogicalKeyboardKey.keyK, meta: true): _openCommandPalette,
+        const SingleActivator(LogicalKeyboardKey.keyK, control: true): _openCommandPalette,
+      },
+      child: Focus(
+        autofocus: true,
+        child: Scaffold(
+          backgroundColor: AppTheme.background,
+          body: SafeArea(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+            // Left: Premium SaaS Sidebar Navigation
+            AppSidebar(
+              project: _project,
+              selectedIndex: _selectedNavIndex,
+              onTabSelected: (idx) {
+                setState(() => _selectedNavIndex = idx);
+              },
+              totalFailures: _totalFailures,
+              isCollapsed: isCollapsed,
+              onToggleCollapse: () {
+                setState(() => _isSidebarCollapsed = !_isSidebarCollapsed);
+              },
+              onSignOut: widget.onSignOut,
             ),
-      drawer: isDesktop
-          ? null
-          : Drawer(
-              backgroundColor: AppTheme.surface,
-              child: _buildSidebarContent(isDrawer: true),
-            ),
-      body: Row(
-        children: [
-          if (isDesktop)
-            Container(
-              width: 250,
-              decoration: const BoxDecoration(
-                color: AppTheme.surface,
-                border: Border(right: BorderSide(color: AppTheme.cardBorder)),
-              ),
-              child: _buildSidebarContent(isDrawer: false),
-            ),
-          Expanded(
-            child: _buildMainContent(),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildSidebarContent({required bool isDrawer}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // App / Project Header
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const EventDockLogo(height: 28),
-              const SizedBox(height: 20),
-              InkWell(
-                onTap: widget.onBackToProjects,
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppTheme.cardSecondary,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.cardBorder),
+            // Right: Content Area with Header
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Top SaaS Header with Search & Project Switcher
+                  DashboardTopBar(
+                    project: _project,
+                    allProjects: _allProjects,
+                    onProjectSelected: _onProjectChanged,
+                    onRefresh: () {
+                      _loadProjects();
+                      _loadFailureCount();
+                    },
+                    onSwitchProject: widget.onBackToProjects,
+                    onCreateProject: () {
+                      CreateProjectDialog.show(
+                        context,
+                        onProjectCreated: (created) {
+                          setState(() {
+                            _project = created;
+                            if (!_allProjects.any((p) => p.id == created.id)) {
+                              _allProjects = [created, ..._allProjects];
+                            }
+                          });
+                          _loadFailureCount();
+                        },
+                      );
+                    },
+                    onToggleSidebar: () {
+                      setState(() => _isSidebarCollapsed = !_isSidebarCollapsed);
+                    },
+                    isSidebarCollapsed: _isSidebarCollapsed,
+                    onNavigate: (idx) => setState(() => _selectedNavIndex = idx),
+                    notifications: _notifications,
+                    onMarkAllNotificationsRead: () {
+                      setState(() {
+                        for (final n in _notifications) {
+                          n.isRead = true;
+                        }
+                      });
+                    },
+                    onNotificationTap: (item) {
+                      setState(() {
+                        item.isRead = true;
+                        if (item.severity == NotificationSeverity.critical || item.route != null) {
+                          _selectedNavIndex = 1; // jump to Event Inbox
+                        }
+                      });
+                    },
+                    onNotificationDismiss: (item) {
+                      setState(() {
+                        _notifications.removeWhere((n) => n.id == item.id);
+                      });
+                    },
+                    onOpenSearch: _openCommandPalette,
+                    onOpenExport: () => ExportDialog.show(context, _project),
                   ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.folder_outlined, size: 16, color: AppTheme.primary),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _project.name,
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppTheme.textPrimary),
-                          overflow: TextOverflow.ellipsis,
+
+                  // Main Tab Content with Solid Dark Background
+                  Expanded(
+                    child: Container(
+                      color: AppTheme.background,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 150),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeIn,
+                        layoutBuilder: (currentChild, previousChildren) {
+                          return Stack(
+                            alignment: Alignment.topLeft,
+                            children: <Widget>[
+                              ...previousChildren,
+                              if (currentChild != null) currentChild,
+                            ],
+                          );
+                        },
+                        child: Container(
+                          key: ValueKey<int>(_selectedNavIndex),
+                          color: AppTheme.background,
+                          width: double.infinity,
+                          height: double.infinity,
+                          child: _buildCurrentView(),
                         ),
                       ),
-                      const Icon(Icons.unfold_more, size: 16, color: AppTheme.textMuted),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        const Divider(height: 1, color: AppTheme.cardBorder),
-
-        // Navigation Items
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-            children: [
-              _buildNavItem(0, 'Event Inbox', Icons.inbox_rounded),
-              _buildNavItem(1, 'API Keys', Icons.vpn_key_rounded),
-              _buildNavItem(2, 'Project Settings', Icons.settings_rounded),
-            ],
-          ),
-        ),
-
-        const Divider(height: 1, color: AppTheme.cardBorder),
-
-        // User profile footer
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppTheme.cardSecondary,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppTheme.cardBorder),
-                ),
-                child: Text(
-                  (AuthService().userEmail ?? 'U').substring(0, 1).toUpperCase(),
-                  style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 13),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  AuthService().userEmail ?? '',
-                  style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.logout_rounded, size: 18, color: AppTheme.textMuted),
-                tooltip: 'Sign Out',
-                onPressed: widget.onSignOut,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
+      ),
+    ),
+  ),
+);
   }
 
-  Widget _buildNavItem(int index, String label, IconData icon) {
+  Widget _buildMobileTab(int index, String label, IconData icon) {
     final isSelected = _selectedNavIndex == index;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: ListTile(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        selected: isSelected,
-        selectedTileColor: AppTheme.primary.withValues(alpha: 0.12),
-        leading: Icon(icon, size: 18, color: isSelected ? AppTheme.primary : AppTheme.textMuted),
-        title: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? AppTheme.primary : AppTheme.textPrimary,
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
+    return InkWell(
+      onTap: () => setState(() => _selectedNavIndex = index),
+      borderRadius: BorderRadius.circular(999),
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      hoverColor: AppTheme.cardSecondary.withValues(alpha: 0.5),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.cardSecondary : Colors.transparent,
+          borderRadius: BorderRadius.circular(999),
+          border: isSelected ? Border.all(color: AppTheme.cardBorder) : null,
         ),
-        dense: true,
-        onTap: () {
-          setState(() => _selectedNavIndex = index);
-          if (Scaffold.of(context).isDrawerOpen) {
-            Navigator.pop(context);
-          }
-        },
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected ? AppTheme.heroOrange : AppTheme.textMuted,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? AppTheme.textPrimary : AppTheme.textMuted,
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildMainContent() {
+  Widget _buildCurrentView() {
     switch (_selectedNavIndex) {
       case 0:
-        return EventInboxView(project: _project);
+        return DashboardOverviewView(
+          project: _project,
+          onViewAllEvents: () {
+            setState(() => _selectedNavIndex = 1);
+          },
+        );
       case 1:
-        return ApiKeysView(project: _project);
+        return EventInboxView(project: _project);
       case 2:
+        return ApiKeysView(project: _project);
+      case 3:
         return ProjectSettingsView(
           project: _project,
           onProjectDeleted: widget.onBackToProjects,
           onProjectUpdated: (updated) => setState(() => _project = updated),
         );
       default:
-        return EventInboxView(project: _project);
+        return DashboardOverviewView(
+          project: _project,
+          onViewAllEvents: () {
+            setState(() => _selectedNavIndex = 1);
+          },
+        );
     }
   }
 }

@@ -33,12 +33,17 @@
   <title>EventDock - Developer Platform</title>
   <link rel="manifest" href="manifest.json">
   <style>
-    body {
-      background-color: #000000;
-      color: #F5F5F5;
+    * {
+      -webkit-tap-highlight-color: transparent !important;
+      outline: none !important;
+    }
+    html, body {
+      background-color: #090A0D;
+      color: #F6F7FA;
       margin: 0;
       padding: 0;
       overflow: hidden;
+      user-select: none;
     }
   </style>
 </head>
@@ -91,6 +96,25 @@
         await firebase.auth().signOut();
       } catch (err) {
         console.error('EventDock Firebase Sign-Out Error:', err);
+      }
+    };
+
+    window.eventdockDownloadFile = function(filename, content, mimeType) {
+      try {
+        const blob = new Blob([content], { type: mimeType || 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 150);
+      } catch (err) {
+        console.error('EventDock Download Error:', err);
       }
     };
   </script>
