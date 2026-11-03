@@ -38,6 +38,8 @@ The starter intercepts requests using a two-pronged instrumentation approach:
 1. `EventDockRequestFilter` (`OncePerRequestFilter`): Captures route URI, HTTP method, client IP, request start time, and final HTTP response status. Sets `X-Request-Id` correlation header.
 2. `EventDockExceptionObserver` (`HandlerExceptionResolver` with `HIGHEST_PRECEDENCE`): Intercepts exceptions passing through Spring MVC without consuming or breaking standard `@ExceptionHandler` handling.
 
+> *For an in-depth, step-by-step explanation written in simple words, see [How Starter Captures Exceptions Internally](how-starter-captures-exceptions.md).*
+
 ### 2.2 Deduplication Strategy
 To prevent double reporting when both the filter and exception resolver detect a failure, `EventDockRequestFilter` maintains an atomic request attribute flag `dev.eventdock.reported`. The diagnostic event is emitted exactly once during filter completion.
 
