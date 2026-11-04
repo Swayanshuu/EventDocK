@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/project.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
-import 'common_widgets.dart';
 
 class AppTopNav extends StatelessWidget {
   final Project project;
@@ -68,7 +67,7 @@ class AppTopNav extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Text(
+                    Text(
                       'EventDock',
                       style: TextStyle(
                         color: AppTheme.textPrimary,
@@ -88,7 +87,7 @@ class AppTopNav extends StatelessWidget {
                 elevation: 12,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  side: const BorderSide(color: AppTheme.cardBorder),
+                  side: BorderSide(color: AppTheme.cardBorder),
                 ),
                 offset: const Offset(0, 44),
                 onSelected: (p) {
@@ -99,7 +98,7 @@ class AppTopNav extends StatelessWidget {
                 itemBuilder: (context) {
                   final projectsList = allProjects.isNotEmpty ? allProjects : [project];
                   return [
-                    const PopupMenuItem<Project>(
+                    PopupMenuItem<Project>(
                       enabled: false,
                       height: 28,
                       child: Text(
@@ -146,12 +145,12 @@ class AppTopNav extends StatelessWidget {
                         ),
                       );
                     }),
-                    const PopupMenuDivider(height: 1),
+                    PopupMenuDivider(height: 1),
                     PopupMenuItem<Project>(
                       enabled: true,
                       onTap: onSwitchProject,
                       child: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.dashboard_customize_outlined, size: 16, color: AppTheme.textMuted),
                           SizedBox(width: 10),
                           Text(
@@ -183,7 +182,7 @@ class AppTopNav extends StatelessWidget {
                         constraints: BoxConstraints(maxWidth: isCompact ? 100 : 140),
                         child: Text(
                           project.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppTheme.textPrimary,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -192,7 +191,7 @@ class AppTopNav extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.unfold_more, size: 14, color: AppTheme.textMuted),
+                      Icon(Icons.unfold_more, size: 14, color: AppTheme.textMuted),
                     ],
                   ),
                 ),
@@ -255,7 +254,7 @@ class AppTopNav extends StatelessWidget {
                 color: AppTheme.card,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: AppTheme.cardBorder),
+                  side: BorderSide(color: AppTheme.cardBorder),
                 ),
                 offset: const Offset(0, 42),
                 onSelected: (val) {
@@ -268,11 +267,11 @@ class AppTopNav extends StatelessWidget {
                     enabled: false,
                     child: Text(
                       AuthService().userEmail ?? 'developer@eventdock.dev',
-                      style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                      style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
                     ),
                   ),
                   const PopupMenuDivider(),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'projects',
                     child: Row(
                       children: [

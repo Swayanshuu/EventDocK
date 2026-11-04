@@ -33,7 +33,7 @@ class CreateProjectDialog {
             backgroundColor: AppTheme.card,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(color: AppTheme.cardBorder),
+              side: BorderSide(color: AppTheme.cardBorder),
             ),
             child: Container(
               constraints: const BoxConstraints(maxWidth: 580),
@@ -57,21 +57,21 @@ class CreateProjectDialog {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Create a New Project',
                             style: TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             'Workspace: ${selectedOrg.name}',
-                            style: const TextStyle(color: AppTheme.textMuted, fontSize: 11),
+                            style: TextStyle(color: AppTheme.textMuted, fontSize: 11),
                           ),
                         ],
                       ),
                       const Spacer(),
                       if (currentStep < 3)
                         IconButton(
-                          icon: const Icon(Icons.close, size: 18, color: AppTheme.textMuted),
+                          icon: Icon(Icons.close, size: 18, color: AppTheme.textMuted),
                           onPressed: () => Navigator.pop(ctx),
                         ),
                     ],
@@ -100,12 +100,12 @@ class CreateProjectDialog {
                   // Step Views
                   if (currentStep == 0) ...[
                     // Step 1: Project Details
-                    const Text('Workspace', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
+                    Text('Workspace', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<Organization>(
-                      value: selectedOrg,
+                      initialValue: selectedOrg,
                       dropdownColor: AppTheme.cardSecondary,
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                      style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                       decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 10)),
                       items: orgs.map((o) => DropdownMenuItem(value: o, child: Text(o.name))).toList(),
                       onChanged: (v) {
@@ -114,32 +114,32 @@ class CreateProjectDialog {
                     ),
                     const SizedBox(height: 14),
 
-                    const Text('Project Name', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
+                    Text('Project Name', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: nameCtrl,
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                      style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                       decoration: const InputDecoration(hintText: 'e.g. Payments Microservice'),
                     ),
                     const SizedBox(height: 14),
 
-                    const Text('Description (optional)', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
+                    Text('Description (optional)', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: descCtrl,
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                      style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                       decoration: const InputDecoration(hintText: 'Short description of this service'),
                     ),
                   ],
 
                   if (currentStep == 1) ...[
                     // Step 2: Configuration
-                    const Text('Cloud Region', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
+                    Text('Cloud Region', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
-                      value: region,
+                      initialValue: region,
                       dropdownColor: AppTheme.cardSecondary,
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                      style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                       decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 10)),
                       items: const [
                         DropdownMenuItem(value: 'us-east-1', child: Text('AWS us-east-1 (N. Virginia)')),
@@ -152,12 +152,12 @@ class CreateProjectDialog {
                     ),
                     const SizedBox(height: 14),
 
-                    const Text('Deployment Environment', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
+                    Text('Deployment Environment', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
-                      value: environment,
+                      initialValue: environment,
                       dropdownColor: AppTheme.cardSecondary,
-                      style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                      style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                       decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 10)),
                       items: const [
                         DropdownMenuItem(value: 'Production', child: Text('Production')),
@@ -170,7 +170,7 @@ class CreateProjectDialog {
                     ),
                     const SizedBox(height: 14),
 
-                    const Text('Diagnostic Retention Policy', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
+                    Text('Diagnostic Retention Policy', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 6),
                     Row(
                       children: [7, 14, 30, 90].map((days) {
@@ -234,9 +234,9 @@ class CreateProjectDialog {
                   if (currentStep == 3) ...[
                     // Step 4: Progress
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      padding: EdgeInsets.symmetric(vertical: 24),
                       child: Column(
-                        children: const [
+                        children: [
                           CircularProgressIndicator(strokeWidth: 2, color: AppTheme.heroOrange),
                           SizedBox(height: 18),
                           Text(
@@ -271,18 +271,18 @@ class CreateProjectDialog {
                           children: [
                             Text(
                               '${finalProject!.name} is Ready!',
-                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppTheme.textPrimary),
+                              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppTheme.textPrimary),
                             ),
                             Text(
                               'Workspace: ${selectedOrg.name}',
-                              style: const TextStyle(color: AppTheme.textMuted, fontSize: 11),
+                              style: TextStyle(color: AppTheme.textMuted, fontSize: 11),
                             ),
                           ],
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const Text(
+                    Text(
                       'Dedicated Ingestion API Key:',
                       style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.bold),
                     ),
@@ -332,12 +332,12 @@ class CreateProjectDialog {
                         if (currentStep > 0)
                           TextButton(
                             onPressed: () => setState(() => currentStep--),
-                            child: const Text('Back', style: TextStyle(color: AppTheme.textMuted)),
+                            child: Text('Back', style: TextStyle(color: AppTheme.textMuted)),
                           )
                         else
                           TextButton(
                             onPressed: () => Navigator.pop(ctx),
-                            child: const Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
+                            child: Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
                           ),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -457,7 +457,7 @@ class CreateProjectDialog {
                 ),
               ),
               if (idx < titles.length - 1)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.symmetric(horizontal: 4),
                   child: Icon(Icons.chevron_right, size: 14, color: AppTheme.textSubtle),
                 ),
@@ -474,8 +474,8 @@ class CreateProjectDialog {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
-          Text(value, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12, fontWeight: FontWeight.w600)),
+          Text(label, style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+          Text(value, style: TextStyle(color: AppTheme.textPrimary, fontSize: 12, fontWeight: FontWeight.w600)),
         ],
       ),
     );

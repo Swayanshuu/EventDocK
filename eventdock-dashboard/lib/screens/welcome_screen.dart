@@ -17,23 +17,53 @@ class WelcomeScreen extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final isCompact = screenWidth < 700;
 
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top Header: Logo
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: isCompact ? 20 : 40,
-                vertical: 24,
-              ),
-              child: Row(
-                children: const [
-                  EventDockLogo(height: 32, fontSize: 20),
-                ],
-              ),
-            ),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: AppTheme.themeModeNotifier,
+      builder: (context, themeMode, _) {
+        final isDark = themeMode == ThemeMode.dark;
+        return Scaffold(
+          backgroundColor: AppTheme.background,
+          body: SafeArea(
+            child: Column(
+              children: [
+                // Top Header: Logo & Theme Toggle
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isCompact ? 20 : 40,
+                    vertical: 24,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const EventDockLogo(height: 32, fontSize: 20),
+                      Tooltip(
+                        message: isDark ? 'Switch to Light Mode (White & Orange)' : 'Switch to Dark Mode (Black & Orange)',
+                        child: InkWell(
+                          onTap: () {
+                            AppTheme.toggleThemeMode();
+                          },
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: AppTheme.cardSecondary,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppTheme.cardBorder),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                                size: 18,
+                                color: AppTheme.heroOrange,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
             // Main Content Area
             Expanded(
@@ -73,7 +103,7 @@ class WelcomeScreen extends StatelessWidget {
                         const SizedBox(height: 24),
 
                         // Main Headline
-                        const Text(
+                        Text(
                           'The Developer Platform for Telemetry & Diagnostics',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -87,7 +117,7 @@ class WelcomeScreen extends StatelessWidget {
                         const SizedBox(height: 16),
 
                         // Supporting Description
-                        const Text(
+                        Text(
                           'Capture microservice HTTP faults, inspect sanitised stack traces, manage workspace API keys, and replay failed production requests seamlessly.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -128,7 +158,7 @@ class WelcomeScreen extends StatelessWidget {
                               onPressed: onSignIn,
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppTheme.textPrimary,
-                                side: const BorderSide(color: AppTheme.cardBorder),
+                                side: BorderSide(color: AppTheme.cardBorder),
                                 backgroundColor: AppTheme.cardSecondary,
                                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -152,7 +182,7 @@ class WelcomeScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Text(
                     'EventDock Desktop Studio v1.2.0 • Privacy Policy • Terms of Service',
                     style: TextStyle(color: AppTheme.textSubtle, fontSize: 11),
@@ -163,6 +193,8 @@ class WelcomeScreen extends StatelessWidget {
           ],
         ),
       ),
+        );
+      },
     );
   }
 }

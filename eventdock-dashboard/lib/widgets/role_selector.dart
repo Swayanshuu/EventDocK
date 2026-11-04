@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/auth_state.dart';
+import '../theme/app_theme.dart';
 
 class RoleSelector extends StatelessWidget {
   final AuthRole selectedRole;
@@ -113,7 +114,7 @@ class RoleSelector extends StatelessWidget {
                   Icon(
                     isSelected ? activeIcon : icon,
                     size: 15,
-                    color: isSelected ? const Color(0xFF0038FF) : const Color(0xFF9CA3AF),
+                    color: isSelected ? AppTheme.heroOrange : const Color(0xFF9CA3AF),
                   ),
                   const SizedBox(width: 6),
                   Text(label),

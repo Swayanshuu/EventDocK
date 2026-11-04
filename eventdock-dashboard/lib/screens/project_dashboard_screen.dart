@@ -35,8 +35,8 @@ class _ProjectDashboardScreenState extends State<ProjectDashboardScreen> {
   List<Project> _allProjects = [];
   int _selectedNavIndex = 0; // 0: Overview, 1: Failures (Inbox), 2: API Keys, 3: Settings
   bool _isSidebarCollapsed = false;
-  int _totalFailures = 4;
-  List<NotificationItem> _notifications = NotificationItem.getInitialNotifications();
+  int _totalFailures = 0;
+  final List<NotificationItem> _notifications = NotificationItem.getInitialNotifications();
 
   void _openCommandPalette() {
     CommandPaletteDialog.show(
@@ -112,9 +112,10 @@ class _ProjectDashboardScreenState extends State<ProjectDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isDesktop = screenWidth >= 1000;
-    final isCollapsed = _isSidebarCollapsed;
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: AppTheme.themeModeNotifier,
+      builder: (context, themeMode, _) {
+        final isCollapsed = _isSidebarCollapsed;
 
     return CallbackShortcuts(
       bindings: <ShortcutActivator, VoidCallback>{
@@ -216,12 +217,12 @@ class _ProjectDashboardScreenState extends State<ProjectDashboardScreen> {
                             alignment: Alignment.topLeft,
                             children: <Widget>[
                               ...previousChildren,
-                              if (currentChild != null) currentChild,
+                              ?currentChild,
                             ],
                           );
                         },
                         child: Container(
-                          key: ValueKey<int>(_selectedNavIndex),
+                          key: ValueKey<String>('$_selectedNavIndex-${themeMode.name}'),
                           color: AppTheme.background,
                           width: double.infinity,
                           height: double.infinity,
@@ -239,43 +240,7 @@ class _ProjectDashboardScreenState extends State<ProjectDashboardScreen> {
     ),
   ),
 );
-  }
-
-  Widget _buildMobileTab(int index, String label, IconData icon) {
-    final isSelected = _selectedNavIndex == index;
-    return InkWell(
-      onTap: () => setState(() => _selectedNavIndex = index),
-      borderRadius: BorderRadius.circular(999),
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      hoverColor: AppTheme.cardSecondary.withValues(alpha: 0.5),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? AppTheme.cardSecondary : Colors.transparent,
-          borderRadius: BorderRadius.circular(999),
-          border: isSelected ? Border.all(color: AppTheme.cardBorder) : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 14,
-              color: isSelected ? AppTheme.heroOrange : AppTheme.textMuted,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? AppTheme.textPrimary : AppTheme.textMuted,
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
+      },
     );
   }
 

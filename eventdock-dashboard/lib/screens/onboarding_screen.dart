@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/organization.dart';
 import '../models/project.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
@@ -117,37 +116,67 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isCompact = screenWidth < 700;
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: AppTheme.themeModeNotifier,
+      builder: (context, themeMode, _) {
+        final isDark = themeMode == ThemeMode.dark;
+        final screenWidth = MediaQuery.of(context).size.width;
+        final isCompact = screenWidth < 700;
 
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top Navigation Bar
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: isCompact ? 16 : 32,
-                vertical: 16,
-              ),
-              decoration: const BoxDecoration(
-                color: AppTheme.sidebar,
-                border: Border(bottom: BorderSide(color: AppTheme.cardBorder, width: 1)),
-              ),
-              child: Row(
-                children: [
-                  const EventDockLogo(height: 28, fontSize: 18),
-                  const Spacer(),
-                  Text(
-                    AuthService().userEmail ?? '',
-                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+        return Scaffold(
+          backgroundColor: AppTheme.background,
+          body: SafeArea(
+            child: Column(
+              children: [
+                // Top Navigation Bar
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isCompact ? 16 : 32,
+                    vertical: 16,
                   ),
-                  const SizedBox(width: 16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.sidebar,
+                    border: Border(bottom: BorderSide(color: AppTheme.cardBorder, width: 1)),
+                  ),
+                  child: Row(
+                    children: [
+                      const EventDockLogo(height: 28, fontSize: 18),
+                      const Spacer(),
+                      Tooltip(
+                        message: isDark ? 'Switch to Light Mode (White & Orange)' : 'Switch to Dark Mode (Black & Orange)',
+                        child: InkWell(
+                          onTap: () {
+                            AppTheme.toggleThemeMode();
+                          },
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            margin: EdgeInsets.only(right: 12),
+                            decoration: BoxDecoration(
+                              color: AppTheme.cardSecondary,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppTheme.cardBorder),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                                size: 16,
+                                color: AppTheme.heroOrange,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        AuthService().userEmail ?? '',
+                        style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                      ),
+                  SizedBox(width: 16),
                   TextButton.icon(
                     onPressed: widget.onSignOut,
-                    icon: const Icon(Icons.logout_rounded, size: 14, color: AppTheme.textMuted),
-                    label: const Text('Sign Out', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                    icon: Icon(Icons.logout_rounded, size: 14, color: AppTheme.textMuted),
+                    label: Text('Sign Out', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
                   ),
                 ],
               ),
@@ -171,8 +200,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                         if (_errorMessage != null) ...[
                           Container(
-                            margin: const EdgeInsets.only(bottom: 20),
-                            padding: const EdgeInsets.all(12),
+                            margin: EdgeInsets.only(bottom: 20),
+                            padding: EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: AppTheme.status5xx.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
@@ -180,10 +209,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.error_outline, color: AppTheme.status5xx, size: 16),
-                                const SizedBox(width: 8),
+                                Icon(Icons.error_outline, color: AppTheme.status5xx, size: 16),
+                                SizedBox(width: 8),
                                 Expanded(
-                                  child: Text(_errorMessage!, style: const TextStyle(color: AppTheme.status5xx, fontSize: 12)),
+                                  child: Text(_errorMessage!, style: TextStyle(color: AppTheme.status5xx, fontSize: 12)),
                                 ),
                               ],
                             ),
@@ -204,6 +233,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
       ),
     );
+      },
+    );
   }
 
   Widget _buildStepperHeader() {
@@ -215,7 +246,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ];
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -241,7 +272,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: isCompleted
-                      ? const Icon(Icons.check, size: 14, color: Colors.black)
+                      ? Icon(Icons.check, size: 14, color: Colors.black)
                       : Text(
                           steps[index]['num']!,
                           style: TextStyle(
@@ -264,7 +295,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
                 if (index < steps.length - 1)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.symmetric(horizontal: 6),
                     child: Icon(Icons.chevron_right, size: 14, color: AppTheme.textSubtle),
                   ),
@@ -278,7 +309,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildStep0Profile() {
     return Container(
-      padding: const EdgeInsets.all(28),
+      padding: EdgeInsets.all(28),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -287,12 +318,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Personal profile',
             style: TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: 4),
-          const Text(
+          SizedBox(height: 4),
+          Text(
             'Tell us your name and engineering role to customize your workspace telemetry experience.',
             style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
           ),
@@ -306,7 +337,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 backgroundColor: AppTheme.heroOrange.withValues(alpha: 0.15),
                 child: Text(
                   _nameController.text.isNotEmpty ? _nameController.text.substring(0, 1).toUpperCase() : 'D',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.heroOrange),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.heroOrange),
                 ),
               ),
               const SizedBox(width: 16),
@@ -315,31 +346,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   Text(
                     AuthService().userEmail ?? 'developer@eventdock.dev',
-                    style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: AppTheme.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
                   ),
-                  const SizedBox(height: 2),
-                  const Text('Personal profile avatar', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11)),
+                  SizedBox(height: 2),
+                  Text('Personal profile avatar', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11)),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
-          const Text('Full Name', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 6),
+          Text('Full Name', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
+          SizedBox(height: 6),
           TextField(
             controller: _nameController,
-            style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+            style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
             decoration: const InputDecoration(hintText: 'e.g. Alex Rivera'),
             onChanged: (v) => setState(() {}),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
 
-          const Text('Job Title / Role (optional)', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 6),
+          Text('Job Title / Role (optional)', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
+          SizedBox(height: 6),
           TextField(
             controller: _roleTitleController,
-            style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+            style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
             decoration: const InputDecoration(hintText: 'e.g. Staff Backend Engineer / SRE Lead'),
           ),
           const SizedBox(height: 28),
@@ -374,7 +405,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildStep1WorkspaceType() {
     return Container(
-      padding: const EdgeInsets.all(28),
+      padding: EdgeInsets.all(28),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -383,12 +414,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Choose your workspace type',
             style: TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: 4),
-          const Text(
+          SizedBox(height: 4),
+          Text(
             'Select whether this workspace is for your solo projects or for an engineering team.',
             style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
           ),
@@ -424,7 +455,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: [
               TextButton(
                 onPressed: () => setState(() => _currentStep = 0),
-                child: const Text('Back to Profile', style: TextStyle(color: AppTheme.textMuted)),
+                child: Text('Back to Profile', style: TextStyle(color: AppTheme.textMuted)),
               ),
               ElevatedButton.icon(
                 onPressed: () {
@@ -469,7 +500,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: isSelected ? AppTheme.heroOrange.withValues(alpha: 0.08) : AppTheme.cardSecondary,
           borderRadius: BorderRadius.circular(12),
@@ -484,25 +515,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: isSelected ? AppTheme.heroOrange.withValues(alpha: 0.2) : AppTheme.card,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(icon, size: 18, color: isSelected ? AppTheme.heroOrange : AppTheme.textMuted),
                 ),
-                const Spacer(),
+                Spacer(),
                 if (isSelected)
-                  const Icon(Icons.check_circle_rounded, size: 18, color: AppTheme.heroOrange),
+                  Icon(Icons.check_circle_rounded, size: 18, color: AppTheme.heroOrange),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Text(title, style: TextStyle(color: isSelected ? AppTheme.textPrimary : AppTheme.textMuted, fontSize: 14, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 6),
-            Text(subtitle, style: const TextStyle(color: AppTheme.textMuted, fontSize: 12, height: 1.4)),
-            const SizedBox(height: 12),
+            SizedBox(height: 6),
+            Text(subtitle, style: TextStyle(color: AppTheme.textMuted, fontSize: 12, height: 1.4)),
+            SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
                 color: isSelected ? AppTheme.heroOrange.withValues(alpha: 0.15) : AppTheme.card,
                 borderRadius: BorderRadius.circular(6),
@@ -526,7 +557,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final isOrg = _workspaceType == 'organization';
 
     return Container(
-      padding: const EdgeInsets.all(28),
+      padding: EdgeInsets.all(28),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -537,25 +568,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           Text(
             isOrg ? 'Organisation workspace setup' : 'Individual workspace setup',
-            style: const TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.w700),
+            style: TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
           Text(
             isOrg
                 ? 'Configure your organisation profile and optionally invite team members.'
                 : 'Configure your private personal workspace.',
-            style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+            style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           Text(
             isOrg ? 'Organisation Name' : 'Workspace Name',
-            style: const TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700),
+            style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           TextField(
             controller: _workspaceNameController,
-            style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+            style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
             decoration: InputDecoration(
               hintText: isOrg ? 'e.g. Acme Microservices' : 'Personal Workspace',
             ),
@@ -563,13 +594,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               _workspaceSlugController.text = val.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '-');
             },
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
 
-          const Text('Workspace Slug', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 6),
+          Text('Workspace Slug', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
+          SizedBox(height: 6),
           TextField(
             controller: _workspaceSlugController,
-            style: const TextStyle(fontSize: 13, color: AppTheme.textMuted, fontFamily: 'monospace'),
+            style: TextStyle(fontSize: 13, color: AppTheme.textMuted, fontFamily: 'monospace'),
             decoration: const InputDecoration(
               prefixText: 'eventdock.dev/org/',
             ),
@@ -583,12 +614,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Industry / Type', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 6),
+                      Text('Industry / Type', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
+                      SizedBox(height: 6),
                       DropdownButtonFormField<String>(
-                        value: _industryType,
+                        initialValue: _industryType,
                         dropdownColor: AppTheme.cardSecondary,
-                        style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary),
+                        style: TextStyle(fontSize: 12, color: AppTheme.textPrimary),
                         decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12)),
                         items: const [
                           DropdownMenuItem(value: 'SaaS & Cloud Services', child: Text('SaaS & Cloud Services')),
@@ -608,12 +639,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Team Size', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 6),
+                      Text('Team Size', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.w700)),
+                      SizedBox(height: 6),
                       DropdownButtonFormField<String>(
-                        value: _teamSize,
+                        initialValue: _teamSize,
                         dropdownColor: AppTheme.cardSecondary,
-                        style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary),
+                        style: TextStyle(fontSize: 12, color: AppTheme.textPrimary),
                         decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12)),
                         items: const [
                           DropdownMenuItem(value: '1-10 members', child: Text('1-10 members')),
@@ -632,12 +663,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             const SizedBox(height: 24),
 
             // Optional Team Invitations Section
-            const Text(
+            Text(
               'Invite Team Members (Optional)',
               style: TextStyle(color: AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.w700),
             ),
-            const SizedBox(height: 4),
-            const Text(
+            SizedBox(height: 4),
+            Text(
               'Add team members now or invite them later from Organisation settings.',
               style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
             ),
@@ -649,7 +680,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   flex: 3,
                   child: TextField(
                     controller: _inviteEmailController,
-                    style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary),
+                    style: TextStyle(fontSize: 12, color: AppTheme.textPrimary),
                     decoration: const InputDecoration(hintText: 'teammate@company.com'),
                   ),
                 ),
@@ -657,9 +688,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Expanded(
                   flex: 2,
                   child: DropdownButtonFormField<String>(
-                    value: _inviteRole,
+                    initialValue: _inviteRole,
                     dropdownColor: AppTheme.cardSecondary,
-                    style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary),
+                    style: TextStyle(fontSize: 12, color: AppTheme.textPrimary),
                     decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12)),
                     items: const [
                       DropdownMenuItem(value: 'Admin', child: Text('Admin')),
@@ -684,7 +715,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.cardSecondary,
                     foregroundColor: AppTheme.textPrimary,
-                    side: const BorderSide(color: AppTheme.cardBorder),
+                    side: BorderSide(color: AppTheme.cardBorder),
                   ),
                   child: const Text('Add'),
                 ),
@@ -699,10 +730,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: _invitations.map((inv) {
                   return Chip(
                     backgroundColor: AppTheme.cardSecondary,
-                    side: const BorderSide(color: AppTheme.cardBorder),
-                    avatar: const Icon(Icons.mail_outline, size: 14, color: AppTheme.heroOrange),
-                    label: Text('${inv['email']} (${inv['role']})', style: const TextStyle(fontSize: 11, color: AppTheme.textPrimary)),
-                    deleteIcon: const Icon(Icons.close, size: 14, color: AppTheme.textMuted),
+                    side: BorderSide(color: AppTheme.cardBorder),
+                    avatar: Icon(Icons.mail_outline, size: 14, color: AppTheme.heroOrange),
+                    label: Text('${inv['email']} (${inv['role']})', style: TextStyle(fontSize: 11, color: AppTheme.textPrimary)),
+                    deleteIcon: Icon(Icons.close, size: 14, color: AppTheme.textMuted),
                     onDeleted: () {
                       setState(() {
                         _invitations.remove(inv);
@@ -721,7 +752,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: [
               TextButton(
                 onPressed: () => setState(() => _currentStep = 1),
-                child: const Text('Back', style: TextStyle(color: AppTheme.textMuted)),
+                child: Text('Back', style: TextStyle(color: AppTheme.textMuted)),
               ),
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleCompleteOnboarding,
@@ -750,7 +781,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final project = _initialProject;
 
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -760,29 +791,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: AppTheme.status2xx.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.check, color: AppTheme.status2xx, size: 28),
+            child: Icon(Icons.check, color: AppTheme.status2xx, size: 28),
           ),
-          const SizedBox(height: 16),
-          const Text(
+          SizedBox(height: 16),
+          Text(
             'Your workspace is ready!',
             style: TextStyle(color: AppTheme.textPrimary, fontSize: 22, fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           Text(
             '${currentOrg.name} (${currentOrg.type == "organization" ? "Organisation" : "Individual"}) is configured with ${currentOrg.plan}.',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+            style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
           ),
           const SizedBox(height: 24),
 
           if (project != null)
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppTheme.cardSecondary,
                 borderRadius: BorderRadius.circular(12),
@@ -791,25 +822,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: AppTheme.heroOrange.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.folder_outlined, color: AppTheme.heroOrange, size: 18),
+                    child: Icon(Icons.folder_outlined, color: AppTheme.heroOrange, size: 18),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(project.name, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
-                        const SizedBox(height: 2),
-                        Text('Initial starter project provisioned with 30-day retention', style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                        Text(project.name, style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
+                        SizedBox(height: 2),
+                        Text('Initial starter project provisioned with 30-day retention', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                       ],
                     ),
                   ),
-                  const Icon(Icons.check_circle_rounded, size: 16, color: AppTheme.status2xx),
+                  Icon(Icons.check_circle_rounded, size: 16, color: AppTheme.status2xx),
                 ],
               ),
             ),

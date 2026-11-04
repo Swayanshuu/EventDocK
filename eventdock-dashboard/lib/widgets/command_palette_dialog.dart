@@ -41,6 +41,7 @@ class CommandPaletteDialog extends StatefulWidget {
   final VoidCallback onToggleSidebar;
   final VoidCallback onRefresh;
   final VoidCallback? onCreateProject;
+  final List<String>? monitoredEndpoints;
 
   const CommandPaletteDialog({
     super.key,
@@ -52,6 +53,7 @@ class CommandPaletteDialog extends StatefulWidget {
     required this.onToggleSidebar,
     required this.onRefresh,
     this.onCreateProject,
+    this.monitoredEndpoints,
   });
 
   static Future<void> show({
@@ -64,6 +66,7 @@ class CommandPaletteDialog extends StatefulWidget {
     required VoidCallback onToggleSidebar,
     required VoidCallback onRefresh,
     VoidCallback? onCreateProject,
+    List<String>? monitoredEndpoints,
   }) {
     return showDialog<void>(
       context: context,
@@ -77,6 +80,7 @@ class CommandPaletteDialog extends StatefulWidget {
         onToggleSidebar: onToggleSidebar,
         onRefresh: onRefresh,
         onCreateProject: onCreateProject,
+        monitoredEndpoints: monitoredEndpoints,
       ),
     );
   }
@@ -229,55 +233,22 @@ class _CommandPaletteDialogState extends State<CommandPaletteDialog> {
       );
     }
 
-    // Monitored Endpoints & Error Codes
-    items.add(
-      CommandPaletteItem(
-        id: 'ep_checkout',
-        title: '/api/v1/checkout/charge',
-        subtitle: 'POST • 500 Spike (14 errors) • PaymentGatewayTimeout',
-        category: 'Endpoints',
-        icon: Icons.error_outline_rounded,
-        type: CommandPaletteItemType.endpoint,
-        badge: 'Critical',
-        onSelect: () => widget.onNavigate(1),
-      ),
-    );
-    items.add(
-      CommandPaletteItem(
-        id: 'ep_auth',
-        title: '/api/v1/auth/login',
-        subtitle: 'POST • 429 RateLimitExceeded • 118ms latency',
-        category: 'Endpoints',
-        icon: Icons.lock_clock_outlined,
-        type: CommandPaletteItemType.endpoint,
-        badge: 'Warning',
-        onSelect: () => widget.onNavigate(1),
-      ),
-    );
-    items.add(
-      CommandPaletteItem(
-        id: 'ep_sync',
-        title: '/api/v1/sync/events',
-        subtitle: 'PUT • 502 BadGatewayError • 1205ms latency',
-        category: 'Endpoints',
-        icon: Icons.sync_problem_rounded,
-        type: CommandPaletteItemType.endpoint,
-        badge: 'Warning',
-        onSelect: () => widget.onNavigate(1),
-      ),
-    );
-    items.add(
-      CommandPaletteItem(
-        id: 'ep_billing',
-        title: '/api/v1/billing/webhook',
-        subtitle: 'POST • 400 InvalidSignatureException • 95ms latency',
-        category: 'Endpoints',
-        icon: Icons.receipt_long_outlined,
-        type: CommandPaletteItemType.endpoint,
-        badge: 'Healthy',
-        onSelect: () => widget.onNavigate(1),
-      ),
-    );
+    // Monitored Endpoints (only if present in telemetry)
+    if (widget.monitoredEndpoints != null) {
+      for (final ep in widget.monitoredEndpoints!) {
+        items.add(
+          CommandPaletteItem(
+            id: 'ep_$ep',
+            title: ep,
+            subtitle: 'Monitored endpoint • View in event inbox',
+            category: 'Endpoints',
+            icon: Icons.link_rounded,
+            type: CommandPaletteItemType.endpoint,
+            onSelect: () => widget.onNavigate(1),
+          ),
+        );
+      }
+    }
 
     return items;
   }
@@ -369,12 +340,12 @@ class _CommandPaletteDialogState extends State<CommandPaletteDialog> {
                         controller: _searchController,
                         focusNode: _focusNode,
                         autofocus: true,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppTheme.textPrimary,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: 'Search pages, endpoints, projects, actions...',
                           hintStyle: TextStyle(
                             color: AppTheme.textMuted,
@@ -390,7 +361,7 @@ class _CommandPaletteDialogState extends State<CommandPaletteDialog> {
                     if (_searchController.text.isNotEmpty)
                       IconButton(
                         onPressed: () => _searchController.clear(),
-                        icon: const Icon(Icons.close_rounded, size: 16, color: AppTheme.textMuted),
+                        icon: Icon(Icons.close_rounded, size: 16, color: AppTheme.textMuted),
                         splashRadius: 14,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
@@ -402,7 +373,7 @@ class _CommandPaletteDialogState extends State<CommandPaletteDialog> {
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(color: AppTheme.cardBorder),
                       ),
-                      child: const Text(
+                      child: Text(
                         'ESC',
                         style: TextStyle(
                           color: AppTheme.textSubtle,
@@ -415,7 +386,7 @@ class _CommandPaletteDialogState extends State<CommandPaletteDialog> {
                 ),
               ),
 
-              const Divider(height: 1, thickness: 1, color: AppTheme.cardBorder),
+              Divider(height: 1, thickness: 1, color: AppTheme.cardBorder),
 
               // Filtered Results List
               Expanded(
@@ -426,18 +397,18 @@ class _CommandPaletteDialogState extends State<CommandPaletteDialog> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.search_off_rounded, size: 28, color: AppTheme.textMuted),
+                              Icon(Icons.search_off_rounded, size: 28, color: AppTheme.textMuted),
                               const SizedBox(height: 12),
                               Text(
                                 'No results for "${_searchController.text}"',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: AppTheme.textPrimary,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              const Text(
+                              Text(
                                 'Try searching for overview, inbox, export, or endpoint path.',
                                 style: TextStyle(
                                   color: AppTheme.textMuted,
@@ -510,7 +481,7 @@ class _CommandPaletteDialogState extends State<CommandPaletteDialog> {
                                           const SizedBox(height: 2),
                                           Text(
                                             item.subtitle!,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               color: AppTheme.textMuted,
                                               fontSize: 11,
                                             ),
@@ -530,7 +501,7 @@ class _CommandPaletteDialogState extends State<CommandPaletteDialog> {
                                       ),
                                       child: Text(
                                         item.category!,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: AppTheme.textMuted,
                                           fontSize: 10,
                                           fontWeight: FontWeight.w500,
@@ -573,7 +544,7 @@ class _CommandPaletteDialogState extends State<CommandPaletteDialog> {
                                   ],
                                   if (isSelected) ...[
                                     const SizedBox(width: 8),
-                                    const Icon(
+                                    Icon(
                                       Icons.keyboard_return_rounded,
                                       size: 14,
                                       color: AppTheme.textMuted,
@@ -587,16 +558,16 @@ class _CommandPaletteDialogState extends State<CommandPaletteDialog> {
                       ),
               ),
 
-              const Divider(height: 1, thickness: 1, color: AppTheme.cardBorder),
+              Divider(height: 1, thickness: 1, color: AppTheme.cardBorder),
 
               // Footer Shortcut Hints
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppTheme.sidebar,
                   borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     Text(
                       'Navigation',

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eventdock_dashboard/main.dart';
 import 'package:eventdock_dashboard/models/auth_state.dart';
 import 'package:eventdock_dashboard/screens/auth_screen.dart';
+import 'package:eventdock_dashboard/screens/email_verification_screen.dart';
 import 'package:eventdock_dashboard/services/auth_service.dart';
 import 'package:eventdock_dashboard/widgets/role_selector.dart';
 import 'package:eventdock_dashboard/widgets/split_auth_card.dart';
@@ -144,6 +145,72 @@ void main() {
       expect(find.byType(AuthScreen), findsOneWidget);
       expect(find.byType(SplitAuthCard), findsOneWidget);
       expect(find.text('EVENTDOCK PLATFORM'), findsOneWidget);
+    });
+
+    testWidgets('6. EmailVerificationScreen renders email verification gate with actions and cooldown', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EmailVerificationScreen(
+            userEmail: 'newdev@swynx.dev',
+            onVerified: () {},
+            onSignOut: () {},
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Verify Your Email Address'), findsOneWidget);
+      expect(find.text('newdev@swynx.dev'), findsOneWidget);
+      expect(find.text("I've Verified My Email — Continue"), findsOneWidget);
+      expect(find.textContaining('Resend email in'), findsOneWidget);
+      expect(find.text('Sign out or use different email'), findsOneWidget);
+    });
+
+    testWidgets('7. AuthForm switches to Forgot Password mode and requests reset instructions', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SplitAuthCard(
+              onAuthSuccess: () {},
+              initialRole: AuthRole.individual,
+              initialMode: AuthMode.signIn,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap on 'Forgot password?' button
+      final forgotBtn = find.text('Forgot password?');
+      expect(forgotBtn, findsOneWidget);
+      await tester.tap(forgotBtn);
+      await tester.pumpAndSettle();
+
+      // Check heading updated to Reset Password
+      expect(find.text('Reset Password'), findsOneWidget);
+      expect(find.text('Send Reset Link'), findsOneWidget);
+
+      // Enter email and tap Send Reset Link
+      await tester.enterText(find.byType(TextField).first, 'developer@eventdock.dev');
+      await tester.tap(find.text('Send Reset Link'));
+      await tester.pumpAndSettle();
+
+      // Success message appears
+      expect(find.textContaining('Password reset instructions have been sent'), findsOneWidget);
     });
   });
 }

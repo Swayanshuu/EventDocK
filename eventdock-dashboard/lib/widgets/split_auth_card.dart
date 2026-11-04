@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/auth_state.dart';
+import '../theme/app_theme.dart';
 import 'auth_form.dart';
 
 class SplitAuthCard extends StatefulWidget {
@@ -38,7 +39,7 @@ class _SplitAuthCardState extends State<SplitAuthCard> {
     final targetCardHeight = (screenHeight - (verticalMargin * 2)).clamp(640.0, 1200.0);
 
     return Container(
-      color: const Color(0xFF0C0D12), // Dark tinted desktop canvas
+      color: AppTheme.background,
       width: double.infinity,
       height: double.infinity,
       child: Center(
@@ -58,7 +59,7 @@ class _SplitAuthCardState extends State<SplitAuthCard> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(28),
               border: Border.all(
-                color: const Color(0xFF262A36), // Proper border color against #0C0D12
+                color: AppTheme.cardBorder,
                 width: 1,
               ),
               boxShadow: const [

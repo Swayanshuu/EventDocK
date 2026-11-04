@@ -1,12 +1,10 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../models/diagnostic_event.dart';
 import '../models/project.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
-import '../widgets/endpoint_ticker.dart';
 import 'event_detail_modal.dart';
 import 'replay_modal.dart';
 
@@ -131,6 +129,16 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: LinearProgressIndicator(
+                minHeight: 2,
+                backgroundColor: Colors.transparent,
+                color: AppTheme.heroOrange,
+              ),
+            ),
+
           // 1. Top Section Title
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -138,7 +146,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Dashboard',
                     style: TextStyle(
                       color: AppTheme.textPrimary,
@@ -150,7 +158,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                   const SizedBox(height: 4),
                   Text(
                     'Real-time failure detection and reproduction for ${widget.project.name}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textMuted,
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
@@ -163,7 +171,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
 
           const SizedBox(height: 20),
 
-          // 2. Row of 4 Stat Summary Cards (Shopeers reference)
+          // 2. Row of 4 Stat Summary Cards
           _buildTopMetricsRow(
             isDesktop: isDesktop,
             isTablet: isTablet,
@@ -171,6 +179,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
             count5xx: count5xx,
             count4xx: count4xx,
             countDeadlocks: countDeadlocks,
+            countTimeouts: countTimeouts,
           ),
 
           const SizedBox(height: 24),
@@ -241,7 +250,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
     );
   }
 
-  // Row of 4 Metric Cards (Like Page Views, Visitors, Click, Orders in Shopeers)
+  // Row of 4 Metric Cards based purely on real ingested telemetry
   Widget _buildTopMetricsRow({
     required bool isDesktop,
     required bool isTablet,
@@ -249,52 +258,58 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
     required int count5xx,
     required int count4xx,
     required int countDeadlocks,
+    required int countTimeouts,
   }) {
+    final eventsWithDuration = _events.where((e) => e.durationMs != null).toList();
+    final avgLatency = eventsWithDuration.isEmpty
+        ? 0
+        : (eventsWithDuration.map((e) => e.durationMs!).reduce((a, b) => a + b) / eventsWithDuration.length).round();
+
     final cards = [
       _buildSingleMetricCard(
         title: 'Service Fault Metrics',
         mainValue: '$totalFailures',
-        badgeText: totalFailures == 0 ? 'Healthy' : '-15.5%',
+        badgeText: totalFailures == 0 ? 'Healthy' : 'Live',
         badgeColor: totalFailures == 0
-            ? const Color(0xFF22C55E).withOpacity(0.16)
-            : const Color(0xFF22C55E).withOpacity(0.16),
-        badgeTextColor: const Color(0xFF22C55E),
-        subtitle: 'vs. 12 last week',
+            ? const Color(0xFF22C55E).withValues(alpha: 0.16)
+            : AppTheme.heroOrange.withValues(alpha: 0.16),
+        badgeTextColor: totalFailures == 0 ? const Color(0xFF22C55E) : AppTheme.heroOrange,
+        subtitle: totalFailures == 0 ? '0 faults captured' : '$totalFailures total captured errors',
         icon: Icons.remove_red_eye_outlined,
-        iconBg: AppTheme.heroOrange.withOpacity(0.12),
+        iconBg: AppTheme.heroOrange.withValues(alpha: 0.12),
         iconColor: AppTheme.heroOrange,
       ),
       _buildSingleMetricCard(
         title: '5xx Server Errors',
         mainValue: '$count5xx',
-        badgeText: count5xx > 0 ? 'Critical' : '0.0%',
-        badgeColor: AppTheme.status5xx.withOpacity(0.16),
+        badgeText: count5xx > 0 ? 'Critical' : 'Healthy',
+        badgeColor: AppTheme.status5xx.withValues(alpha: 0.16),
         badgeTextColor: AppTheme.status5xx,
-        subtitle: '$countDeadlocks deadlocks caught',
+        subtitle: countDeadlocks > 0 ? '$countDeadlocks deadlocks caught' : '0 thread deadlocks',
         icon: Icons.dns_rounded,
-        iconBg: AppTheme.status5xx.withOpacity(0.12),
+        iconBg: AppTheme.status5xx.withValues(alpha: 0.12),
         iconColor: AppTheme.status5xx,
       ),
       _buildSingleMetricCard(
         title: '4xx Client Errors',
         mainValue: '$count4xx',
-        badgeText: '-10.5%',
-        badgeColor: const Color(0xFFF59E0B).withOpacity(0.16),
+        badgeText: count4xx > 0 ? 'Warning' : 'Healthy',
+        badgeColor: const Color(0xFFF59E0B).withValues(alpha: 0.16),
         badgeTextColor: const Color(0xFFF59E0B),
-        subtitle: 'vs. 4 last period',
+        subtitle: countTimeouts > 0 ? '$countTimeouts timeouts caught' : '$count4xx client faults',
         icon: Icons.filter_alt_outlined,
-        iconBg: const Color(0xFFF59E0B).withOpacity(0.12),
+        iconBg: const Color(0xFFF59E0B).withValues(alpha: 0.12),
         iconColor: const Color(0xFFF59E0B),
       ),
       _buildSingleMetricCard(
         title: 'Avg Latency',
-        mainValue: '128ms',
-        badgeText: '+4.4%',
-        badgeColor: const Color(0xFF22C55E).withOpacity(0.16),
+        mainValue: totalFailures == 0 ? '0ms' : '${avgLatency}ms',
+        badgeText: avgLatency > 500 ? 'Degraded' : 'Optimal',
+        badgeColor: const Color(0xFF22C55E).withValues(alpha: 0.16),
         badgeTextColor: const Color(0xFF22C55E),
-        subtitle: 'vs. 145ms benchmark',
+        subtitle: totalFailures == 0 ? 'No latency recorded' : 'Across ${eventsWithDuration.length} traces',
         icon: Icons.speed_rounded,
-        iconBg: const Color(0xFF22C55E).withOpacity(0.12),
+        iconBg: const Color(0xFF22C55E).withValues(alpha: 0.12),
         iconColor: const Color(0xFF22C55E),
       ),
     ];
@@ -365,7 +380,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppTheme.textMuted,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -392,7 +407,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
             children: [
               Text(
                 mainValue,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppTheme.textPrimary,
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
@@ -419,7 +434,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
           const SizedBox(height: 6),
           Text(
             subtitle,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppTheme.textSubtle,
               fontSize: 11,
             ),
@@ -460,7 +475,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Failure Ingestion Velocity',
                     style: TextStyle(
                       color: AppTheme.textMuted,
@@ -476,7 +491,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                     children: [
                       Text(
                         totalFailures == 0 ? '0 Errors' : '$totalFailures Failures',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppTheme.textPrimary,
                           fontSize: 32,
                           fontWeight: FontWeight.w800,
@@ -486,18 +501,22 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF22C55E).withOpacity(0.16),
+                          color: (totalFailures == 0 ? const Color(0xFF22C55E) : AppTheme.heroOrange).withValues(alpha: 0.16),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.arrow_downward, color: Color(0xFF22C55E), size: 10),
-                            SizedBox(width: 3),
+                          children: [
+                            Icon(
+                              totalFailures == 0 ? Icons.check_circle_rounded : Icons.sensors_rounded,
+                              color: totalFailures == 0 ? const Color(0xFF22C55E) : AppTheme.heroOrange,
+                              size: 11,
+                            ),
+                            const SizedBox(width: 4),
                             Text(
-                              '-24.4% vs last period',
+                              totalFailures == 0 ? 'Healthy · 0 Ingestion Errors' : 'Live Ingestion Active',
                               style: TextStyle(
-                                color: Color(0xFF22C55E),
+                                color: totalFailures == 0 ? const Color(0xFF22C55E) : AppTheme.heroOrange,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -615,7 +634,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
             children: months
                 .map((m) => Text(
                       m,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppTheme.textSubtle,
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
@@ -625,8 +644,8 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
           ),
 
           const SizedBox(height: 20),
-          const Divider(color: AppTheme.cardBorder, height: 1),
-          const SizedBox(height: 18),
+          Divider(color: AppTheme.cardBorder, height: 1),
+          SizedBox(height: 18),
 
           // Bottom Failure Distribution breakdown (like Customers: Retailers/Distributors/Wholesalers in Shopeers)
           Column(
@@ -634,7 +653,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
+                children: [
                   Text(
                     'Failure Distribution',
                     style: TextStyle(
@@ -717,7 +736,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                 const SizedBox(width: 6),
                 Text(
                   count,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppTheme.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -728,7 +747,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
             const SizedBox(height: 4),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textMuted,
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
@@ -759,7 +778,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
           border: Border.all(color: AppTheme.cardBorderLight, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.55),
+              color: Colors.black.withValues(alpha: AppTheme.isDark ? 0.55 : 0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -769,7 +788,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Jan 18, 2026',
               style: TextStyle(color: AppTheme.textSubtle, fontSize: 9),
             ),
@@ -777,7 +796,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Failures',
                   style: TextStyle(color: AppTheme.textMuted, fontSize: 10),
                 ),
@@ -814,7 +833,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Recent Intercepted Incidents',
                   style: TextStyle(
@@ -865,13 +884,13 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                     children: [
                       // Table Header
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         decoration: BoxDecoration(
                           color: AppTheme.cardSecondary,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
-                          children: const [
+                          children: [
                             SizedBox(
                               width: 75,
                               child: Text('ID',
@@ -925,7 +944,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                             child: Text(
                               'No intercepted failures recorded. All endpoints healthy.',
                               style: TextStyle(
-                                  color: AppTheme.textMuted.withOpacity(0.8), fontSize: 12),
+                                  color: AppTheme.textMuted.withValues(alpha: 0.8), fontSize: 12),
                             ),
                           ),
                         )
@@ -937,7 +956,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
 
                             return Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 border: Border(
                                   bottom: BorderSide(color: AppTheme.cardBorder, width: 0.6),
                                 ),
@@ -949,7 +968,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                                     width: 75,
                                     child: Text(
                                       '#${e.id.length > 7 ? e.id.substring(0, 7) : e.id}',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: AppTheme.textMuted,
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600,
@@ -984,7 +1003,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                                         Expanded(
                                           child: Text(
                                             e.routeTemplate ?? e.requestUri,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               color: AppTheme.textPrimary,
                                               fontSize: 12,
                                               fontWeight: FontWeight.w500,
@@ -1026,7 +1045,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                                     width: 70,
                                     child: Text(
                                       '${e.durationMs ?? 0}ms',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: AppTheme.textMuted,
                                         fontSize: 11,
                                       ),
@@ -1054,7 +1073,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                                               borderRadius: BorderRadius.circular(6),
                                               border: Border.all(color: AppTheme.cardBorder),
                                             ),
-                                            child: const Text(
+                                            child: Text(
                                               'Inspect',
                                               style: TextStyle(
                                                   color: AppTheme.textPrimary, fontSize: 10),
@@ -1110,11 +1129,19 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
     );
   }
 
-  // Right Column Card 1: Endpoints Activity / Weekly Load (like "Most Day Active" in Shopeers)
+  // Right Column Card 1: Endpoints Activity / Weekly Load based purely on real ingested event timestamps
   Widget _buildWeeklyActivityBarCard(int totalFailures) {
     final days = const ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    // Tuesday is the active peak day with vivid orange highlight
-    final heights = [0.25, 0.45, 0.90, 0.35, 0.50, 0.30, 0.40];
+    final weekdayCounts = List<int>.filled(7, 0);
+    for (final e in _events) {
+      final dt = DateTime.tryParse(e.occurredAt);
+      if (dt != null) {
+        final idx = dt.weekday % 7; // Sun=0, Mon=1...
+        weekdayCounts[idx]++;
+      }
+    }
+    final maxDayCount = weekdayCounts.reduce(math.max);
+    final peakIndex = maxDayCount > 0 ? weekdayCounts.indexOf(maxDayCount) : -1;
 
     return Container(
       padding: const EdgeInsets.all(22),
@@ -1128,7 +1155,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Text(
                 'Endpoints Activity',
                 style: TextStyle(
@@ -1142,15 +1169,21 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
           ),
           const SizedBox(height: 20),
 
-          // 7 Vertical Bars
+          // 7 Vertical Bars representing actual daily traffic
           SizedBox(
             height: 140,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: List.generate(7, (i) {
-                final isPeak = i == 2; // Tue
-                final barHeight = heights[i] * 100;
+                final count = weekdayCounts[i];
+                final isPeak = i == peakIndex && count > 0;
+                final double barHeight;
+                if (maxDayCount == 0) {
+                  barHeight = 6.0;
+                } else {
+                  barHeight = (count / maxDayCount * 90.0).clamp(6.0, 100.0);
+                }
 
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -1165,7 +1198,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                           border: Border.all(color: AppTheme.heroOrange),
                         ),
                         child: Text(
-                          totalFailures > 0 ? '$totalFailures' : '4',
+                          '$count',
                           style: const TextStyle(
                             color: AppTheme.heroOrange,
                             fontSize: 10,
@@ -1215,7 +1248,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
     }
 
     return Container(
-      padding: const EdgeInsets.all(22),
+      padding: EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: AppTheme.card,
         borderRadius: BorderRadius.circular(20),
@@ -1226,7 +1259,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Text(
                 'Stability Score',
                 style: TextStyle(
@@ -1262,7 +1295,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                       children: [
                         Text(
                           '${score.toInt()}%',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppTheme.textPrimary,
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
@@ -1291,7 +1324,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
               score >= 90
                   ? 'On track for 99.9% target SLA'
                   : '$count5xx server errors require inspection',
-              style: const TextStyle(color: AppTheme.textMuted, fontSize: 11),
+              style: TextStyle(color: AppTheme.textMuted, fontSize: 11),
             ),
           ),
           const SizedBox(height: 12),
@@ -1300,7 +1333,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
               onPressed: widget.onViewAllEvents,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppTheme.textPrimary,
-                side: const BorderSide(color: AppTheme.cardBorder),
+                side: BorderSide(color: AppTheme.cardBorder),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
@@ -1322,7 +1355,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
     final routes = distinctRoutes.values.take(3).toList();
 
     return Container(
-      padding: const EdgeInsets.all(22),
+      padding: EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: AppTheme.card,
         borderRadius: BorderRadius.circular(20),
@@ -1333,7 +1366,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Text(
                 'Endpoints',
                 style: TextStyle(
@@ -1361,7 +1394,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'All monitored endpoints healthy',
                       style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
@@ -1379,7 +1412,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
 
                 return Container(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(color: AppTheme.cardBorder, width: 0.6),
                     ),
@@ -1409,7 +1442,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                       Expanded(
                         child: Text(
                           route,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppTheme.textPrimary,
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
@@ -1438,7 +1471,7 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
                       const SizedBox(width: 8),
                       Text(
                         '${e.durationMs ?? 0}ms',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppTheme.textSubtle,
                           fontSize: 10,
                         ),
@@ -1477,7 +1510,7 @@ class _VelocitySplinePainter extends CustomPainter {
 
     // Horizontal dashed lines
     final guidePaint = Paint()
-      ..color = AppTheme.cardBorder.withOpacity(0.6)
+      ..color = AppTheme.cardBorder.withValues(alpha: 0.6)
       ..strokeWidth = 1.0;
 
     for (final ratio in [0.2, 0.5, 0.8]) {
@@ -1531,8 +1564,8 @@ class _VelocitySplinePainter extends CustomPainter {
       Offset(0, top),
       Offset(0, top + h),
       [
-        AppTheme.heroOrange.withOpacity(0.24),
-        AppTheme.heroOrange.withOpacity(0.01),
+        AppTheme.heroOrange.withValues(alpha: 0.24),
+        AppTheme.heroOrange.withValues(alpha: 0.01),
       ],
     );
     final fillPaint = Paint()
@@ -1553,7 +1586,7 @@ class _VelocitySplinePainter extends CustomPainter {
     if (hoverFraction != null) {
       final hx = (leftOffset + w * hoverFraction!).clamp(leftOffset, size.width - 10);
       final scrubberPaint = Paint()
-        ..color = AppTheme.heroOrange.withOpacity(0.6)
+        ..color = AppTheme.heroOrange.withValues(alpha: 0.6)
         ..strokeWidth = 1.2;
       canvas.drawLine(Offset(hx, top), Offset(hx, top + h), scrubberPaint);
 

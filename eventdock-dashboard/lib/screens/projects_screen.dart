@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/project.dart';
 import '../models/organization.dart';
-import '../models/workspace_member.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
@@ -79,7 +78,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           backgroundColor: AppTheme.card,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppTheme.cardBorder)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: AppTheme.cardBorder)),
           title: const Text('Invite Team Member', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
           content: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 440),
@@ -87,20 +86,20 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Teammate Email Address', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.bold)),
+                Text('Teammate Email Address', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
                 TextField(
                   controller: emailCtrl,
-                  style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                  style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                   decoration: const InputDecoration(hintText: 'colleague@company.com'),
                 ),
                 const SizedBox(height: 14),
-                const Text('Workspace Role', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.bold)),
+                Text('Workspace Role', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 6),
                 DropdownButtonFormField<String>(
-                  value: role,
+                  initialValue: role,
                   dropdownColor: AppTheme.cardSecondary,
-                  style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                  style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
                   decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12)),
                   items: const [
                     DropdownMenuItem(value: 'Admin', child: Text('Admin (Can create projects and invite members)')),
@@ -116,7 +115,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
+              child: Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -148,7 +147,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppTheme.cardBorder)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: AppTheme.cardBorder)),
         title: Row(
           children: [
             const Icon(Icons.warning_amber_rounded, color: AppTheme.status5xx, size: 20),
@@ -158,12 +157,12 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         ),
         content: Text(
           'Are you sure you want to permanently delete "${project.name}"? All associated diagnostic events, keys, and metrics will be purged.',
-          style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+          style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
+            child: Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -191,7 +190,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppTheme.card,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppTheme.cardBorder)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: AppTheme.cardBorder)),
         title: const Text('Account Profile Settings', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
         content: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 440),
@@ -199,20 +198,20 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Email: ${AuthService().userEmail ?? ""}', style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+              Text('Email: ${AuthService().userEmail ?? ""}', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
               const SizedBox(height: 16),
-              const Text('Full Name', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.bold)),
+              Text('Full Name', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextField(
                 controller: nameCtrl,
-                style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
               ),
               const SizedBox(height: 14),
-              const Text('Job Title / Role', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.bold)),
+              Text('Job Title / Role', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextField(
                 controller: roleCtrl,
-                style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
               ),
             ],
           ),
@@ -220,7 +219,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
+            child: Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -259,15 +258,18 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isCompact = screenWidth < 800;
-    final currentOrg = AuthService().currentOrganization;
-    final orgs = AuthService().organizations;
-    final isOrg = currentOrg.type == 'organization';
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: AppTheme.themeModeNotifier,
+      builder: (context, themeMode, _) {
+        final screenWidth = MediaQuery.of(context).size.width;
+        final isCompact = screenWidth < 800;
+        final currentOrg = AuthService().currentOrganization;
+        final orgs = AuthService().organizations;
+        final isOrg = currentOrg.type == 'organization';
 
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(
+        return Scaffold(
+          backgroundColor: AppTheme.background,
+          appBar: AppBar(
         backgroundColor: AppTheme.sidebar,
         title: Row(
           children: [
@@ -283,7 +285,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
               elevation: 10,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: AppTheme.cardBorder),
+                side: BorderSide(color: AppTheme.cardBorder),
               ),
               onSelected: (org) {
                 setState(() {
@@ -291,7 +293,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                 });
               },
               itemBuilder: (ctx) => [
-                const PopupMenuItem<Organization>(
+                PopupMenuItem<Organization>(
                   enabled: false,
                   height: 26,
                   child: Text(
@@ -347,27 +349,55 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                     const SizedBox(width: 6),
                     Text(
                       currentOrg.name,
-                      style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12, fontWeight: FontWeight.w600),
+                      style: TextStyle(color: AppTheme.textPrimary, fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.textMuted),
+                    Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.textMuted),
                   ],
                 ),
               ),
             ),
           ],
         ),
-        bottom: const PreferredSize(
+        bottom: PreferredSize(
           preferredSize: Size.fromHeight(1),
           child: Divider(height: 1, color: AppTheme.cardBorder),
         ),
         actions: [
+          // Theme Toggle Button
+          Tooltip(
+            message: themeMode == ThemeMode.dark ? 'Switch to Light Mode (White & Orange)' : 'Switch to Dark Mode (Black & Orange)',
+            child: InkWell(
+              onTap: () {
+                AppTheme.toggleThemeMode();
+              },
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                width: 38,
+                height: 38,
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: AppTheme.cardSecondary,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.cardBorder),
+                ),
+                child: Center(
+                  child: Icon(
+                    themeMode == ThemeMode.dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                    size: 18,
+                    color: AppTheme.heroOrange,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
           // Account Profile & Menu
           PopupMenuButton<String>(
             tooltip: 'Account Settings',
             color: AppTheme.card,
             elevation: 10,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppTheme.cardBorder)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: AppTheme.cardBorder)),
             onSelected: (action) {
               if (action == 'settings') {
                 _showAccountSettingsModal();
@@ -381,13 +411,13 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(AuthService().fullName, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
-                    Text(AuthService().userEmail ?? '', style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                    Text(AuthService().fullName, style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 13)),
+                    Text(AuthService().userEmail ?? '', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                   ],
                 ),
               ),
               const PopupMenuDivider(height: 1),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'settings',
                 child: Row(
                   children: [
@@ -424,10 +454,10 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                     const SizedBox(width: 8),
                     Text(
                       AuthService().fullName,
-                      style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12, fontWeight: FontWeight.w600),
+                      style: TextStyle(color: AppTheme.textPrimary, fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.textMuted),
+                    Icon(Icons.arrow_drop_down, size: 16, color: AppTheme.textMuted),
                   ],
                 ],
               ),
@@ -438,7 +468,27 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.heroOrange))
-          : SingleChildScrollView(
+          : _error != null
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.error_outline_rounded, color: AppTheme.status5xx, size: 36),
+                      const SizedBox(height: 12),
+                      Text(_error!, style: TextStyle(color: AppTheme.textPrimary, fontSize: 14)),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _loadProjects,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.heroOrange,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                )
+              : SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: isCompact ? 16 : 40, vertical: 28),
               child: Center(
                 child: Container(
@@ -459,7 +509,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                   children: [
                                     Text(
                                       currentOrg.name,
-                                      style: const TextStyle(color: AppTheme.textPrimary, fontSize: 24, fontWeight: FontWeight.w700),
+                                      style: TextStyle(color: AppTheme.textPrimary, fontSize: 24, fontWeight: FontWeight.w700),
                                     ),
                                     const SizedBox(width: 10),
                                     Container(
@@ -481,7 +531,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                   isOrg
                                       ? 'Organisation workspace • ${_projects.length} microservices active'
                                       : 'Individual workspace • Solo developer telemetry pipeline',
-                                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+                                  style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
                                 ),
                               ],
                             ),
@@ -516,6 +566,8 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
               ),
             ),
     );
+      },
+    );
   }
 
   Widget _buildWorkspaceTabs(bool isOrg) {
@@ -527,7 +579,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     ];
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: AppTheme.cardBorder, width: 1)),
       ),
       child: Row(
@@ -624,7 +676,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Recent Projects',
               style: TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.w700),
             ),
@@ -668,16 +720,16 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(p.name, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.w700)),
+                              Text(p.name, style: TextStyle(color: AppTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.w700)),
                               const SizedBox(height: 2),
-                              Text(p.slug, style: const TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontFamily: 'monospace')),
+                              Text(p.slug, style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontFamily: 'monospace')),
                             ],
                           ),
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(color: AppTheme.cardSecondary, borderRadius: BorderRadius.circular(6)),
-                          child: Text('${p.retentionDays}d retention', style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+                          child: Text('${p.retentionDays}d retention', style: TextStyle(fontSize: 11, color: AppTheme.textMuted)),
                         ),
                         const SizedBox(width: 16),
                         const Icon(Icons.arrow_forward_rounded, size: 16, color: AppTheme.heroOrange),
@@ -711,12 +763,12 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.search_rounded, size: 18, color: AppTheme.textMuted),
+                    Icon(Icons.search_rounded, size: 18, color: AppTheme.textMuted),
                     const SizedBox(width: 10),
                     Expanded(
                       child: TextField(
-                        style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary),
-                        decoration: const InputDecoration(
+                        style: TextStyle(fontSize: 13, color: AppTheme.textPrimary),
+                        decoration: InputDecoration(
                           hintText: 'Search projects by name or slug...',
                           hintStyle: TextStyle(color: AppTheme.textSubtle, fontSize: 13),
                           border: InputBorder.none,
@@ -742,7 +794,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                 value: _sortBy,
                 underline: const SizedBox(),
                 dropdownColor: AppTheme.cardSecondary,
-                style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary),
+                style: TextStyle(fontSize: 12, color: AppTheme.textPrimary),
                 items: const [
                   DropdownMenuItem(value: 'name', child: Text('Sort by Name')),
                   DropdownMenuItem(value: 'date', child: Text('Sort by Recent')),
@@ -797,9 +849,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Organisation Members', style: TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
+                Text('Organisation Members', style: TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 2),
-                Text('Manage access permissions and role-based actions for ${AuthService().currentOrganization.name}', style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                Text('Manage access permissions and role-based actions for ${AuthService().currentOrganization.name}', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
               ],
             ),
             ElevatedButton.icon(
@@ -814,7 +866,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20),
 
         // Compact Data Table
         Container(
@@ -827,12 +879,12 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
             children: [
               // Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                decoration: const BoxDecoration(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                decoration: BoxDecoration(
                   border: Border(bottom: BorderSide(color: AppTheme.cardBorder, width: 1)),
                 ),
                 child: Row(
-                  children: const [
+                  children: [
                     Expanded(flex: 3, child: Text('MEMBER', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.bold))),
                     Expanded(flex: 2, child: Text('ROLE', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.bold))),
                     Expanded(flex: 2, child: Text('STATUS', style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.bold))),
@@ -845,7 +897,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
               ...members.map((m) {
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     border: Border(bottom: BorderSide(color: AppTheme.cardBorder, width: 1)),
                   ),
                   child: Row(
@@ -868,8 +920,8 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(m.name, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
-                                  Text(m.email, style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                                  Text(m.name, style: TextStyle(color: AppTheme.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+                                  Text(m.email, style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                                 ],
                               ),
                             ),
@@ -890,7 +942,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                 value: m.role,
                                 underline: const SizedBox(),
                                 dropdownColor: AppTheme.cardSecondary,
-                                style: const TextStyle(fontSize: 12, color: AppTheme.textPrimary),
+                                style: TextStyle(fontSize: 12, color: AppTheme.textPrimary),
                                 items: const [
                                   DropdownMenuItem(value: 'Admin', child: Text('Admin')),
                                   DropdownMenuItem(value: 'Member', child: Text('Member')),
@@ -931,7 +983,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                       // Actions Overflow
                       if (m.role != 'Owner')
                         IconButton(
-                          icon: const Icon(Icons.remove_circle_outline, size: 16, color: AppTheme.textMuted),
+                          icon: Icon(Icons.remove_circle_outline, size: 16, color: AppTheme.textMuted),
                           tooltip: 'Remove member',
                           onPressed: () {
                             AuthService().removeMember(orgId, m.id);
@@ -962,14 +1014,14 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Workspace Settings', style: TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
+          Text('Workspace Settings', style: TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
-          const Text('Manage workspace name, slug, and subscription plan tier.', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+          Text('Manage workspace name, slug, and subscription plan tier.', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
           const SizedBox(height: 20),
 
-          Text('Workspace Name: ${org.name}', style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+          Text('Workspace Name: ${org.name}', style: TextStyle(color: AppTheme.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
-          Text('Slug: ${org.slug}', style: const TextStyle(color: AppTheme.textMuted, fontSize: 12, fontFamily: 'monospace')),
+          Text('Slug: ${org.slug}', style: TextStyle(color: AppTheme.textMuted, fontSize: 12, fontFamily: 'monospace')),
           const SizedBox(height: 12),
           Text('Plan: ${org.plan}', style: const TextStyle(color: AppTheme.heroOrange, fontSize: 12, fontWeight: FontWeight.bold)),
         ],
@@ -996,14 +1048,14 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: const TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+              Text(title, style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
               Icon(icon, size: 16, color: AppTheme.heroOrange),
             ],
           ),
           const SizedBox(height: 10),
-          Text(value, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 24, fontWeight: FontWeight.w800)),
+          Text(value, style: TextStyle(color: AppTheme.textPrimary, fontSize: 24, fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
-          Text(subtitle, style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+          Text(subtitle, style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
         ],
       ),
     );
@@ -1033,15 +1085,15 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                     Expanded(
                       child: Text(
                         project.name,
-                        style: const TextStyle(color: AppTheme.textPrimary, fontSize: 15, fontWeight: FontWeight.w700),
+                        style: TextStyle(color: AppTheme.textPrimary, fontSize: 15, fontWeight: FontWeight.w700),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_horiz, size: 18, color: AppTheme.textMuted),
+                      icon: Icon(Icons.more_horiz, size: 18, color: AppTheme.textMuted),
                       color: AppTheme.card,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: const BorderSide(color: AppTheme.cardBorder)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: AppTheme.cardBorder)),
                       onSelected: (act) {
                         if (act == 'open') widget.onSelectProject(project);
                         if (act == 'delete') _showDeleteProjectConfirmation(project);
@@ -1055,12 +1107,12 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                 ),
                 Text(
                   project.slug,
-                  style: const TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontFamily: 'monospace'),
+                  style: TextStyle(color: AppTheme.textSubtle, fontSize: 11, fontFamily: 'monospace'),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   project.description?.isNotEmpty == true ? project.description! : 'Diagnostic telemetry pipeline active',
-                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                  style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1072,7 +1124,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(color: AppTheme.cardSecondary, borderRadius: BorderRadius.circular(4)),
-                  child: Text('${project.retentionDays}d retention', style: const TextStyle(fontSize: 10, color: AppTheme.textMuted)),
+                  child: Text('${project.retentionDays}d retention', style: TextStyle(fontSize: 10, color: AppTheme.textMuted)),
                 ),
                 Row(
                   children: const [
@@ -1109,9 +1161,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
               child: const Icon(Icons.add, color: AppTheme.heroOrange, size: 20),
             ),
             const SizedBox(height: 10),
-            const Text('New Project', style: TextStyle(color: AppTheme.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
+            Text('New Project', style: TextStyle(color: AppTheme.textPrimary, fontSize: 13, fontWeight: FontWeight.w700)),
             const SizedBox(height: 2),
-            const Text('Provision API keys & diagnostic pipeline', style: TextStyle(color: AppTheme.textSubtle, fontSize: 10), textAlign: TextAlign.center),
+            Text('Provision API keys & diagnostic pipeline', style: TextStyle(color: AppTheme.textSubtle, fontSize: 10), textAlign: TextAlign.center),
           ],
         ),
       ),
@@ -1135,9 +1187,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
             child: const Icon(Icons.folder_open_rounded, color: AppTheme.heroOrange, size: 32),
           ),
           const SizedBox(height: 16),
-          const Text('Your workspace is ready', style: TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
+          Text('Your workspace is ready', style: TextStyle(color: AppTheme.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
-          const Text('Create your first project to connect your Spring Boot application and ingest diagnostic faults.', style: TextStyle(color: AppTheme.textMuted, fontSize: 13), textAlign: TextAlign.center),
+          Text('Create your first project to connect your Spring Boot application and ingest diagnostic faults.', style: TextStyle(color: AppTheme.textMuted, fontSize: 13), textAlign: TextAlign.center),
           const SizedBox(height: 20),
           ElevatedButton.icon(
             onPressed: _openCreateProjectModal,

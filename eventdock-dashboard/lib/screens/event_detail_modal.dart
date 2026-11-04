@@ -65,7 +65,7 @@ class _EventDetailModalState extends State<EventDetailModal> {
       backgroundColor: AppTheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppTheme.cardBorder),
+        side: BorderSide(color: AppTheme.cardBorder),
       ),
       insetPadding: EdgeInsets.symmetric(
         horizontal: isMobile ? 12 : 32,
@@ -102,7 +102,7 @@ class _EventDetailModalState extends State<EventDetailModal> {
                             MethodBadge(method: _detail!.httpMethod),
                             const Spacer(),
                             IconButton(
-                              icon: const Icon(Icons.close, color: AppTheme.textMuted),
+                              icon: Icon(Icons.close, color: AppTheme.textMuted),
                               onPressed: () => Navigator.pop(context),
                             ),
                           ],
@@ -163,7 +163,7 @@ class _EventDetailModalState extends State<EventDetailModal> {
                             ),
                             const SizedBox(width: 8),
                             IconButton(
-                              icon: const Icon(Icons.close, color: AppTheme.textMuted),
+                              icon: Icon(Icons.close, color: AppTheme.textMuted),
                               onPressed: () => Navigator.pop(context),
                             ),
                           ],
@@ -185,7 +185,7 @@ class _EventDetailModalState extends State<EventDetailModal> {
                                 children: [
                                   Row(
                                     children: [
-                                      const Text('Request ID: ', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                                      Text('Request ID: ', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
                                       Expanded(
                                         child: SelectableText(
                                           _detail!.requestId,
@@ -199,7 +199,7 @@ class _EventDetailModalState extends State<EventDetailModal> {
                                         ),
                                       ),
                                       IconButton(
-                                        icon: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.textMuted),
+                                        icon: Icon(Icons.copy_rounded, size: 14, color: AppTheme.textMuted),
                                         tooltip: 'Copy Request ID',
                                         constraints: const BoxConstraints(),
                                         padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -215,13 +215,13 @@ class _EventDetailModalState extends State<EventDetailModal> {
                                   const SizedBox(height: 6),
                                   Text(
                                     '${_detail!.durationMs ?? 0} ms • ${_detail!.serviceName ?? "app"} • ${_detail!.occurredAt}',
-                                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 11),
+                                    style: TextStyle(color: AppTheme.textMuted, fontSize: 11),
                                   ),
                                 ],
                               )
                             : Row(
                                 children: [
-                                  const Text('Request ID: ', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                                  Text('Request ID: ', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
                                   SelectableText(
                                     _detail!.requestId,
                                     style: const TextStyle(
@@ -232,7 +232,7 @@ class _EventDetailModalState extends State<EventDetailModal> {
                                     ),
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.copy_rounded, size: 14, color: AppTheme.textMuted),
+                                    icon: Icon(Icons.copy_rounded, size: 14, color: AppTheme.textMuted),
                                     tooltip: 'Copy Request ID',
                                     constraints: const BoxConstraints(),
                                     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -246,7 +246,7 @@ class _EventDetailModalState extends State<EventDetailModal> {
                                   const Spacer(),
                                   Text(
                                     'Duration: ${_detail!.durationMs ?? 0} ms  •  Service: ${_detail!.serviceName ?? "app"}  •  ${_detail!.occurredAt}',
-                                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                                    style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
                                   ),
                                 ],
                               ),
@@ -285,7 +285,7 @@ class _EventDetailModalState extends State<EventDetailModal> {
                                       const SizedBox(height: 6),
                                       Text(
                                         _detail!.sanitizedErrorMessage ?? 'No message provided',
-                                        style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13),
+                                        style: TextStyle(color: AppTheme.textPrimary, fontSize: 13),
                                       ),
                                     ],
                                   ),

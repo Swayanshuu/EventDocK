@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eventdock_dashboard/main.dart';
-import 'package:eventdock_dashboard/models/notification_item.dart';
-import 'package:eventdock_dashboard/models/project.dart';
 import 'package:eventdock_dashboard/services/auth_service.dart';
 import 'package:eventdock_dashboard/widgets/command_palette_dialog.dart';
 import 'package:eventdock_dashboard/widgets/export_dialog.dart';
@@ -10,15 +8,6 @@ import 'package:eventdock_dashboard/widgets/notifications_panel.dart';
 
 void main() {
   group('Interactive SaaS Dashboard Features Tests', () {
-    final testProject = Project(
-      id: 'proj_test_1',
-      name: 'Acme Cloud Platform',
-      slug: 'acme-cloud',
-      ownerId: 'user_dev_1',
-      retentionDays: 30,
-      createdAt: DateTime.now().toIso8601String(),
-    );
-
     setUp(() async {
       await AuthService().signInWithGoogle(googleEmail: 'developer@eventdock.dev');
     });
@@ -109,8 +98,8 @@ void main() {
       await tester.pumpWidget(const EventDockApp(initialRoute: '/'));
       await tester.pumpAndSettle();
 
-      // Tap on Notification Bell (has tooltip 'Notifications')
-      final notifTooltip = find.byTooltip('Notifications (2 unread)');
+      // Tap on Notification Bell (has tooltip 'Notifications' when no unread)
+      final notifTooltip = find.byTooltip('Notifications');
       expect(notifTooltip, findsOneWidget);
       await tester.tap(notifTooltip);
       await tester.pumpAndSettle();
@@ -118,22 +107,12 @@ void main() {
       // Verify NotificationsPanel opened
       expect(find.byType(NotificationsPanel), findsOneWidget);
       expect(find.text('Notifications'), findsOneWidget);
-      expect(find.text('2 new'), findsOneWidget);
-      expect(find.text('Critical Failure Rate Spike'), findsOneWidget);
+      expect(find.text('All caught up'), findsOneWidget);
 
       // Tap 'Unread' filter
       await tester.tap(find.text('Unread'));
       await tester.pumpAndSettle();
-      expect(find.text('Critical Failure Rate Spike'), findsOneWidget);
-
-      // Tap 'Mark read'
-      final markReadBtn = find.text('Mark read');
-      expect(markReadBtn, findsOneWidget);
-      await tester.tap(markReadBtn);
-      await tester.pumpAndSettle();
-
-      // Unread count badge in header should be gone
-      expect(find.text('2 new'), findsNothing);
+      expect(find.text('All caught up'), findsOneWidget);
     });
   });
 }

@@ -92,7 +92,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
             padding: const EdgeInsets.fromLTRB(14, 14, 10, 10),
             child: Row(
               children: [
-                const Text(
+                Text(
                   'Notifications',
                   style: TextStyle(
                     color: AppTheme.textPrimary,
@@ -132,7 +132,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
                       widget.onMarkAllRead();
                     },
                     borderRadius: BorderRadius.circular(6),
-                    child: const Padding(
+                    child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                       child: Text(
                         'Mark read',
@@ -148,7 +148,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
                 InkWell(
                   onTap: () => Navigator.of(context).pop(),
                   borderRadius: BorderRadius.circular(6),
-                  child: const Padding(
+                  child: Padding(
                     padding: EdgeInsets.all(4),
                     child: Icon(Icons.close_rounded, size: 16, color: AppTheme.textMuted),
                   ),
@@ -175,7 +175,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
           ),
 
           const SizedBox(height: 12),
-          const Divider(height: 1, thickness: 1, color: AppTheme.cardBorder),
+          Divider(height: 1, thickness: 1, color: AppTheme.cardBorder),
 
           // Notifications List
           Expanded(
@@ -184,7 +184,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
                 : ListView.separated(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     itemCount: filteredList.length,
-                    separatorBuilder: (_, __) => const Divider(
+                    separatorBuilder: (ctx, idx) => Divider(
                       height: 1,
                       thickness: 1,
                       color: AppTheme.cardBorder,
@@ -198,7 +198,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
                   ),
           ),
 
-          const Divider(height: 1, thickness: 1, color: AppTheme.cardBorder),
+          Divider(height: 1, thickness: 1, color: AppTheme.cardBorder),
 
           // Footer
           Padding(
@@ -208,7 +208,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
                 Expanded(
                   child: Text(
                     '${widget.notifications.length} tracked events',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textMuted,
                       fontSize: 11,
                     ),
@@ -308,14 +308,14 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: AppTheme.cardBorder),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.notifications_off_outlined,
                 size: 22,
                 color: AppTheme.textMuted,
               ),
             ),
             const SizedBox(height: 14),
-            const Text(
+            Text(
               'All caught up',
               style: TextStyle(
                 color: AppTheme.textPrimary,
@@ -324,7 +324,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'No new alerts matching the selected filter.',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -382,7 +382,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
                       const SizedBox(width: 8),
                       Text(
                         item.timeAgo,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppTheme.textMuted,
                           fontSize: 11,
                         ),
@@ -403,7 +403,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
                   const SizedBox(height: 4),
                   Text(
                     item.message,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppTheme.textMuted,
                       fontSize: 12,
                       height: 1.45,
@@ -420,7 +420,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
                       ),
                       child: Text(
                         item.route!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'monospace',
                           color: AppTheme.textSubtle,
                           fontSize: 10,
@@ -436,7 +436,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
             // Dismiss Button
             IconButton(
               onPressed: () => widget.onNotificationDismiss(item),
-              icon: const Icon(Icons.close_rounded, size: 14, color: AppTheme.textMuted),
+              icon: Icon(Icons.close_rounded, size: 14, color: AppTheme.textMuted),
               splashRadius: 14,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 24, minHeight: 24),

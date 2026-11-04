@@ -84,7 +84,7 @@ class _ReplayModalState extends State<ReplayModal> {
       backgroundColor: AppTheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: AppTheme.cardBorder),
+        side: BorderSide(color: AppTheme.cardBorder),
       ),
       insetPadding: EdgeInsets.symmetric(
         horizontal: isMobile ? 12 : 32,
@@ -122,13 +122,13 @@ class _ReplayModalState extends State<ReplayModal> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: AppTheme.textMuted),
+                  icon: Icon(Icons.close, color: AppTheme.textMuted),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            const Divider(color: AppTheme.cardBorder),
+            Divider(color: AppTheme.cardBorder),
             const SizedBox(height: 16),
 
             // Scrollable Content
@@ -200,7 +200,7 @@ class _ReplayModalState extends State<ReplayModal> {
                               ],
                             ),
                             const SizedBox(height: 6),
-                            const Text(
+                            Text(
                               'Replaying this request may alter records or trigger side effects on the destination server.',
                               style: TextStyle(color: AppTheme.textPrimary, fontSize: 12),
                             ),
@@ -288,7 +288,7 @@ class _ReplayModalState extends State<ReplayModal> {
                                   ),
                                 ),
                                 const Spacer(),
-                                Text('${_latestResult!.durationMs ?? 0} ms', style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                                Text('${_latestResult!.durationMs ?? 0} ms', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
                               ],
                             ),
                             if (_latestResult!.safeErrorSummary != null) ...[
@@ -297,11 +297,11 @@ class _ReplayModalState extends State<ReplayModal> {
                             ],
                             if (_latestResult!.responseSnippet != null) ...[
                               const SizedBox(height: 10),
-                              const Text('Response:', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                              Text('Response:', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                               const SizedBox(height: 4),
                               SelectableText(
                                 _latestResult!.responseSnippet!,
-                                style: const TextStyle(fontFamily: 'monospace', fontSize: 11, color: AppTheme.textPrimary),
+                                style: TextStyle(fontFamily: 'monospace', fontSize: 11, color: AppTheme.textPrimary),
                               ),
                             ],
                           ],
@@ -316,7 +316,7 @@ class _ReplayModalState extends State<ReplayModal> {
                     if (_loadingHistory)
                       const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
                     else if (_history.isEmpty)
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.all(12),
                         child: Text('No replay attempts recorded for this event yet.', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
                       )
@@ -351,7 +351,7 @@ class _ReplayModalState extends State<ReplayModal> {
                                 ),
                                 Text(
                                   '${h.durationMs ?? 0}ms • ${h.outcome}',
-                                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 11),
+                                  style: TextStyle(color: AppTheme.textMuted, fontSize: 11),
                                 ),
                               ],
                             ),

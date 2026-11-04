@@ -39,7 +39,7 @@ class StabilityGaugeCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Stability Score',
                 style: TextStyle(
                   color: AppTheme.textMuted,
@@ -55,7 +55,7 @@ class StabilityGaugeCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: AppTheme.cardBorder),
                 ),
-                child: const Icon(Icons.arrow_outward, size: 14, color: AppTheme.textMuted),
+                child: Icon(Icons.arrow_outward, size: 14, color: AppTheme.textMuted),
               ),
             ],
           ),
@@ -69,7 +69,7 @@ class StabilityGaugeCard extends StatelessWidget {
             children: [
               Text(
                 '${score.toInt()}',
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppTheme.textPrimary,
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
@@ -77,7 +77,7 @@ class StabilityGaugeCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 4),
-              const Text(
+              Text(
                 '/100',
                 style: TextStyle(
                   color: AppTheme.textMuted,
@@ -99,6 +99,7 @@ class StabilityGaugeCard extends StatelessWidget {
                   painter: _RadialGaugePainter(
                     fraction: (score / 100.0).clamp(0.0, 1.0),
                     activeColor: gaugeColor,
+                    isDark: AppTheme.isDark,
                   ),
                 ),
               ),
@@ -114,7 +115,7 @@ class StabilityGaugeCard extends StatelessWidget {
                   ? 'All endpoints healthy · 0 critical errors'
                   : '$count5xx server errors (5xx) · $count4xx client errors (4xx)',
               style: TextStyle(
-                color: AppTheme.textMuted.withOpacity(0.9),
+                color: AppTheme.textMuted.withValues(alpha: 0.9),
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
               ),
@@ -130,10 +131,12 @@ class StabilityGaugeCard extends StatelessWidget {
 class _RadialGaugePainter extends CustomPainter {
   final double fraction;
   final Color activeColor;
+  final bool isDark;
 
   _RadialGaugePainter({
     required this.fraction,
     this.activeColor = const Color(0xFF22C55E),
+    this.isDark = true,
   });
 
   @override
@@ -147,7 +150,7 @@ class _RadialGaugePainter extends CustomPainter {
 
     // Background track arc
     final trackPaint = Paint()
-      ..color = const Color(0xFF262632)
+      ..color = isDark ? const Color(0xFF262632) : const Color(0xFFE2E4E9)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
@@ -180,8 +183,8 @@ class _RadialGaugePainter extends CustomPainter {
     final knobX = center.dx + radius * math.cos(currentAngle);
     final knobY = center.dy + radius * math.sin(currentAngle);
 
-    final knobOuter = Paint()..color = Colors.white;
-    final knobInner = Paint()..color = const Color(0xFF0C0C0E);
+    final knobOuter = Paint()..color = isDark ? Colors.white : const Color(0xFF0F1115);
+    final knobInner = Paint()..color = isDark ? const Color(0xFF0C0C0E) : Colors.white;
 
     canvas.drawCircle(Offset(knobX, knobY), strokeWidth * 0.58, knobOuter);
     canvas.drawCircle(Offset(knobX, knobY), strokeWidth * 0.28, knobInner);
@@ -189,6 +192,6 @@ class _RadialGaugePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _RadialGaugePainter old) {
-    return old.fraction != fraction || old.activeColor != activeColor;
+    return old.fraction != fraction || old.activeColor != activeColor || old.isDark != isDark;
   }
 }

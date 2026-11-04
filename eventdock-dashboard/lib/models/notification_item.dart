@@ -97,50 +97,6 @@ class NotificationItem {
   }
 
   static List<NotificationItem> getInitialNotifications() {
-    final now = DateTime.now();
-    return [
-      NotificationItem(
-        id: 'notif_1',
-        title: 'Critical Failure Rate Spike',
-        message: 'Endpoint /api/v1/checkout/charge returned 14 consecutive 500 errors.',
-        timestamp: now.subtract(const Duration(minutes: 4)),
-        severity: NotificationSeverity.critical,
-        route: '/api/v1/checkout/charge',
-        isRead: false,
-      ),
-      NotificationItem(
-        id: 'notif_2',
-        title: 'P95 Latency Threshold Exceeded',
-        message: 'Overall latency reached 412ms, exceeding baseline threshold of 350ms.',
-        timestamp: now.subtract(const Duration(minutes: 24)),
-        severity: NotificationSeverity.warning,
-        isRead: false,
-      ),
-      NotificationItem(
-        id: 'notif_3',
-        title: 'Ingestion Pool Recovered',
-        message: 'Upstream connection pool restored; /api/v1/auth/login recovered to 99.9% uptime.',
-        timestamp: now.subtract(const Duration(hours: 1, minutes: 12)),
-        severity: NotificationSeverity.resolved,
-        route: '/api/v1/auth/login',
-        isRead: true,
-      ),
-      NotificationItem(
-        id: 'notif_4',
-        title: 'Reproduction Replay Generated',
-        message: 'Deterministic bug reproduction artifact generated for incident #INC-4920.',
-        timestamp: now.subtract(const Duration(hours: 3)),
-        severity: NotificationSeverity.info,
-        isRead: true,
-      ),
-      NotificationItem(
-        id: 'notif_5',
-        title: 'Team Member Access Granted',
-        message: 'Sarah Connor accepted invitation to collaborate on Acme Cloud Platform.',
-        timestamp: now.subtract(const Duration(days: 1)),
-        severity: NotificationSeverity.system,
-        isRead: true,
-      ),
-    ];
+    return const [];
   }
 }

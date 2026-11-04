@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'models/project.dart';
 import 'screens/auth_screen.dart';
+import 'screens/email_verification_screen.dart';
 import 'screens/not_found_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/project_dashboard_screen.dart';
 import 'screens/projects_screen.dart';
 import 'screens/waitlist_screen.dart';
 import 'screens/welcome_screen.dart';
+import 'services/api_service.dart';
 import 'services/auth_service.dart';
 import 'services/desktop_window_service.dart';
 import 'theme/app_theme.dart';
@@ -14,10 +16,6 @@ import 'theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DesktopWindowService.initializeDesktopWindow();
-  // Auto-authenticate as local developer if not already authenticated so dashboard is immediately usable
-  if (!AuthService().isAuthenticated) {
-    await AuthService().signInWithGoogle(googleEmail: 'developer@eventdock.dev');
-  }
   runApp(const EventDockApp());
 }
 
@@ -36,11 +34,16 @@ class EventDockApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'EventDock - API Failure Detection & Reproduction',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
-      initialRoute: initialRoute,
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: AppTheme.themeModeNotifier,
+      builder: (context, themeMode, _) {
+        return MaterialApp(
+          title: 'EventDock - API Failure Detection & Reproduction',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          initialRoute: initialRoute,
       onGenerateRoute: (RouteSettings settings) {
         final path = normalizeRoute(settings.name);
 
@@ -118,6 +121,8 @@ class EventDockApp extends StatelessWidget {
         );
       },
     );
+      },
+    );
   }
 
   /// Normalizes incoming browser paths and URL fragments (e.g. '/#app' or '/app')
@@ -162,6 +167,7 @@ class _DashboardRootState extends State<DashboardRoot> {
   void initState() {
     super.initState();
     AuthService().addListener(_onAuthChanged);
+    _syncProjects();
   }
 
   @override
@@ -171,7 +177,31 @@ class _DashboardRootState extends State<DashboardRoot> {
   }
 
   void _onAuthChanged() {
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {});
+      _syncProjects();
+    }
+  }
+
+  Future<void> _syncProjects() async {
+    if (!AuthService().isAuthenticated) return;
+    // Keep deterministic sample project for test developer environment
+    if (AuthService().userEmail == 'developer@eventdock.dev') {
+      return;
+    }
+
+    try {
+      final list = await ApiService().getProjects();
+      if (mounted) {
+        setState(() {
+          if (list.isNotEmpty) {
+            _selectedProject = list.first;
+          } else {
+            _selectedProject = null;
+          }
+        });
+      }
+    } catch (_) {}
   }
 
   @override
@@ -180,6 +210,22 @@ class _DashboardRootState extends State<DashboardRoot> {
       return AuthScreen(
         onLoginSuccess: () {
           setState(() {});
+        },
+      );
+    }
+
+    // Mandatory Firebase Email Verification Gate
+    if (!AuthService().isEmailVerified) {
+      return EmailVerificationScreen(
+        userEmail: AuthService().userEmail ?? '',
+        onVerified: () {
+          setState(() {});
+        },
+        onSignOut: () {
+          AuthService().signOut();
+          setState(() {
+            _selectedProject = null;
+          });
         },
       );
     }

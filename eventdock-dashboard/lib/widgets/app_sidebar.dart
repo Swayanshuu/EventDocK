@@ -32,7 +32,7 @@ class AppSidebar extends StatelessWidget {
       curve: Curves.easeInOutCubic,
       width: width,
       clipBehavior: Clip.antiAlias,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppTheme.sidebar,
         border: Border(
           right: BorderSide(color: AppTheme.cardBorder, width: 1),
@@ -99,7 +99,7 @@ class AppSidebar extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 10),
-                            const Expanded(
+                            Expanded(
                               child: Text(
                                 'EventDock',
                                 style: TextStyle(
@@ -130,7 +130,7 @@ class AppSidebar extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: AppTheme.cardBorder),
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Icon(
                                 Icons.view_sidebar_outlined,
                                 size: 15,
@@ -187,7 +187,7 @@ class AppSidebar extends StatelessWidget {
               horizontal: isCollapsed ? 12 : 16,
               vertical: 14,
             ),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(color: AppTheme.cardBorder, width: 1),
               ),
@@ -240,7 +240,7 @@ class AppSidebar extends StatelessWidget {
                             children: [
                               Text(
                                 AuthService().userEmail ?? 'developer',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: AppTheme.textPrimary,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
@@ -265,7 +265,7 @@ class AppSidebar extends StatelessWidget {
                 ),
                 if (!isCollapsed)
                   IconButton(
-                    icon: const Icon(Icons.logout_rounded, size: 16, color: AppTheme.textMuted),
+                    icon: Icon(Icons.logout_rounded, size: 16, color: AppTheme.textMuted),
                     tooltip: 'Sign out',
                     splashColor: Colors.transparent,
                     highlightColor: Colors.transparent,

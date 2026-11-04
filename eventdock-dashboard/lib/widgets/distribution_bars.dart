@@ -44,7 +44,7 @@ class DistributionBarsCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Failure Distribution',
                   style: TextStyle(
@@ -60,7 +60,7 @@ class DistributionBarsCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppTheme.cardSecondary,
                       borderRadius: BorderRadius.circular(8),
@@ -68,7 +68,7 @@ class DistributionBarsCard extends StatelessWidget {
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
+                      children: [
                         Text('HTTP code', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                         SizedBox(width: 4),
                         Icon(Icons.keyboard_arrow_down, size: 14, color: AppTheme.textMuted),
@@ -84,7 +84,7 @@ class DistributionBarsCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: AppTheme.cardBorder),
                     ),
-                    child: const Icon(Icons.bar_chart, size: 14, color: AppTheme.textMuted),
+                    child: Icon(Icons.bar_chart, size: 14, color: AppTheme.textMuted),
                   ),
                 ],
               ),
@@ -116,15 +116,15 @@ class DistributionBarsCard extends StatelessWidget {
                   label: '400 Client',
                   percent: '$p4xx%',
                   heightFraction: f4xx,
-                  color: Colors.white,
-                  textColor: Colors.black,
+                  color: AppTheme.isDark ? Colors.white : const Color(0xFF3B82F6),
+                  textColor: AppTheme.isDark ? Colors.black : Colors.white,
                 ),
                 const SizedBox(width: 12),
                 _buildBarCol(
                   label: 'Other',
                   percent: '$pOther%',
                   heightFraction: fOther,
-                  color: const Color(0xFF262633),
+                  color: AppTheme.cardSecondary,
                   isPattern: true,
                 ),
               ],
@@ -159,7 +159,7 @@ class DistributionBarsCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: color,
                     borderRadius: BorderRadius.circular(10),
-                    border: isPattern ? Border.all(color: const Color(0xFF383848)) : null,
+                    border: isPattern ? Border.all(color: AppTheme.cardBorder) : null,
                   ),
                   child: Align(
                     alignment: Alignment.topLeft,
@@ -179,7 +179,7 @@ class DistributionBarsCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppTheme.textMuted,
               fontSize: 10,
               fontWeight: FontWeight.w500,

@@ -96,7 +96,7 @@ class _HeroFailureChartState extends State<HeroFailureChart> with SingleTickerPr
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Failure Ingestion Velocity',
                       style: TextStyle(
                         color: AppTheme.textMuted,
@@ -114,7 +114,7 @@ class _HeroFailureChartState extends State<HeroFailureChart> with SingleTickerPr
                           widget.totalFailures == 0
                               ? '0 Errors'
                               : '${widget.totalFailures} Failures',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppTheme.textPrimary,
                             fontSize: 28,
                             fontWeight: FontWeight.w800,
@@ -234,7 +234,7 @@ class _HeroFailureChartState extends State<HeroFailureChart> with SingleTickerPr
                           left: 0,
                           child: Text(
                             widget.totalFailures == 0 ? '0' : '100%',
-                            style: const TextStyle(color: AppTheme.textMuted, fontSize: 10, fontWeight: FontWeight.w600),
+                            style: TextStyle(color: AppTheme.textMuted, fontSize: 10, fontWeight: FontWeight.w600),
                           ),
                         ),
                         Positioned(
@@ -242,7 +242,7 @@ class _HeroFailureChartState extends State<HeroFailureChart> with SingleTickerPr
                           left: 0,
                           child: Text(
                             widget.totalFailures == 0 ? '0' : '50%',
-                            style: const TextStyle(color: AppTheme.textMuted, fontSize: 10, fontWeight: FontWeight.w600),
+                            style: TextStyle(color: AppTheme.textMuted, fontSize: 10, fontWeight: FontWeight.w600),
                           ),
                         ),
 
@@ -256,6 +256,7 @@ class _HeroFailureChartState extends State<HeroFailureChart> with SingleTickerPr
                                   points: points,
                                   progress: _anim.value,
                                   hoverFraction: _hoverFraction,
+                                  isDark: AppTheme.isDark,
                                 ),
                               );
                             },
@@ -281,7 +282,7 @@ class _HeroFailureChartState extends State<HeroFailureChart> with SingleTickerPr
             children: _months.map((m) {
               return Text(
                 m,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppTheme.textMuted,
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
@@ -311,7 +312,7 @@ class _HeroFailureChartState extends State<HeroFailureChart> with SingleTickerPr
           border: Border.all(color: AppTheme.cardBorderLight, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: AppTheme.isDark ? 0.45 : 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -324,13 +325,13 @@ class _HeroFailureChartState extends State<HeroFailureChart> with SingleTickerPr
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Failures',
                   style: TextStyle(color: AppTheme.textMuted, fontSize: 10),
                 ),
                 Text(
                   '$val',
-                  style: const TextStyle(color: AppTheme.textPrimary, fontSize: 11, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: AppTheme.textPrimary, fontSize: 11, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -338,7 +339,7 @@ class _HeroFailureChartState extends State<HeroFailureChart> with SingleTickerPr
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
               decoration: BoxDecoration(
-                color: (val > 0 ? AppTheme.status5xx : const Color(0xFF22C55E)).withOpacity(0.16),
+                color: (val > 0 ? AppTheme.status5xx : const Color(0xFF22C55E)).withValues(alpha: 0.16),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
@@ -361,11 +362,13 @@ class _SplineChartPainter extends CustomPainter {
   final List<double> points;
   final double progress;
   final double? hoverFraction;
+  final bool isDark;
 
   _SplineChartPainter({
     required this.points,
     required this.progress,
     required this.hoverFraction,
+    this.isDark = true,
   });
 
   @override
@@ -379,7 +382,7 @@ class _SplineChartPainter extends CustomPainter {
 
     // Subtle horizontal dashed guide lines
     final guidePaint = Paint()
-      ..color = AppTheme.cardBorder.withOpacity(0.65)
+      ..color = AppTheme.cardBorder.withValues(alpha: 0.65)
       ..strokeWidth = 1.0;
 
     const dashWidth = 4.0;
@@ -438,8 +441,8 @@ class _SplineChartPainter extends CustomPainter {
       Offset(0, top),
       Offset(0, top + h),
       [
-        AppTheme.heroCoral.withOpacity(0.22),
-        AppTheme.heroCoral.withOpacity(0.01),
+        AppTheme.heroCoral.withValues(alpha: 0.22),
+        AppTheme.heroCoral.withValues(alpha: 0.01),
       ],
     );
     final fillPaint = Paint()
@@ -462,12 +465,12 @@ class _SplineChartPainter extends CustomPainter {
       final hx = (leftOffset + w * hoverFraction!).clamp(leftOffset, size.width);
 
       // Light highlight pillar behind scrubber
-      final pillarPaint = Paint()..color = Colors.white.withOpacity(0.04);
+      final pillarPaint = Paint()..color = (isDark ? Colors.white : Colors.black).withValues(alpha: 0.04);
       canvas.drawRect(Rect.fromLTWH(hx - 12, top, 24, h), pillarPaint);
 
       // Vertical dashed line
       final scrubberPaint = Paint()
-        ..color = AppTheme.textMuted.withOpacity(0.5)
+        ..color = AppTheme.textMuted.withValues(alpha: 0.5)
         ..strokeWidth = 1.0;
       canvas.drawLine(Offset(hx, top), Offset(hx, top + h), scrubberPaint);
 
@@ -475,7 +478,7 @@ class _SplineChartPainter extends CustomPainter {
       final idx = ((coords.length - 1) * hoverFraction!).round().clamp(0, coords.length - 1);
       final dotPos = coords[idx];
 
-      final outerDot = Paint()..color = Colors.white;
+      final outerDot = Paint()..color = isDark ? Colors.white : const Color(0xFF0F1115);
       final innerDot = Paint()..color = AppTheme.heroCoral;
 
       canvas.drawCircle(dotPos, 5, outerDot);
@@ -485,6 +488,6 @@ class _SplineChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _SplineChartPainter old) {
-    return old.progress != progress || old.hoverFraction != hoverFraction || old.points != points;
+    return old.progress != progress || old.hoverFraction != hoverFraction || old.points != points || old.isDark != isDark;
   }
 }

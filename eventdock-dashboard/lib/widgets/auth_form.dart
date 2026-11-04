@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:eventdock_dashboard/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import '../models/auth_state.dart';
 import '../services/auth_service.dart';
@@ -46,12 +47,7 @@ class _AuthFormState extends State<AuthForm> {
 
   // Dropdown States
   String _selectedTeamSize = '1-10';
-  final List<String> _teamSizeOptions = [
-    '1-10',
-    '11-50',
-    '50-200',
-    '200+',
-  ];
+  final List<String> _teamSizeOptions = ['1-10', '11-50', '50-200', '200+'];
 
   // Focus Nodes for Keyboard Traversal (Tab + Enter)
   final _nameFocusNode = FocusNode();
@@ -102,7 +98,9 @@ class _AuthFormState extends State<AuthForm> {
 
   void _onPasswordChanged() {
     setState(() {
-      _passwordValidation = PasswordValidation.validate(_passwordController.text);
+      _passwordValidation = PasswordValidation.validate(
+        _passwordController.text,
+      );
     });
   }
 
@@ -184,7 +182,8 @@ class _AuthFormState extends State<AuthForm> {
           throw Exception('Please enter your full name.');
         }
 
-        if (_role == AuthRole.organisation && _orgNameController.text.trim().isEmpty) {
+        if (_role == AuthRole.organisation &&
+            _orgNameController.text.trim().isEmpty) {
           throw Exception('Please enter your organization or company name.');
         }
 
@@ -202,7 +201,8 @@ class _AuthFormState extends State<AuthForm> {
       } else if (_mode == AuthMode.forgotPassword) {
         await AuthService().sendPasswordReset(email);
         setState(() {
-          _successMessage = 'Password reset instructions have been sent to $email';
+          _successMessage =
+              'Password reset instructions have been sent to $email';
         });
       }
     } catch (e) {
@@ -258,15 +258,18 @@ class _AuthFormState extends State<AuthForm> {
                     width: 34,
                     height: 34,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0038FF),
+                      color: AppTheme.heroOrange,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+                      border: Border.all(
+                        color: const Color(0xFFE5E7EB),
+                        width: 1,
+                      ),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: Image.asset(
                       'assets/auth_mascot.jpg',
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Center(
+                      errorBuilder: (ctx, err, stack) => const Center(
                         child: Icon(
                           Icons.radar_rounded,
                           color: Colors.white,
@@ -293,8 +296,8 @@ class _AuthFormState extends State<AuthForm> {
                 isSignIn
                     ? 'Welcome Back'
                     : isSignUp
-                        ? 'Create Your Account'
-                        : 'Reset Password',
+                    ? 'Create Your Account'
+                    : 'Reset Password',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
@@ -308,8 +311,8 @@ class _AuthFormState extends State<AuthForm> {
                 isSignIn
                     ? 'Authenticate to access deterministic benchmarking and telemetry.'
                     : isSignUp
-                        ? 'Join the engineering platform for verified teams and developers.'
-                        : 'Enter your email to receive recovery instructions.',
+                    ? 'Join the engineering platform for verified teams and developers.'
+                    : 'Enter your email to receive recovery instructions.',
                 style: const TextStyle(
                   fontSize: 13,
                   color: Color(0xFF6B7280),
@@ -319,17 +322,17 @@ class _AuthFormState extends State<AuthForm> {
               const SizedBox(height: 18),
 
               // 2. Dual-Role Segmented Selector
-              RoleSelector(
-                selectedRole: _role,
-                onRoleChanged: _switchRole,
-              ),
+              RoleSelector(selectedRole: _role, onRoleChanged: _switchRole),
               const SizedBox(height: 16),
 
               // 3. Real-Time Lockout Alert Banner
               if (_lockoutRemainingSeconds > 0)
                 Container(
                   margin: const EdgeInsets.only(bottom: 14),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFEF2F2),
                     borderRadius: BorderRadius.circular(10),
@@ -337,7 +340,11 @@ class _AuthFormState extends State<AuthForm> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.lock_clock_rounded, color: Color(0xFFDC2626), size: 16),
+                      const Icon(
+                        Icons.lock_clock_rounded,
+                        color: Color(0xFFDC2626),
+                        size: 16,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -357,7 +364,10 @@ class _AuthFormState extends State<AuthForm> {
               if (_errorMessage != null && _lockoutRemainingSeconds == 0)
                 Container(
                   margin: const EdgeInsets.only(bottom: 14),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFEF2F2),
                     borderRadius: BorderRadius.circular(10),
@@ -366,7 +376,11 @@ class _AuthFormState extends State<AuthForm> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.error_outline_rounded, color: Color(0xFFDC2626), size: 16),
+                      const Icon(
+                        Icons.error_outline_rounded,
+                        color: Color(0xFFDC2626),
+                        size: 16,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -386,7 +400,10 @@ class _AuthFormState extends State<AuthForm> {
               if (_successMessage != null)
                 Container(
                   margin: const EdgeInsets.only(bottom: 14),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFECFDF5),
                     borderRadius: BorderRadius.circular(10),
@@ -394,7 +411,11 @@ class _AuthFormState extends State<AuthForm> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF059669), size: 16),
+                      const Icon(
+                        Icons.check_circle_outline_rounded,
+                        color: Color(0xFF059669),
+                        size: 16,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -466,7 +487,9 @@ class _AuthFormState extends State<AuthForm> {
                           value: _selectedTeamSize,
                           items: _teamSizeOptions,
                           onChanged: (v) {
-                            if (v != null) setState(() => _selectedTeamSize = v);
+                            if (v != null) {
+                              setState(() => _selectedTeamSize = v);
+                            }
                           },
                         ),
                       ),
@@ -499,7 +522,9 @@ class _AuthFormState extends State<AuthForm> {
                 // Sign In mode Email Field
                 _buildInputField(
                   label: isOrg ? 'Work Email Address' : 'Email Address',
-                  hintText: isOrg ? 'engineering@company.com' : 'engineer@domain.com',
+                  hintText: isOrg
+                      ? 'engineering@company.com'
+                      : 'engineer@domain.com',
                   controller: _emailController,
                   focusNode: _emailFocusNode,
                   nextFocusNode: _passwordFocusNode,
@@ -551,9 +576,12 @@ class _AuthFormState extends State<AuthForm> {
                             height: 18,
                             child: Checkbox(
                               value: _rememberMe,
-                              onChanged: (v) => setState(() => _rememberMe = v ?? false),
-                              activeColor: const Color(0xFF0038FF),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                              onChanged: (v) =>
+                                  setState(() => _rememberMe = v ?? false),
+                              activeColor: AppTheme.heroOrange,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
                               side: const BorderSide(color: Color(0xFFD1D5DB)),
                             ),
                           ),
@@ -572,14 +600,17 @@ class _AuthFormState extends State<AuthForm> {
                     TextButton(
                       onPressed: () => _switchMode(AuthMode.forgotPassword),
                       style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF0038FF),
+                        foregroundColor: AppTheme.heroOrange,
                         padding: EdgeInsets.zero,
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: const Text(
                         'Forgot password?',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -591,11 +622,15 @@ class _AuthFormState extends State<AuthForm> {
               SizedBox(
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: (_isLoading || _lockoutRemainingSeconds > 0) ? null : _handleSubmit,
+                  onPressed: (_isLoading || _lockoutRemainingSeconds > 0)
+                      ? null
+                      : _handleSubmit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0038FF),
+                    backgroundColor: AppTheme.heroOrange,
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor: const Color(0xFF93C5FD),
+                    disabledBackgroundColor: AppTheme.heroOrange.withValues(
+                      alpha: 0.5,
+                    ),
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -608,15 +643,17 @@ class _AuthFormState extends State<AuthForm> {
                           height: 18,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       : Text(
                           isSignIn
                               ? 'Sign In to EventDock'
                               : isSignUp
-                                  ? 'Create Verified Account'
-                                  : 'Send Reset Link',
+                              ? 'Create Verified Account'
+                              : 'Send Reset Link',
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -637,8 +674,8 @@ class _AuthFormState extends State<AuthForm> {
                       isSignIn
                           ? "Don't have an account? "
                           : isSignUp
-                              ? 'Already have an account? '
-                              : 'Remembered your password? ',
+                          ? 'Already have an account? '
+                          : 'Remembered your password? ',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF6B7280),
@@ -653,15 +690,13 @@ class _AuthFormState extends State<AuthForm> {
                         }
                       },
                       style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF0038FF),
+                        foregroundColor: AppTheme.heroOrange,
                         padding: EdgeInsets.zero,
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: Text(
-                        isSignIn
-                            ? 'Sign Up'
-                            : 'Sign In',
+                        isSignIn ? 'Sign Up' : 'Sign In',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
@@ -704,15 +739,15 @@ class _AuthFormState extends State<AuthForm> {
         ),
         const SizedBox(height: 6),
         Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
           child: TextField(
             controller: controller,
             focusNode: focusNode,
             obscureText: isPassword && obscureText,
             keyboardType: keyboardType,
-            textInputAction: nextFocusNode != null ? TextInputAction.next : TextInputAction.done,
+            textInputAction: nextFocusNode != null
+                ? TextInputAction.next
+                : TextInputAction.done,
             onSubmitted: (val) {
               if (nextFocusNode != null) {
                 FocusScope.of(context).requestFocus(nextFocusNode);
@@ -732,7 +767,10 @@ class _AuthFormState extends State<AuthForm> {
                 fontSize: 13,
                 fontWeight: FontWeight.w400,
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 13,
+              ),
               filled: true,
               fillColor: const Color(0xFFFAFAFA),
               prefixIcon: icon != null
@@ -741,7 +779,9 @@ class _AuthFormState extends State<AuthForm> {
               suffixIcon: isPassword
                   ? IconButton(
                       icon: Icon(
-                        obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                        obscureText
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
                         size: 17,
                         color: const Color(0xFF9CA3AF),
                       ),
@@ -752,15 +792,24 @@ class _AuthFormState extends State<AuthForm> {
                   : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1),
+                borderSide: const BorderSide(
+                  color: Color(0xFFE5E7EB),
+                  width: 1,
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1),
+                borderSide: const BorderSide(
+                  color: Color(0xFFE5E7EB),
+                  width: 1,
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF0038FF), width: 1.5),
+                borderSide: const BorderSide(
+                  color: AppTheme.heroOrange,
+                  width: 1.5,
+                ),
               ),
             ),
           ),
@@ -801,7 +850,11 @@ class _AuthFormState extends State<AuthForm> {
               isExpanded: true,
               dropdownColor: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: Color(0xFF6B7280)),
+              icon: const Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 18,
+                color: Color(0xFF6B7280),
+              ),
               items: items.map((item) {
                 return DropdownMenuItem<T>(
                   value: item,
@@ -865,11 +918,20 @@ class _AuthFormState extends State<AuthForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildRequirementItem('8+ characters', _passwordValidation.hasMinLength),
+                    _buildRequirementItem(
+                      '8+ characters',
+                      _passwordValidation.hasMinLength,
+                    ),
                     const SizedBox(height: 3),
-                    _buildRequirementItem('Uppercase (A-Z)', _passwordValidation.hasUppercase),
+                    _buildRequirementItem(
+                      'Uppercase (A-Z)',
+                      _passwordValidation.hasUppercase,
+                    ),
                     const SizedBox(height: 3),
-                    _buildRequirementItem('One number (0-9)', _passwordValidation.hasDigit),
+                    _buildRequirementItem(
+                      'One number (0-9)',
+                      _passwordValidation.hasDigit,
+                    ),
                   ],
                 ),
               ),
@@ -878,9 +940,15 @@ class _AuthFormState extends State<AuthForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildRequirementItem('Lowercase (a-z)', _passwordValidation.hasLowercase),
+                    _buildRequirementItem(
+                      'Lowercase (a-z)',
+                      _passwordValidation.hasLowercase,
+                    ),
                     const SizedBox(height: 3),
-                    _buildRequirementItem('Special char (!@#\$%)', _passwordValidation.hasSpecialChar),
+                    _buildRequirementItem(
+                      'Special char (!@#\$%)',
+                      _passwordValidation.hasSpecialChar,
+                    ),
                   ],
                 ),
               ),
@@ -895,9 +963,13 @@ class _AuthFormState extends State<AuthForm> {
     return Row(
       children: [
         Icon(
-          isSatisfied ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+          isSatisfied
+              ? Icons.check_circle_rounded
+              : Icons.radio_button_unchecked_rounded,
           size: 13,
-          color: isSatisfied ? const Color(0xFF10B981) : const Color(0xFF9CA3AF),
+          color: isSatisfied
+              ? const Color(0xFF10B981)
+              : const Color(0xFF9CA3AF),
         ),
         const SizedBox(width: 6),
         Text(
@@ -905,7 +977,9 @@ class _AuthFormState extends State<AuthForm> {
           style: TextStyle(
             fontSize: 11,
             fontWeight: isSatisfied ? FontWeight.w600 : FontWeight.w400,
-            color: isSatisfied ? const Color(0xFF065F46) : const Color(0xFF6B7280),
+            color: isSatisfied
+                ? const Color(0xFF065F46)
+                : const Color(0xFF6B7280),
           ),
         ),
       ],

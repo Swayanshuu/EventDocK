@@ -200,7 +200,7 @@ class CodeSnippetBox extends StatelessWidget {
           if (label != null)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: AppTheme.cardBorder, width: 1)),
               ),
               child: Row(
@@ -209,7 +209,7 @@ class CodeSnippetBox extends StatelessWidget {
                   Expanded(
                     child: Text(
                       label!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppTheme.textMuted,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -253,7 +253,7 @@ class CodeSnippetBox extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             child: SelectableText(
               content,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 12,
                 color: AppTheme.textPrimary,

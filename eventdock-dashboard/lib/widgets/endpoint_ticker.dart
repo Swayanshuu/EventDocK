@@ -33,7 +33,7 @@ class EndpointTickerStrip extends StatelessWidget {
       child: Row(
         children: [
           // Left Label
-          const Text(
+          Text(
             'Endpoints',
             style: TextStyle(
               color: AppTheme.textMuted,
@@ -54,13 +54,13 @@ class EndpointTickerStrip extends StatelessWidget {
                         width: 24,
                         height: 24,
                         decoration: BoxDecoration(
-                          color: AppTheme.status2xx.withOpacity(0.12),
+                          color: AppTheme.status2xx.withValues(alpha: 0.12),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.check, size: 14, color: AppTheme.status2xx),
                       ),
                       const SizedBox(width: 10),
-                      const Text(
+                      Text(
                         'All endpoints healthy · No active failure traces recorded',
                         style: TextStyle(
                           color: AppTheme.textMuted,
@@ -112,7 +112,7 @@ class EndpointTickerStrip extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: AppTheme.cardBorder),
             ),
-            child: const Icon(Icons.chevron_right, size: 16, color: AppTheme.textMuted),
+            child: Icon(Icons.chevron_right, size: 16, color: AppTheme.textMuted),
           ),
         ],
       ),
@@ -135,9 +135,9 @@ class EndpointTickerStrip extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
+            color: color.withValues(alpha: 0.12),
             shape: BoxShape.circle,
-            border: Border.all(color: color.withOpacity(0.25)),
+            border: Border.all(color: color.withValues(alpha: 0.25)),
           ),
           child: Icon(icon, size: 16, color: color),
         ),
@@ -148,7 +148,7 @@ class EndpointTickerStrip extends StatelessWidget {
           children: [
             Text(
               service,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textPrimary,
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -161,7 +161,7 @@ class EndpointTickerStrip extends StatelessWidget {
                   constraints: const BoxConstraints(maxWidth: 160),
                   child: Text(
                     route,
-                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 10),
+                    style: TextStyle(color: AppTheme.textMuted, fontSize: 10),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),

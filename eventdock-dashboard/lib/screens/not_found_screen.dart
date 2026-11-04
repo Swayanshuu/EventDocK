@@ -7,10 +7,13 @@ class NotFoundScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: const Key('not_found_screen'),
-      backgroundColor: AppTheme.background,
-      body: Center(
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: AppTheme.themeModeNotifier,
+      builder: (context, themeMode, _) {
+        return Scaffold(
+          key: const Key('not_found_screen'),
+          backgroundColor: AppTheme.background,
+          body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: ConstrainedBox(
@@ -53,7 +56,7 @@ class NotFoundScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Page Not Accessible',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -63,7 +66,7 @@ class NotFoundScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
+                  Text(
                     'Direct URL navigation to dashboard and internal routes is disabled. EventDock is currently operating exclusively in private waitlist mode.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -98,6 +101,8 @@ class NotFoundScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+      },
     );
   }
 }

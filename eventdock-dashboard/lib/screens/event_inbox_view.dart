@@ -131,7 +131,7 @@ class _EventInboxViewState extends State<EventInboxView> {
                   _buildFilterPill('4xx Errors', 400),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.refresh_rounded, color: AppTheme.textMuted),
+                    icon: Icon(Icons.refresh_rounded, color: AppTheme.textMuted),
                     tooltip: 'Refresh events',
                     onPressed: _fetchEvents,
                   ),
@@ -177,7 +177,7 @@ class _EventInboxViewState extends State<EventInboxView> {
                 _buildFilterPill('5xx Server Errors', 500),
                 _buildFilterPill('4xx Client Errors', 400),
                 IconButton(
-                  icon: const Icon(Icons.refresh_rounded, color: AppTheme.textMuted),
+                  icon: Icon(Icons.refresh_rounded, color: AppTheme.textMuted),
                   tooltip: 'Refresh events',
                   onPressed: _fetchEvents,
                 ),
@@ -189,7 +189,7 @@ class _EventInboxViewState extends State<EventInboxView> {
           // Event Count info
           Text(
             'Showing ${_events.length} of $_totalElements recorded failures',
-            style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+            style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
           ),
           const SizedBox(height: 16),
 
@@ -219,7 +219,7 @@ class _EventInboxViewState extends State<EventInboxView> {
                                 const SizedBox(height: 16),
                                 const Text('No API failures detected', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 8),
-                                const Text(
+                                Text(
                                   'Configured requests are executing normally or no errors match your filter.',
                                   style: TextStyle(color: AppTheme.textMuted),
                                 ),
@@ -248,7 +248,7 @@ class _EventInboxViewState extends State<EventInboxView> {
                 ),
                 Text(
                   'Page ${_currentPage + 1} of $_totalPages',
-                  style: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+                  style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
                 ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
@@ -303,14 +303,14 @@ class _EventInboxViewState extends State<EventInboxView> {
         borderRadius: BorderRadius.circular(10),
         child: ListView.separated(
           itemCount: _events.length + 1,
-          separatorBuilder: (context, index) => const Divider(height: 1, color: AppTheme.cardBorder),
+          separatorBuilder: (context, index) => Divider(height: 1, color: AppTheme.cardBorder),
           itemBuilder: (context, index) {
             if (index == 0) {
               // Table Header
               return Container(
                 color: AppTheme.cardSecondary,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                child: const Row(
+                child: Row(
                   children: [
                     SizedBox(width: 70, child: Text('STATUS', style: TextStyle(color: AppTheme.textMuted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5))),
                     SizedBox(width: 75, child: Text('METHOD', style: TextStyle(color: AppTheme.textMuted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5))),
@@ -346,19 +346,19 @@ class _EventInboxViewState extends State<EventInboxView> {
                       flex: 3,
                       child: Text(
                         event.errorType ?? 'HTTP Error',
-                        style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                        style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     SizedBox(
                       width: 80,
-                      child: Text('${event.durationMs ?? 0} ms', style: const TextStyle(fontSize: 12, color: AppTheme.textMuted)),
+                      child: Text('${event.durationMs ?? 0} ms', style: TextStyle(fontSize: 12, color: AppTheme.textMuted)),
                     ),
                     SizedBox(
                       width: 150,
                       child: Text(
                         event.occurredAt.split('T').join(' ').split('.').first,
-                        style: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                        style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -390,7 +390,7 @@ class _EventInboxViewState extends State<EventInboxView> {
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
-            side: const BorderSide(color: AppTheme.cardBorder),
+            side: BorderSide(color: AppTheme.cardBorder),
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(10),
@@ -406,7 +406,7 @@ class _EventInboxViewState extends State<EventInboxView> {
                       const SizedBox(width: 8),
                       MethodBadge(method: event.httpMethod),
                       const Spacer(),
-                      Text('${event.durationMs ?? 0} ms', style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                      Text('${event.durationMs ?? 0} ms', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -424,7 +424,7 @@ class _EventInboxViewState extends State<EventInboxView> {
                   const SizedBox(height: 6),
                   Text(
                     event.occurredAt.split('T').join(' ').split('.').first,
-                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 11),
+                    style: TextStyle(color: AppTheme.textMuted, fontSize: 11),
                   ),
                 ],
               ),

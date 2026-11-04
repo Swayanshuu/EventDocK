@@ -116,7 +116,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Project settings updated successfully'),
-            backgroundColor: Color(0xFF1E293B),
+            backgroundColor: AppTheme.status2xx,
             duration: Duration(seconds: 2),
           ),
         );
@@ -142,10 +142,10 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
         backgroundColor: AppTheme.card,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppTheme.cardBorder),
+          side: BorderSide(color: AppTheme.cardBorder),
         ),
         title: Row(
-          children: const [
+          children: [
             Icon(Icons.warning_amber_rounded, color: AppTheme.status5xx, size: 22),
             SizedBox(width: 10),
             Text(
@@ -164,14 +164,14 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
           children: [
             Text(
               'Are you sure you want to permanently delete "${widget.project.name}"?',
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppTheme.textPrimary,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'All recorded failures, stack traces, replay attempts, and API keys associated with this service will be permanently erased. This operation cannot be undone.',
               style: TextStyle(
                 color: AppTheme.textMuted,
@@ -187,7 +187,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
             onPressed: () => Navigator.pop(ctx),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppTheme.textMuted,
-              side: const BorderSide(color: AppTheme.cardBorder),
+              side: BorderSide(color: AppTheme.cardBorder),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             child: const Text('Cancel'),
@@ -258,7 +258,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Project Settings',
                           style: TextStyle(
                             color: AppTheme.textPrimary,
@@ -270,7 +270,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                         const SizedBox(height: 4),
                         Text(
                           'Configure telemetry ingestion, retention rules, and metadata for ${widget.project.name}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppTheme.textMuted,
                             fontSize: 12,
                           ),
@@ -286,7 +286,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                           onPressed: _resetChanges,
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppTheme.textMuted,
-                            side: const BorderSide(color: AppTheme.cardBorder),
+                            side: BorderSide(color: AppTheme.cardBorder),
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
@@ -342,7 +342,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                           Expanded(
                             child: Text(
                               widget.project.slug,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppTheme.textPrimary,
                                 fontSize: 13,
                                 fontFamily: 'monospace',
@@ -360,7 +360,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(color: AppTheme.cardBorder),
                               ),
-                              child: const Icon(Icons.copy_rounded, size: 13, color: AppTheme.textMuted),
+                              child: Icon(Icons.copy_rounded, size: 13, color: AppTheme.textMuted),
                             ),
                           ),
                         ],
@@ -373,20 +373,20 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                     const SizedBox(height: 6),
                     TextField(
                       controller: _nameController,
-                      style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13),
+                      style: TextStyle(color: AppTheme.textPrimary, fontSize: 13),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: AppTheme.cardSecondary,
                         hintText: 'e.g. Auth Service',
-                        hintStyle: const TextStyle(color: AppTheme.textSubtle, fontSize: 13),
+                        hintStyle: TextStyle(color: AppTheme.textSubtle, fontSize: 13),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: AppTheme.cardBorder),
+                          borderSide: BorderSide(color: AppTheme.cardBorder),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: AppTheme.cardBorder),
+                          borderSide: BorderSide(color: AppTheme.cardBorder),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -402,20 +402,20 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                     TextField(
                       controller: _descController,
                       maxLines: 2,
-                      style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13),
+                      style: TextStyle(color: AppTheme.textPrimary, fontSize: 13),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: AppTheme.cardSecondary,
                         hintText: 'Brief summary of the microservice or API cluster',
-                        hintStyle: const TextStyle(color: AppTheme.textSubtle, fontSize: 13),
+                        hintStyle: TextStyle(color: AppTheme.textSubtle, fontSize: 13),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: AppTheme.cardBorder),
+                          borderSide: BorderSide(color: AppTheme.cardBorder),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: AppTheme.cardBorder),
+                          borderSide: BorderSide(color: AppTheme.cardBorder),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -436,7 +436,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Select how long failure diagnostics, traces, and replay snapshots are stored before automatic purging.',
                       style: TextStyle(color: AppTheme.textMuted, fontSize: 12, height: 1.4),
                     ),
@@ -468,7 +468,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? AppTheme.heroOrange.withOpacity(0.12)
+                                      ? AppTheme.heroOrange.withValues(alpha: 0.12)
                                       : AppTheme.cardSecondary,
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
@@ -538,7 +538,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Forward diagnostic events from your service via HTTP POST to this ingestion URL.',
                       style: TextStyle(color: AppTheme.textMuted, fontSize: 12, height: 1.4),
                     ),
@@ -555,7 +555,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppTheme.heroOrange.withOpacity(0.18),
+                              color: AppTheme.heroOrange.withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: const Text(
@@ -571,7 +571,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                           Expanded(
                             child: Text(
                               'http://localhost:8080/api/v1/projects/${widget.project.id}/events',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppTheme.textPrimary,
                                 fontSize: 12,
                                 fontFamily: 'monospace',
@@ -592,7 +592,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(color: AppTheme.cardBorder),
                               ),
-                              child: const Icon(Icons.copy_rounded, size: 13, color: AppTheme.textMuted),
+                              child: Icon(Icons.copy_rounded, size: 13, color: AppTheme.textMuted),
                             ),
                           ),
                         ],
@@ -608,9 +608,9 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
               Container(
                 padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
-                  color: AppTheme.status5xx.withOpacity(0.04),
+                  color: AppTheme.status5xx.withValues(alpha: 0.04),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppTheme.status5xx.withOpacity(0.3)),
+                  border: Border.all(color: AppTheme.status5xx.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -630,7 +630,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Permanently remove this project, all diagnostic failure records, stack frames, replay logs, and project API keys. This action cannot be reversed.',
                       style: TextStyle(fontSize: 12, color: AppTheme.textMuted, height: 1.4),
                     ),
@@ -708,7 +708,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: AppTheme.heroOrange.withOpacity(0.12),
+                  color: AppTheme.heroOrange.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, size: 16, color: AppTheme.heroOrange),
@@ -716,7 +716,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
               const SizedBox(width: 10),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppTheme.textPrimary,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
@@ -734,7 +734,7 @@ class _ProjectSettingsViewState extends State<ProjectSettingsView> {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         color: AppTheme.textSubtle,
         fontSize: 11,
         fontWeight: FontWeight.w700,

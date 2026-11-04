@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/notification_item.dart';
 import '../models/project.dart';
+import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'command_palette_dialog.dart';
 import 'export_dialog.dart';
@@ -55,7 +56,7 @@ class DashboardTopBar extends StatelessWidget {
         horizontal: isDesktop ? 28 : 16,
         vertical: 16,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppTheme.sidebar,
         border: Border(
           bottom: BorderSide(color: AppTheme.cardBorder, width: 1),
@@ -99,8 +100,8 @@ class DashboardTopBar extends StatelessWidget {
             ),
 
           // Left: Interactive Search Bar & Command Palette Trigger
-          Expanded(
-            flex: isDesktop ? 5 : 4,
+          SizedBox(
+            width: isDesktop ? 260 : 190,
             child: Tooltip(
               message: 'Search pages, projects, endpoints (⌘K / Ctrl+K)',
               child: InkWell(
@@ -136,7 +137,7 @@ class DashboardTopBar extends StatelessWidget {
                     children: [
                       const Icon(Icons.search_rounded, size: 18, color: AppTheme.heroOrange),
                       const SizedBox(width: 10),
-                      const Expanded(
+                      Expanded(
                         child: Text(
                           'Search anything... (⌘K / Ctrl+K)',
                           style: TextStyle(
@@ -154,7 +155,7 @@ class DashboardTopBar extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(color: AppTheme.cardBorder),
                         ),
-                        child: const Text(
+                        child: Text(
                           '⌘K',
                           style: TextStyle(
                             color: AppTheme.textSubtle,
@@ -177,9 +178,9 @@ class DashboardTopBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Date Filter Pill (like in Shopeers)
-              if (isDesktop) ...[
+              if (screenWidth >= 1350) ...[
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: AppTheme.cardSecondary,
                     borderRadius: BorderRadius.circular(10),
@@ -187,7 +188,7 @@ class DashboardTopBar extends StatelessWidget {
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
+                    children: [
                       Icon(Icons.calendar_today_rounded, size: 13, color: AppTheme.textMuted),
                       SizedBox(width: 8),
                       Text(
@@ -211,14 +212,14 @@ class DashboardTopBar extends StatelessWidget {
                 elevation: 12,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  side: const BorderSide(color: AppTheme.cardBorder),
+                  side: BorderSide(color: AppTheme.cardBorder),
                 ),
                 offset: const Offset(0, 48),
                 onSelected: onProjectSelected,
                 itemBuilder: (context) {
                   final projectsList = allProjects.isNotEmpty ? allProjects : [project];
                   return [
-                    const PopupMenuItem<Project>(
+                    PopupMenuItem<Project>(
                       enabled: false,
                       height: 28,
                       child: Text(
@@ -287,12 +288,12 @@ class DashboardTopBar extends StatelessWidget {
                       ),
                     ],
                     if (onSwitchProject != null) ...[
-                      const PopupMenuDivider(height: 1),
+                      PopupMenuDivider(height: 1),
                       PopupMenuItem<Project>(
                         enabled: true,
                         onTap: onSwitchProject,
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(Icons.dashboard_customize_outlined, size: 16, color: AppTheme.textMuted),
                             SizedBox(width: 10),
                             Text(
@@ -325,7 +326,7 @@ class DashboardTopBar extends StatelessWidget {
                         constraints: BoxConstraints(maxWidth: isTablet ? 110 : 150),
                         child: Text(
                           project.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppTheme.textPrimary,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -334,7 +335,7 @@ class DashboardTopBar extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.unfold_more_rounded, size: 14, color: AppTheme.textMuted),
+                      Icon(Icons.unfold_more_rounded, size: 14, color: AppTheme.textMuted),
                     ],
                   ),
                 ),
@@ -363,6 +364,87 @@ class DashboardTopBar extends StatelessWidget {
                   elevation: 0,
                 ),
               ),
+
+              const SizedBox(width: 10),
+
+              // Theme Mode Toggle (Black & Orange for Dark, White & Orange for Light)
+              ValueListenableBuilder<ThemeMode>(
+                valueListenable: AppTheme.themeModeNotifier,
+                builder: (context, mode, _) {
+                  final isDark = mode == ThemeMode.dark;
+                  return Tooltip(
+                    message: isDark
+                        ? 'Switch to Light Mode (White & Orange)'
+                        : 'Switch to Dark Mode (Black & Orange)',
+                    child: InkWell(
+                      onTap: AppTheme.toggleThemeMode,
+                      borderRadius: BorderRadius.circular(10),
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      hoverColor: AppTheme.cardSecondary.withValues(alpha: 0.8),
+                      child: Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: AppTheme.cardSecondary,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppTheme.cardBorder),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                            size: 18,
+                            color: AppTheme.heroOrange,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              // Real Backend Connection Status Pill
+              if (isDesktop) ...[
+                const SizedBox(width: 8),
+                Tooltip(
+                  message: 'Target API: ${ApiService().baseUrl} (${ApiService().isConnected ? (ApiService().isUsingLocalhost ? "Connected to Localhost:8080" : "Online") : "Connecting..."})',
+                  child: Container(
+                    height: 38,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.cardSecondary,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppTheme.cardBorder),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: ApiService().isConnected ? AppTheme.status2xx : AppTheme.status4xx,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        if (screenWidth >= 1400) ...[
+                          const SizedBox(width: 6),
+                          Text(
+                            ApiService().isConnected
+                                ? (ApiService().isUsingLocalhost ? 'Localhost :8080' : 'Live API')
+                                : 'Connecting...',
+                            style: TextStyle(
+                              color: AppTheme.textMuted,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
 
               const SizedBox(width: 10),
 
@@ -404,7 +486,7 @@ class DashboardTopBar extends StatelessWidget {
                         child: Stack(
                           clipBehavior: Clip.none,
                           children: [
-                            const Center(
+                            Center(
                               child: Icon(Icons.notifications_none_rounded, size: 18, color: AppTheme.textMuted),
                             ),
                             if (unreadCount > 0)

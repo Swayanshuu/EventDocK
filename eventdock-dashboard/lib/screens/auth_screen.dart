@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/auth_state.dart';
+import '../theme/app_theme.dart';
 import '../widgets/split_auth_card.dart';
 
 enum AuthViewMode { signIn, signUp, forgotPassword, emailVerification }
@@ -27,22 +28,60 @@ class _AuthScreenState extends State<AuthScreen> {
         return AuthMode.forgotPassword;
       case AuthViewMode.signIn:
       case AuthViewMode.emailVerification:
-      default:
         return AuthMode.signIn;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0C0D12),
-      body: SafeArea(
-        child: SplitAuthCard(
-          onAuthSuccess: widget.onLoginSuccess,
-          initialRole: AuthRole.individual,
-          initialMode: _mapInitialMode(widget.initialMode),
-        ),
-      ),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: AppTheme.themeModeNotifier,
+      builder: (context, themeMode, _) {
+        final isDark = themeMode == ThemeMode.dark;
+        return Scaffold(
+          backgroundColor: AppTheme.background,
+          body: SafeArea(
+            child: Stack(
+              children: [
+                SplitAuthCard(
+                  onAuthSuccess: widget.onLoginSuccess,
+                  initialRole: AuthRole.individual,
+                  initialMode: _mapInitialMode(widget.initialMode),
+                ),
+                Positioned(
+                  top: 16,
+                  right: 20,
+                  child: Tooltip(
+                    message: isDark ? 'Switch to Light Mode (White & Orange)' : 'Switch to Dark Mode (Black & Orange)',
+                    child: InkWell(
+                      onTap: () {
+                        AppTheme.toggleThemeMode();
+                      },
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: AppTheme.cardSecondary,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppTheme.cardBorder),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                            size: 18,
+                            color: AppTheme.heroOrange,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
