@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/common_widgets.dart';
 
 /// Mandatory Email Verification Gate for EventDock.
 /// Prevents unverified users from accessing projects, API keys, or telemetry data.
@@ -172,7 +173,13 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Top Brand & Email Icon
+                // Brand Logo Header
+                const Center(
+                  child: EventDockLogo(height: 32, fontSize: 18),
+                ),
+                const SizedBox(height: 24),
+
+                // Top Email Icon
                 Center(
                   child: Container(
                     width: 72,

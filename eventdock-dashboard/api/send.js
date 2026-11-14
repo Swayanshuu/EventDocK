@@ -42,7 +42,7 @@ export default async function handler(req, res) {
           <tr>
             <td>
               <div style="margin-bottom: 24px;">
-                <img src="https://eventdock.swynx.dev/assets/assets/EventDocK-removebg-preview.png" alt="EventDock" height="34" style="display: block; height: 34px; border: 0;" />
+                <img src="https://eventdock.swynx.dev/EventDock-LOGO-WHITE.png" alt="EventDock" height="38" style="display: block; height: 38px; border: 0;" />
               </div>
               <h1 style="color: #F5F5F5; font-size: 20px; font-weight: 700; margin: 0 0 14px 0;">
                 You're on the early access list, ${displayName}!

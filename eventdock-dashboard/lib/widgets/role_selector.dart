@@ -20,9 +20,9 @@ class RoleSelector extends StatelessWidget {
       height: 46,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6), // Neutral soft gray
+        color: AppTheme.cardSecondary,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+        border: Border.all(color: AppTheme.cardBorder, width: 1),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -39,13 +39,13 @@ class RoleSelector extends StatelessWidget {
                   width: tabWidth,
                   height: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppTheme.isDark ? const Color(0xFF262936) : Colors.white,
                     borderRadius: BorderRadius.circular(10),
-                    boxShadow: const [
+                    boxShadow: [
                       BoxShadow(
-                        color: Color(0x12000000),
+                        color: Colors.black.withValues(alpha: AppTheme.isDark ? 0.25 : 0.06),
                         blurRadius: 6,
-                        offset: Offset(0, 2),
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
@@ -103,7 +103,7 @@ class RoleSelector extends StatelessWidget {
             child: AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 180),
               style: TextStyle(
-                color: isSelected ? const Color(0xFF111827) : const Color(0xFF6B7280),
+                color: isSelected ? AppTheme.textPrimary : AppTheme.textMuted,
                 fontSize: 12.5,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 letterSpacing: -0.2,
@@ -114,7 +114,7 @@ class RoleSelector extends StatelessWidget {
                   Icon(
                     isSelected ? activeIcon : icon,
                     size: 15,
-                    color: isSelected ? AppTheme.heroOrange : const Color(0xFF9CA3AF),
+                    color: isSelected ? AppTheme.heroOrange : AppTheme.textSubtle,
                   ),
                   const SizedBox(width: 6),
                   Text(label),

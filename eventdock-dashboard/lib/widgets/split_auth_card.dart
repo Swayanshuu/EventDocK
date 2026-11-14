@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/auth_state.dart';
 import '../theme/app_theme.dart';
 import 'auth_form.dart';
+import 'common_widgets.dart';
 
 class SplitAuthCard extends StatefulWidget {
   final VoidCallback onAuthSuccess;
@@ -56,7 +57,7 @@ class _SplitAuthCardState extends State<SplitAuthCard> {
               maxHeight: isDesktop ? targetCardHeight : double.infinity,
             ),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppTheme.card,
               borderRadius: BorderRadius.circular(28),
               border: Border.all(
                 color: AppTheme.cardBorder,
@@ -83,7 +84,7 @@ class _SplitAuthCardState extends State<SplitAuthCard> {
                       // Panel dividing border
                       Container(
                         width: 1,
-                        color: const Color(0xFFE5E7EB),
+                        color: AppTheme.cardBorder,
                       ),
 
                       // Right Form Card (50%)
@@ -129,12 +130,12 @@ class _SplitAuthCardState extends State<SplitAuthCard> {
     final isIndividual = _activeRole == AuthRole.individual;
 
     final headline = isIndividual
-        ? 'Prove Your Skills.\nShip With Precision.'
-        : 'Hire Verified Talent.\nBenchmark Teams.';
+        ? 'Detect Failures.\nReplay With Precision.'
+        : 'Microservice Telemetry.\nUnified Diagnostics.';
 
     final subtitle = isIndividual
-        ? 'Empirical developer benchmarking and automated failure reproduction. Prove competence with verified performance.'
-        : 'Streamline technical evaluation with deterministic reproduction pipelines and verified performance baselines.';
+        ? 'Zero-overhead Spring Boot failure detection, sanitized stack trace capture, and deterministic HTTP request replay.'
+        : 'Enterprise-grade microservice observability, team access control, and automated failure detection across distributed environments.';
 
     return Container(
       decoration: const BoxDecoration(
@@ -184,9 +185,11 @@ class _SplitAuthCardState extends State<SplitAuthCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top Tag: PLATFORM with Divider
+                // Top Tag: Official EventDock Logo & Badge with Divider
                 Row(
                   children: [
+                    const EventDockLogo(height: 28, fontSize: 16, isDark: true),
+                    const SizedBox(width: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
@@ -207,7 +210,7 @@ class _SplitAuthCardState extends State<SplitAuthCard> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Container(
                         height: 1,

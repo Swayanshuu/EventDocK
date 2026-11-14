@@ -87,7 +87,7 @@ void main() {
 
       // Check left visual card
       expect(find.text('EVENTDOCK PLATFORM'), findsOneWidget);
-      expect(find.textContaining('Prove Your Skills'), findsOneWidget);
+      expect(find.textContaining('Detect Failures'), findsOneWidget);
 
       // Check right form card
       expect(find.text('Welcome Back'), findsOneWidget);
@@ -125,7 +125,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check headline updated to Organisation quote
-      expect(find.textContaining('Hire Verified Talent'), findsOneWidget);
+      expect(find.textContaining('Microservice Telemetry'), findsOneWidget);
 
       // Check input label updated to Work Email
       expect(find.text('Work Email Address'), findsOneWidget);

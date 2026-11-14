@@ -3,17 +3,20 @@ import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
 
 /// Reusable EventDock Logo Component
-/// Displays the official wordmark asset with seamless fallback to high-fidelity typographic wordmark.
+/// Displays EventDock-LOGO-BLACK for light theme and EventDock-LOGO-WHITE for dark mode,
+/// with seamless fallback to high-fidelity typographic wordmark.
 class EventDockLogo extends StatelessWidget {
   final double height;
   final double fontSize;
   final bool forceText;
+  final bool? isDark;
 
   const EventDockLogo({
     super.key,
     this.height = 32,
     this.fontSize = 20,
     this.forceText = false,
+    this.isDark,
   });
 
   @override
@@ -21,6 +24,11 @@ class EventDockLogo extends StatelessWidget {
     if (forceText) {
       return EventDockWordmark(fontSize: fontSize);
     }
+
+    final effectiveIsDark = isDark ?? (Theme.of(context).brightness == Brightness.dark);
+    final logoPath = effectiveIsDark
+        ? 'assets/EventDock-LOGO-WHITE.png'
+        : 'assets/EventDock-LOGO-BLACK.png';
 
     return Semantics(
       label: 'EventDock',
@@ -34,7 +42,7 @@ class EventDockLogo extends StatelessWidget {
             child: Text('EventDock', style: TextStyle(color: Colors.transparent, fontSize: 0.01)),
           ),
           Image.asset(
-            'assets/EventDocK-removebg-preview.png',
+            logoPath,
             height: height,
             fit: BoxFit.contain,
             filterQuality: FilterQuality.high,

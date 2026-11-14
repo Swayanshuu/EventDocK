@@ -3,6 +3,7 @@ import 'package:eventdock_dashboard/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import '../models/auth_state.dart';
 import '../services/auth_service.dart';
+import 'common_widgets.dart';
 import 'role_selector.dart';
 
 class AuthForm extends StatefulWidget {
@@ -251,46 +252,12 @@ class _AuthFormState extends State<AuthForm> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 1. Header with Logo & Typography
-              Row(
-                children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color: AppTheme.heroOrange,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: const Color(0xFFE5E7EB),
-                        width: 1,
-                      ),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Image.asset(
-                      'assets/auth_mascot.jpg',
-                      fit: BoxFit.cover,
-                      errorBuilder: (ctx, err, stack) => const Center(
-                        child: Icon(
-                          Icons.radar_rounded,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'EventDock',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF111827),
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ],
+              // 1. Header with Official EventDock Logo
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: EventDockLogo(height: 36, fontSize: 20),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               Text(
                 isSignIn
@@ -298,10 +265,10 @@ class _AuthFormState extends State<AuthForm> {
                     : isSignUp
                     ? 'Create Your Account'
                     : 'Reset Password',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF111827),
+                  color: AppTheme.textPrimary,
                   letterSpacing: -0.7,
                   height: 1.15,
                 ),
@@ -309,13 +276,13 @@ class _AuthFormState extends State<AuthForm> {
               const SizedBox(height: 4),
               Text(
                 isSignIn
-                    ? 'Authenticate to access deterministic benchmarking and telemetry.'
+                    ? 'Authenticate to inspect microservice telemetry, diagnostic traces, and API keys.'
                     : isSignUp
-                    ? 'Join the engineering platform for verified teams and developers.'
-                    : 'Enter your email to receive recovery instructions.',
-                style: const TextStyle(
+                    ? 'Join EventDock to detect API failures and replay requests with zero latency overhead.'
+                    : 'Enter your account email to receive secure recovery instructions.',
+                style: TextStyle(
                   fontSize: 13,
-                  color: Color(0xFF6B7280),
+                  color: AppTheme.textMuted,
                   height: 1.4,
                 ),
               ),
@@ -334,23 +301,23 @@ class _AuthFormState extends State<AuthForm> {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFEF2F2),
+                    color: AppTheme.isDark ? const Color(0xFF2B1214) : const Color(0xFFFEF2F2),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFFCA5A5)),
+                    border: Border.all(color: AppTheme.isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFCA5A5)),
                   ),
                   child: Row(
                     children: [
                       const Icon(
                         Icons.lock_clock_rounded,
-                        color: Color(0xFFDC2626),
+                        color: Color(0xFFEF4444),
                         size: 16,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           'Security Lockout: Rate limit exceeded. Try again in ${_lockoutRemainingSeconds}s.',
-                          style: const TextStyle(
-                            color: Color(0xFF991B1B),
+                          style: TextStyle(
+                            color: AppTheme.isDark ? const Color(0xFFFCA5A5) : const Color(0xFF991B1B),
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -369,24 +336,24 @@ class _AuthFormState extends State<AuthForm> {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFEF2F2),
+                    color: AppTheme.isDark ? const Color(0xFF2B1214) : const Color(0xFFFEF2F2),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFFCA5A5)),
+                    border: Border.all(color: AppTheme.isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFCA5A5)),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Icon(
                         Icons.error_outline_rounded,
-                        color: Color(0xFFDC2626),
+                        color: Color(0xFFEF4444),
                         size: 16,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           _errorMessage!,
-                          style: const TextStyle(
-                            color: Color(0xFF991B1B),
+                          style: TextStyle(
+                            color: AppTheme.isDark ? const Color(0xFFFCA5A5) : const Color(0xFF991B1B),
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -405,23 +372,23 @@ class _AuthFormState extends State<AuthForm> {
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFECFDF5),
+                    color: AppTheme.isDark ? const Color(0xFF063A29) : const Color(0xFFECFDF5),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF6EE7B7)),
+                    border: Border.all(color: AppTheme.isDark ? const Color(0xFF047857) : const Color(0xFF6EE7B7)),
                   ),
                   child: Row(
                     children: [
                       const Icon(
                         Icons.check_circle_outline_rounded,
-                        color: Color(0xFF059669),
+                        color: Color(0xFF10B981),
                         size: 16,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           _successMessage!,
-                          style: const TextStyle(
-                            color: Color(0xFF065F46),
+                          style: TextStyle(
+                            color: AppTheme.isDark ? const Color(0xFFA7F3D0) : const Color(0xFF065F46),
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -582,14 +549,14 @@ class _AuthFormState extends State<AuthForm> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              side: const BorderSide(color: Color(0xFFD1D5DB)),
+                              side: BorderSide(color: AppTheme.cardBorder),
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Text(
+                          Text(
                             'Remember me',
                             style: TextStyle(
-                              color: Color(0xFF4B5563),
+                              color: AppTheme.textMuted,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -676,9 +643,9 @@ class _AuthFormState extends State<AuthForm> {
                           : isSignUp
                           ? 'Already have an account? '
                           : 'Remembered your password? ',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF6B7280),
+                        color: AppTheme.textMuted,
                       ),
                     ),
                     TextButton(
@@ -731,10 +698,10 @@ class _AuthFormState extends State<AuthForm> {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF374151),
+            color: AppTheme.textPrimary,
           ),
         ),
         const SizedBox(height: 6),
@@ -755,15 +722,15 @@ class _AuthFormState extends State<AuthForm> {
                 onSubmitted(val);
               }
             },
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF111827),
+              color: AppTheme.textPrimary,
             ),
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: const TextStyle(
-                color: Color(0xFF9CA3AF),
+              hintStyle: TextStyle(
+                color: AppTheme.textSubtle,
                 fontSize: 13,
                 fontWeight: FontWeight.w400,
               ),
@@ -772,9 +739,9 @@ class _AuthFormState extends State<AuthForm> {
                 vertical: 13,
               ),
               filled: true,
-              fillColor: const Color(0xFFFAFAFA),
+              fillColor: AppTheme.cardSecondary,
               prefixIcon: icon != null
-                  ? Icon(icon, size: 17, color: const Color(0xFF9CA3AF))
+                  ? Icon(icon, size: 17, color: AppTheme.textSubtle)
                   : null,
               suffixIcon: isPassword
                   ? IconButton(
@@ -783,7 +750,7 @@ class _AuthFormState extends State<AuthForm> {
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
                         size: 17,
-                        color: const Color(0xFF9CA3AF),
+                        color: AppTheme.textSubtle,
                       ),
                       splashColor: Colors.transparent,
                       highlightColor: Colors.transparent,
@@ -792,15 +759,15 @@ class _AuthFormState extends State<AuthForm> {
                   : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: Color(0xFFE5E7EB),
+                borderSide: BorderSide(
+                  color: AppTheme.cardBorder,
                   width: 1,
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: Color(0xFFE5E7EB),
+                borderSide: BorderSide(
+                  color: AppTheme.cardBorder,
                   width: 1,
                 ),
               ),
@@ -829,10 +796,10 @@ class _AuthFormState extends State<AuthForm> {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF374151),
+            color: AppTheme.textPrimary,
           ),
         ),
         const SizedBox(height: 6),
@@ -840,30 +807,30 @@ class _AuthFormState extends State<AuthForm> {
           height: 44,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFFFAFAFA),
+            color: AppTheme.cardSecondary,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+            border: Border.all(color: AppTheme.cardBorder, width: 1),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<T>(
               value: value,
               isExpanded: true,
-              dropdownColor: Colors.white,
+              dropdownColor: AppTheme.card,
               borderRadius: BorderRadius.circular(12),
-              icon: const Icon(
+              icon: Icon(
                 Icons.keyboard_arrow_down_rounded,
                 size: 18,
-                color: Color(0xFF6B7280),
+                color: AppTheme.textMuted,
               ),
               items: items.map((item) {
                 return DropdownMenuItem<T>(
                   value: item,
                   child: Text(
                     item.toString(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF111827),
+                      color: AppTheme.textPrimary,
                     ),
                   ),
                 );
@@ -880,9 +847,9 @@ class _AuthFormState extends State<AuthForm> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
+        color: AppTheme.cardSecondary,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: AppTheme.cardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -890,12 +857,12 @@ class _AuthFormState extends State<AuthForm> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Password requirements:',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF4B5563),
+                  color: AppTheme.textMuted,
                 ),
               ),
               Text(
@@ -904,8 +871,8 @@ class _AuthFormState extends State<AuthForm> {
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
                   color: _passwordValidation.isValid
-                      ? const Color(0xFF059669)
-                      : const Color(0xFF9CA3AF),
+                      ? (AppTheme.isDark ? const Color(0xFF34D399) : const Color(0xFF059669))
+                      : AppTheme.textSubtle,
                 ),
               ),
             ],
@@ -968,8 +935,8 @@ class _AuthFormState extends State<AuthForm> {
               : Icons.radio_button_unchecked_rounded,
           size: 13,
           color: isSatisfied
-              ? const Color(0xFF10B981)
-              : const Color(0xFF9CA3AF),
+              ? (AppTheme.isDark ? const Color(0xFF34D399) : const Color(0xFF10B981))
+              : AppTheme.textSubtle,
         ),
         const SizedBox(width: 6),
         Text(
@@ -978,8 +945,8 @@ class _AuthFormState extends State<AuthForm> {
             fontSize: 11,
             fontWeight: isSatisfied ? FontWeight.w600 : FontWeight.w400,
             color: isSatisfied
-                ? const Color(0xFF065F46)
-                : const Color(0xFF6B7280),
+                ? (AppTheme.isDark ? const Color(0xFFA7F3D0) : const Color(0xFF065F46))
+                : AppTheme.textMuted,
           ),
         ),
       ],

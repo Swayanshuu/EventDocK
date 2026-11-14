@@ -310,6 +310,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
                   child: EventDockLogo(
                     height: isMobile ? 32 : 42,
                     fontSize: isMobile ? 20 : 26,
+                    isDark: true,
                   ),
                 ),
               ),
@@ -1101,6 +1102,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
                       child: EventDockLogo(
                         height: 38,
                         fontSize: 22,
+                        isDark: true,
                       ),
                     ),
                   ),
@@ -1171,6 +1173,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
                       child: EventDockLogo(
                         height: 44,
                         fontSize: 26,
+                        isDark: true,
                       ),
                     ),
                   ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/project.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import 'common_widgets.dart';
 
 class AppTopNav extends StatelessWidget {
   final Project project;
@@ -41,46 +42,9 @@ class AppTopNav extends StatelessWidget {
           // Left: Brand Logo & Project Switcher Dropdown
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppTheme.card,
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: AppTheme.cardBorder),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 22,
-                      height: 22,
-                      decoration: BoxDecoration(
-                        color: AppTheme.heroCoral,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.insights,
-                          color: Colors.white,
-                          size: 13,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'EventDock',
-                      style: TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              const EventDockLogo(height: 26, fontSize: 15),
 
-              const SizedBox(width: 10),
+              const SizedBox(width: 14),
               PopupMenuButton<Project>(
                 tooltip: 'Switch project',
                 color: AppTheme.card,

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eventdock_dashboard/main.dart';
 import 'package:eventdock_dashboard/services/auth_service.dart';
 import 'package:eventdock_dashboard/theme/app_theme.dart';
+import 'package:eventdock_dashboard/widgets/common_widgets.dart';
 
 void main() {
   group('Dual Theme System Tests (Black & Orange vs. White & Orange)', () {
@@ -95,6 +96,38 @@ void main() {
       // Verify Scaffold background is matte black in Dark Mode
       final darkScaffold = tester.widget<Scaffold>(find.byType(Scaffold).first);
       expect(darkScaffold.backgroundColor, equals(const Color(0xFF090A0D)));
+    });
+
+    testWidgets('5. EventDockLogo renders EventDock-LOGO-BLACK for light theme and EventDock-LOGO-WHITE for dark mode', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.light,
+          home: const Scaffold(body: EventDockLogo()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final lightImageFinder = find.byType(Image);
+      expect(lightImageFinder, findsOneWidget);
+      final lightImage = tester.widget<Image>(lightImageFinder);
+      expect((lightImage.image as AssetImage).assetName, 'assets/EventDock-LOGO-BLACK.png');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.dark,
+          home: const Scaffold(body: EventDockLogo()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final darkImageFinder = find.byType(Image);
+      expect(darkImageFinder, findsOneWidget);
+      final darkImage = tester.widget<Image>(darkImageFinder);
+      expect((darkImage.image as AssetImage).assetName, 'assets/EventDock-LOGO-WHITE.png');
     });
   });
 }

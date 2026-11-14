@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/project.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import 'common_widgets.dart';
 
 class AppSidebar extends StatelessWidget {
   final Project project;
@@ -79,39 +80,10 @@ class AppSidebar extends StatelessWidget {
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: AppTheme.heroOrange,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.radar_rounded,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'EventDock',
-                                style: TextStyle(
-                                  color: AppTheme.textPrimary,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.4,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
+                      const Expanded(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: EventDockLogo(height: 28, fontSize: 16),
                         ),
                       ),
                       Tooltip(
