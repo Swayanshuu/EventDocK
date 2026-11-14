@@ -5,6 +5,7 @@ import '../models/diagnostic_event.dart';
 import '../models/project.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/error_state_card.dart';
 import 'event_detail_modal.dart';
 import 'replay_modal.dart';
 
@@ -25,6 +26,7 @@ class DashboardOverviewView extends StatefulWidget {
 class _DashboardOverviewViewState extends State<DashboardOverviewView>
     with SingleTickerProviderStateMixin {
   bool _isLoading = true;
+  String? _error;
   List<DiagnosticEventSummary> _events = [];
   int _selectedTimeframeIndex = 4; // '1Y' default
   final List<String> _timeframes = ['1D', '1W', '1M', '3M', '1Y', 'All'];
@@ -62,7 +64,10 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
   }
 
   Future<void> _loadProjectEvents() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
     try {
       final res = await ApiService().getEvents(widget.project.id);
       final list = (res['events'] as List<DiagnosticEventSummary>?) ?? [];
@@ -73,9 +78,12 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
         });
         _chartAnimController.forward(from: 0.0);
       }
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _error = e.toString().replaceFirst('Exception: ', '');
+          _isLoading = false;
+        });
       }
     }
   }
@@ -168,6 +176,15 @@ class _DashboardOverviewViewState extends State<DashboardOverviewView>
               ),
             ],
           ),
+
+          if (_error != null) ...[
+            const SizedBox(height: 16),
+            ErrorStateCard(
+              title: 'Unable to load real-time failure telemetry',
+              rawError: _error!,
+              onRetry: _loadProjectEvents,
+            ),
+          ],
 
           const SizedBox(height: 20),
 

@@ -15,7 +15,7 @@ import java.util.Map;
  * load balancers, and external uptime monitors.
  */
 @RestController
-@RequestMapping("/health")
+@RequestMapping({"/health", "/api/v1/health"})
 @Tag(name = "Health", description = "Health and readiness verification endpoints")
 public class Health {
 

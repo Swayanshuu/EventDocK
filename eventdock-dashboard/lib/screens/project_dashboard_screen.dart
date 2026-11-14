@@ -84,9 +84,10 @@ class _ProjectDashboardScreenState extends State<ProjectDashboardScreen> {
         setState(() {
           _allProjects = list;
           if (!list.any((p) => p.id == _project.id)) {
-            _allProjects = [widget.initialProject, ...list];
+            _project = list.first;
           }
         });
+        _loadFailureCount();
       }
     } catch (_) {}
   }

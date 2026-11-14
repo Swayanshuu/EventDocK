@@ -4,6 +4,7 @@ import '../models/project.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
+import '../widgets/error_state_card.dart';
 import 'event_detail_modal.dart';
 
 class EventInboxView extends StatefulWidget {
@@ -198,17 +199,10 @@ class _EventInboxViewState extends State<EventInboxView> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _error != null
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.error_outline, size: 40, color: AppTheme.status5xx),
-                            const SizedBox(height: 12),
-                            Text(_error!, style: const TextStyle(color: AppTheme.status5xx)),
-                            const SizedBox(height: 12),
-                            ElevatedButton(onPressed: _fetchEvents, child: const Text('Retry')),
-                          ],
-                        ),
+                    ? ErrorStateCard(
+                        rawError: _error!,
+                        onRetry: _fetchEvents,
+                        title: 'Failed to load diagnostic events',
                       )
                     : _events.isEmpty
                         ? Center(

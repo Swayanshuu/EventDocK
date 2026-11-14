@@ -4,6 +4,7 @@ import '../models/api_key.dart';
 import '../models/project.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/error_state_card.dart';
 
 class ApiKeysView extends StatefulWidget {
   final Project project;
@@ -23,6 +24,14 @@ class _ApiKeysViewState extends State<ApiKeysView> {
   void initState() {
     super.initState();
     _fetchKeys();
+  }
+
+  @override
+  void didUpdateWidget(covariant ApiKeysView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.project.id != widget.project.id) {
+      _fetchKeys();
+    }
   }
 
   Future<void> _fetchKeys() async {
@@ -372,11 +381,10 @@ class _ApiKeysViewState extends State<ApiKeysView> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _error != null
-                ? Center(
-                    child: Text(
-                      _error!,
-                      style: const TextStyle(color: AppTheme.status5xx),
-                    ),
+                ? ErrorStateCard(
+                    rawError: _error!,
+                    onRetry: _fetchKeys,
+                    title: 'Failed to load API keys',
                   )
                 : _keys.isEmpty
                 ? Center(

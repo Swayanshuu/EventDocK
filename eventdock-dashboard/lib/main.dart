@@ -153,15 +153,7 @@ class DashboardRoot extends StatefulWidget {
 }
 
 class _DashboardRootState extends State<DashboardRoot> {
-  Project? _selectedProject = Project(
-    id: 'proj_linkpeer_demo',
-    name: 'LinkPeer Microservice',
-    slug: 'linkpeer-microservice',
-    description: 'Reference Spring Boot 3.4 microservice with EventDock starter embedded',
-    ownerId: 'dev_user',
-    retentionDays: 30,
-    createdAt: '2026-10-15T00:00:00Z',
-  );
+  Project? _selectedProject;
 
   @override
   void initState() {
@@ -185,17 +177,16 @@ class _DashboardRootState extends State<DashboardRoot> {
 
   Future<void> _syncProjects() async {
     if (!AuthService().isAuthenticated) return;
-    // Keep deterministic sample project for test developer environment
-    if (AuthService().userEmail == 'developer@eventdock.dev') {
-      return;
-    }
 
     try {
       final list = await ApiService().getProjects();
       if (mounted) {
         setState(() {
           if (list.isNotEmpty) {
-            _selectedProject = list.first;
+            // If currently selected project is still in list, keep it; otherwise pick first real project
+            if (_selectedProject == null || !list.any((p) => p.id == _selectedProject!.id)) {
+              _selectedProject = list.first;
+            }
           } else {
             _selectedProject = null;
           }

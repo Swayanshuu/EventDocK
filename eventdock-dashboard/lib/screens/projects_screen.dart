@@ -6,6 +6,8 @@ import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/create_project_dialog.dart';
+import '../widgets/connection_status_badge.dart';
+import '../widgets/error_state_card.dart';
 
 class ProjectsScreen extends StatefulWidget {
   final Function(Project) onSelectProject;
@@ -364,6 +366,10 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
           child: Divider(height: 1, color: AppTheme.cardBorder),
         ),
         actions: [
+          // Real Backend Connection Status Badge
+          ConnectionStatusBadge(compact: isCompact),
+          const SizedBox(width: 8),
+
           // Theme Toggle Button
           Tooltip(
             message: themeMode == ThemeMode.dark ? 'Switch to Light Mode (White & Orange)' : 'Switch to Dark Mode (Black & Orange)',
@@ -469,24 +475,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.heroOrange))
           : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.error_outline_rounded, color: AppTheme.status5xx, size: 36),
-                      const SizedBox(height: 12),
-                      Text(_error!, style: TextStyle(color: AppTheme.textPrimary, fontSize: 14)),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadProjects,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.heroOrange,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
+              ? ErrorStateCard(
+                  rawError: _error!,
+                  onRetry: _loadProjects,
                 )
               : SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: isCompact ? 16 : 40, vertical: 28),

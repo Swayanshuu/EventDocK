@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../models/notification_item.dart';
 import '../models/project.dart';
-import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'command_palette_dialog.dart';
 import 'export_dialog.dart';
 import 'notifications_panel.dart';
+import 'connection_status_badge.dart';
 
 class DashboardTopBar extends StatelessWidget {
   final Project project;
@@ -403,47 +403,10 @@ class DashboardTopBar extends StatelessWidget {
                 },
               ),
 
-              // Real Backend Connection Status Pill
+              // Real Backend Connection Status Badge
               if (isDesktop) ...[
                 const SizedBox(width: 8),
-                Tooltip(
-                  message: 'Target API: ${ApiService().baseUrl} (${ApiService().isConnected ? (ApiService().isUsingLocalhost ? "Connected to Localhost:8080" : "Online") : "Connecting..."})',
-                  child: Container(
-                    height: 38,
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                      color: AppTheme.cardSecondary,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppTheme.cardBorder),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: ApiService().isConnected ? AppTheme.status2xx : AppTheme.status4xx,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        if (screenWidth >= 1400) ...[
-                          const SizedBox(width: 6),
-                          Text(
-                            ApiService().isConnected
-                                ? (ApiService().isUsingLocalhost ? 'Localhost :8080' : 'Live API')
-                                : 'Connecting...',
-                            style: TextStyle(
-                              color: AppTheme.textMuted,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
+                ConnectionStatusBadge(compact: screenWidth < 1200),
               ],
 
               const SizedBox(width: 10),

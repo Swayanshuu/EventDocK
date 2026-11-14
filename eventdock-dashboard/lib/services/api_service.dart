@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import '../models/project.dart';
 import '../models/api_key.dart';
@@ -6,6 +8,47 @@ import '../models/diagnostic_event.dart';
 import '../models/replay_attempt.dart';
 import 'auth_service.dart';
 import 'waitlist_service.dart';
+
+/// Connection status model describing active backend connectivity
+class ConnectionStatus {
+  final bool isConnected;
+  final bool isConnecting;
+  final bool isLocalhost;
+  final String baseUrl;
+  final String statusLabel;
+  final int? latencyMs;
+  final String? lastChecked;
+
+  const ConnectionStatus({
+    required this.isConnected,
+    this.isConnecting = false,
+    required this.isLocalhost,
+    required this.baseUrl,
+    required this.statusLabel,
+    this.latencyMs,
+    this.lastChecked,
+  });
+
+  ConnectionStatus copyWith({
+    bool? isConnected,
+    bool? isConnecting,
+    bool? isLocalhost,
+    String? baseUrl,
+    String? statusLabel,
+    int? latencyMs,
+    String? lastChecked,
+  }) {
+    return ConnectionStatus(
+      isConnected: isConnected ?? this.isConnected,
+      isConnecting: isConnecting ?? this.isConnecting,
+      isLocalhost: isLocalhost ?? this.isLocalhost,
+      baseUrl: baseUrl ?? this.baseUrl,
+      statusLabel: statusLabel ?? this.statusLabel,
+      latencyMs: latencyMs ?? this.latencyMs,
+      lastChecked: lastChecked ?? this.lastChecked,
+    );
+  }
+}
 
 /// Service for communicating with the real EventDock Spring Boot Backend API.
 /// Connects to PostgreSQL via REST endpoints for real projects, real API keys,
@@ -26,6 +69,18 @@ class ApiService {
   static const String _defaultDomainUrl = 'https://api.eventdock.swynx.dev/api/v1';
   static const String _localUrl = 'http://localhost:8080/api/v1';
   static const String _localIpUrl = 'http://127.0.0.1:8080/api/v1';
+
+  /// Reactive connection status notifier for live UI updates
+  static final ValueNotifier<ConnectionStatus> statusNotifier =
+      ValueNotifier<ConnectionStatus>(
+    const ConnectionStatus(
+      isConnected: true,
+      isConnecting: false,
+      isLocalhost: false,
+      baseUrl: _defaultDomainUrl,
+      statusLabel: 'Live API',
+    ),
+  );
 
   /// Candidate API endpoints tried in priority order.
   /// If the cloud domain is unreachable or failing, ApiService automatically
@@ -54,11 +109,22 @@ class ApiService {
   /// Manually force a specific base URL (e.g. for testing)
   void setBaseUrl(String url) {
     _activeBaseUrl = url.trim();
+    final isLocal = _activeBaseUrl.contains('localhost') || _activeBaseUrl.contains('127.0.0.1');
+    statusNotifier.value = statusNotifier.value.copyWith(
+      baseUrl: _activeBaseUrl,
+      isLocalhost: isLocal,
+      statusLabel: isLocal ? 'Localhost :8080' : 'Live API',
+    );
   }
 
   /// Reset active base URL to default
   void resetBaseUrl() {
     _activeBaseUrl = '';
+    statusNotifier.value = statusNotifier.value.copyWith(
+      baseUrl: _defaultDomainUrl,
+      isLocalhost: false,
+      statusLabel: 'Live API',
+    );
   }
 
   /// Whether the real EventDock API is reachable
@@ -88,6 +154,16 @@ class ApiService {
     try {
       final res = await sendRequest(initial);
       _isConnected = true;
+      final isLocal = initial.contains('localhost') || initial.contains('127.0.0.1');
+      if (!statusNotifier.value.isConnected || statusNotifier.value.baseUrl != initial) {
+        statusNotifier.value = ConnectionStatus(
+          isConnected: true,
+          isConnecting: false,
+          isLocalhost: isLocal,
+          baseUrl: initial,
+          statusLabel: isLocal ? 'Localhost :8080' : 'Live API',
+        );
+      }
       return res;
     } catch (firstErr) {
       if (_isTestEnvironment()) rethrow;
@@ -99,12 +175,27 @@ class ApiService {
           final res = await sendRequest(alt);
           _activeBaseUrl = alt;
           _isConnected = true;
+          final isLocal = alt.contains('localhost') || alt.contains('127.0.0.1');
+          statusNotifier.value = ConnectionStatus(
+            isConnected: true,
+            isConnecting: false,
+            isLocalhost: isLocal,
+            baseUrl: alt,
+            statusLabel: isLocal ? 'Localhost :8080' : 'Live API',
+          );
           return res;
         } catch (_) {
           // Continue to next candidate
         }
       }
       _isConnected = false;
+      statusNotifier.value = ConnectionStatus(
+        isConnected: false,
+        isConnecting: false,
+        isLocalhost: baseUrl.contains('localhost') || baseUrl.contains('127.0.0.1'),
+        baseUrl: baseUrl,
+        statusLabel: 'Offline',
+      );
       rethrow;
     }
   }
@@ -131,32 +222,127 @@ class ApiService {
     return '$fallback (HTTP ${res.statusCode})';
   }
 
+  /// Measures live roundtrip ping to backend endpoint in milliseconds
+  Future<ConnectionStatus> ping({String? targetUrl}) async {
+    final target = targetUrl ?? baseUrl;
+    final stopwatch = Stopwatch()..start();
+    statusNotifier.value = statusNotifier.value.copyWith(isConnecting: true);
+
+    final rootUrl = target.replaceAll('/api/v1', '');
+    for (final testUrl in ['$target/health', '$rootUrl/health']) {
+      try {
+        final res = await client
+            .get(Uri.parse(testUrl))
+            .timeout(const Duration(milliseconds: 2500));
+        stopwatch.stop();
+        if (res.statusCode == 200 || res.statusCode == 401) {
+          final isLocal = target.contains('localhost') || target.contains('127.0.0.1');
+          final status = ConnectionStatus(
+            isConnected: true,
+            isConnecting: false,
+            isLocalhost: isLocal,
+            baseUrl: target,
+            statusLabel: isLocal ? 'Localhost :8080' : 'Live API',
+            latencyMs: stopwatch.elapsedMilliseconds,
+            lastChecked: DateTime.now().toIso8601String(),
+          );
+          _activeBaseUrl = target;
+          _isConnected = true;
+          statusNotifier.value = status;
+          return status;
+        }
+      } catch (_) {}
+    }
+
+    try {
+      final res2 = await client
+          .get(Uri.parse('$target/projects'), headers: _headers())
+          .timeout(const Duration(milliseconds: 2500));
+      stopwatch.stop();
+      if (res2.statusCode == 200 || res2.statusCode == 401) {
+        final isLocal = target.contains('localhost') || target.contains('127.0.0.1');
+        final status = ConnectionStatus(
+          isConnected: true,
+          isConnecting: false,
+          isLocalhost: isLocal,
+          baseUrl: target,
+          statusLabel: isLocal ? 'Localhost :8080' : 'Live API',
+          latencyMs: stopwatch.elapsedMilliseconds,
+          lastChecked: DateTime.now().toIso8601String(),
+        );
+        _activeBaseUrl = target;
+        _isConnected = true;
+        statusNotifier.value = status;
+        return status;
+      }
+    } catch (_) {}
+
+    stopwatch.stop();
+    final offlineStatus = ConnectionStatus(
+      isConnected: false,
+      isConnecting: false,
+      isLocalhost: target.contains('localhost') || target.contains('127.0.0.1'),
+      baseUrl: target,
+      statusLabel: 'Offline',
+      lastChecked: DateTime.now().toIso8601String(),
+    );
+    _isConnected = false;
+    statusNotifier.value = offlineStatus;
+    return offlineStatus;
+  }
+
   /// Checks whether the real EventDock backend is reachable, trying domain then localhost
   Future<bool> checkConnection() async {
     for (final candidate in candidateUrls) {
-      try {
-        final res = await client
-            .get(Uri.parse('$candidate/health'))
-            .timeout(const Duration(milliseconds: 1800));
-        if (res.statusCode == 200 || res.statusCode == 401) {
-          _activeBaseUrl = candidate;
-          _isConnected = true;
-          return true;
-        }
-      } catch (_) {
+      final rootUrl = candidate.replaceAll('/api/v1', '');
+      for (final testUrl in ['$candidate/health', '$rootUrl/health']) {
         try {
-          final res2 = await client
-              .get(Uri.parse('$candidate/projects'), headers: _headers())
+          final res = await client
+              .get(Uri.parse(testUrl))
               .timeout(const Duration(milliseconds: 1800));
-          if (res2.statusCode == 200 || res2.statusCode == 401) {
+          if (res.statusCode == 200 || res.statusCode == 401) {
             _activeBaseUrl = candidate;
             _isConnected = true;
+            final isLocal = candidate.contains('localhost') || candidate.contains('127.0.0.1');
+            statusNotifier.value = ConnectionStatus(
+              isConnected: true,
+              isConnecting: false,
+              isLocalhost: isLocal,
+              baseUrl: candidate,
+              statusLabel: isLocal ? 'Localhost :8080' : 'Live API',
+            );
             return true;
           }
         } catch (_) {}
       }
+
+      try {
+        final res2 = await client
+            .get(Uri.parse('$candidate/projects'), headers: _headers())
+            .timeout(const Duration(milliseconds: 1800));
+        if (res2.statusCode == 200 || res2.statusCode == 401) {
+          _activeBaseUrl = candidate;
+          _isConnected = true;
+          final isLocal = candidate.contains('localhost') || candidate.contains('127.0.0.1');
+          statusNotifier.value = ConnectionStatus(
+            isConnected: true,
+            isConnecting: false,
+            isLocalhost: isLocal,
+            baseUrl: candidate,
+            statusLabel: isLocal ? 'Localhost :8080' : 'Live API',
+          );
+          return true;
+        }
+      } catch (_) {}
     }
     _isConnected = false;
+    statusNotifier.value = ConnectionStatus(
+      isConnected: false,
+      isConnecting: false,
+      isLocalhost: baseUrl.contains('localhost') || baseUrl.contains('127.0.0.1'),
+      baseUrl: baseUrl,
+      statusLabel: 'Offline',
+    );
     return false;
   }
 
@@ -179,11 +365,11 @@ class ApiService {
       } else if (res.statusCode == 401) {
         throw Exception('Unauthorized. Please sign in to view your projects.');
       } else {
-        throw Exception('Server returned ${res.statusCode}: ${res.body}');
+        throw Exception(_parseApiErrorMessage(res, 'Failed to fetch projects'));
       }
     } catch (e) {
       _isConnected = false;
-      // In offline widget test environment where developer@eventdock.dev runs flutter test without network
+      // In offline widget test environment where flutter test executes without network
       if (_isTestEnvironment()) {
         return _getTestProjects();
       }
@@ -215,8 +401,9 @@ class ApiService {
       }
     } catch (e) {
       if (_isTestEnvironment()) {
+        final ms = DateTime.now().millisecondsSinceEpoch.toString().padLeft(12, '0');
         return Project(
-          id: 'proj_${DateTime.now().millisecondsSinceEpoch}',
+          id: '00000000-0000-0000-0000-${ms.substring(ms.length - 12)}',
           name: name,
           slug: name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '-'),
           description: description,
@@ -351,11 +538,12 @@ class ApiService {
             .map((e) => DiagnosticEventSummary.fromJson(e as Map<String, dynamic>))
             .toList();
 
+        final rawTotalPages = data['totalPages'] as int? ?? (content.isEmpty ? 1 : (content.length / size).ceil());
         _isConnected = true;
         return {
           'events': content,
           'totalElements': data['totalElements'] as int? ?? content.length,
-          'totalPages': data['totalPages'] as int? ?? (content.isEmpty ? 1 : (content.length / size).ceil()),
+          'totalPages': rawTotalPages <= 0 ? 1 : rawTotalPages,
           'number': data['number'] as int? ?? page,
         };
       } else {
@@ -447,13 +635,19 @@ class ApiService {
   // Test Environment Helpers (Only used when flutter test executes without network)
   // ==========================================
   bool _isTestEnvironment() {
-    return AuthService().userEmail == 'developer@eventdock.dev' && !_isConnected;
+    if (kIsWeb) return false;
+    try {
+      final binding = WidgetsBinding.instance;
+      return binding.runtimeType.toString().contains('Test');
+    } catch (_) {
+      return false;
+    }
   }
 
   List<Project> _getTestProjects() {
     return [
       Project(
-        id: 'proj_linkpeer_demo',
+        id: '00000000-0000-0000-0000-000000000001',
         name: 'LinkPeer Microservice',
         slug: 'linkpeer-microservice',
         description: 'Reference Spring Boot microservice',
@@ -462,7 +656,7 @@ class ApiService {
         createdAt: '2026-10-15T00:00:00Z',
       ),
       Project(
-        id: 'proj_auth_service',
+        id: '00000000-0000-0000-0000-000000000002',
         name: 'Auth Service',
         slug: 'auth-service',
         description: 'OAuth2 and session token service',
