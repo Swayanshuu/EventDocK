@@ -17,29 +17,10 @@ class RateLimiter {
   final Map<String, DateTime> _lockoutExpiry = {};
   DateTime? _lastAttemptTimestamp;
 
-  RateLimitState checkLimit(String email) {
+  RateLimitState checkLimit(String email, {bool checkBurst = false}) {
     final cleanEmail = email.trim().toLowerCase();
 
-    // 1. Device burst throttle check (min 2s between clicks)
-    if (_lastAttemptTimestamp != null) {
-      final elapsedMs = DateTime.now()
-          .difference(_lastAttemptTimestamp!)
-          .inMilliseconds;
-      if (elapsedMs < burstThrottleSeconds * 1000) {
-        final waitSeconds = ((burstThrottleSeconds * 1000 - elapsedMs) / 1000)
-            .ceil()
-            .clamp(1, 2);
-        return RateLimitState(
-          isLocked: true,
-          remainingSeconds: waitSeconds,
-          failedAttempts: _failedAttempts[cleanEmail] ?? 0,
-          message:
-              'Throttle active: please wait $waitSeconds second${waitSeconds > 1 ? "s" : ""} before retrying.',
-        );
-      }
-    }
-
-    // 2. Account Lockout check (5 failed attempts -> 300s lockout)
+    // 1. Account Lockout check (5 failed attempts -> 300s lockout)
     final expiry = _lockoutExpiry[cleanEmail];
     if (expiry != null) {
       final remaining = expiry.difference(DateTime.now()).inSeconds;
@@ -54,6 +35,25 @@ class RateLimiter {
       } else {
         _lockoutExpiry.remove(cleanEmail);
         _failedAttempts.remove(cleanEmail);
+      }
+    }
+
+    // 2. Device burst throttle check (min 2s between clicks, only when submitting)
+    if (checkBurst && _lastAttemptTimestamp != null) {
+      final elapsedMs = DateTime.now()
+          .difference(_lastAttemptTimestamp!)
+          .inMilliseconds;
+      if (elapsedMs < burstThrottleSeconds * 1000) {
+        final waitSeconds = ((burstThrottleSeconds * 1000 - elapsedMs) / 1000)
+            .ceil()
+            .clamp(1, 2);
+        return RateLimitState(
+          isLocked: true,
+          remainingSeconds: waitSeconds,
+          failedAttempts: _failedAttempts[cleanEmail] ?? 0,
+          message:
+              'Throttle active: please wait $waitSeconds second${waitSeconds > 1 ? "s" : ""} before retrying.',
+        );
       }
     }
 
@@ -146,7 +146,8 @@ class AuthService extends ChangeNotifier {
   final String firebaseProjectId = 'eventdock-5cc21';
   final String firebaseAuthDomain = 'eventdock-5cc21.firebaseapp.com';
 
-  RateLimitState checkRateLimit(String email) => _rateLimiter.checkLimit(email);
+  RateLimitState checkRateLimit(String email, {bool checkBurst = false}) =>
+      _rateLimiter.checkLimit(email, checkBurst: checkBurst);
 
   void updateProfile({String? fullName, String? roleTitle, AuthRole? role}) {
     if (fullName != null && fullName.trim().isNotEmpty) {
@@ -257,6 +258,10 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  static final RegExp _emailRegex = RegExp(
+    r'^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
+  );
+
   /// Parses Firebase Identity Toolkit REST error payloads into human-friendly messages
   String _parseFirebaseError(String responseBody, String defaultMessage) {
     try {
@@ -264,6 +269,9 @@ class AuthService extends ChangeNotifier {
       final error = data?['error'] as Map<String, dynamic>?;
       final rawMsg = error?['message'] as String? ?? '';
 
+      if (rawMsg.contains('INVALID_EMAIL')) {
+        return 'Please enter a valid email address (e.g. name@domain.com).';
+      }
       if (rawMsg.contains('EMAIL_EXISTS')) {
         return 'This email address is already registered. Please sign in instead.';
       }
@@ -307,8 +315,8 @@ class AuthService extends ChangeNotifier {
     int? cliPort,
   }) async {
     final cleanEmail = email.trim();
-    if (cleanEmail.isEmpty || !cleanEmail.contains('@')) {
-      throw Exception('Please provide a valid work or personal email address.');
+    if (cleanEmail.isEmpty || !_emailRegex.hasMatch(cleanEmail)) {
+      throw Exception('Please provide a valid work or personal email address (e.g. name@domain.com).');
     }
 
     final validator = PasswordValidation.validate(password);
@@ -319,7 +327,7 @@ class AuthService extends ChangeNotifier {
     }
 
     // Rate limit check
-    final rateState = _rateLimiter.checkLimit(cleanEmail);
+    final rateState = _rateLimiter.checkLimit(cleanEmail, checkBurst: true);
     if (rateState.isLocked) {
       throw Exception(rateState.message ?? 'Too many requests. Please wait.');
     }
@@ -445,15 +453,15 @@ class AuthService extends ChangeNotifier {
     int? cliPort,
   }) async {
     final cleanEmail = email.trim();
-    if (cleanEmail.isEmpty || !cleanEmail.contains('@')) {
-      throw Exception('Please enter a valid email address.');
+    if (cleanEmail.isEmpty || !_emailRegex.hasMatch(cleanEmail)) {
+      throw Exception('Please enter a valid email address (e.g. name@domain.com).');
     }
     if (password.isEmpty) {
       throw Exception('Please enter your password.');
     }
 
     // Rate Limit & Brute-Force Check
-    final rateState = _rateLimiter.checkLimit(cleanEmail);
+    final rateState = _rateLimiter.checkLimit(cleanEmail, checkBurst: true);
     if (rateState.isLocked) {
       throw Exception(
         rateState.message ?? 'Locked out due to security rate limit.',
@@ -638,8 +646,8 @@ class AuthService extends ChangeNotifier {
   /// Dispatches password reset email via Firebase Auth REST API
   Future<void> sendPasswordReset(String email) async {
     final clean = email.trim();
-    if (clean.isEmpty || !clean.contains('@')) {
-      throw Exception('Please enter a valid email address.');
+    if (clean.isEmpty || !_emailRegex.hasMatch(clean)) {
+      throw Exception('Please enter a valid email address (e.g. name@domain.com).');
     }
 
     if (clean == 'developer@eventdock.dev') {

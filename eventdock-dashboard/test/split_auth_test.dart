@@ -212,5 +212,112 @@ void main() {
       // Success message appears
       expect(find.textContaining('Password reset instructions have been sent'), findsOneWidget);
     });
+
+    testWidgets('8. Mode switcher tabs toggle between Sign In and Create Account modes', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SplitAuthCard(
+              onAuthSuccess: () {},
+              initialRole: AuthRole.individual,
+              initialMode: AuthMode.signIn,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Starts in Sign In mode
+      expect(find.text('Welcome Back'), findsOneWidget);
+      expect(find.text('Sign In to EventDock'), findsOneWidget);
+
+      // Switch to Create Account via top tab
+      await tester.tap(find.text('Create Account').first);
+      await tester.pumpAndSettle();
+
+      // Heading and button update to Sign Up
+      expect(find.text('Create Your Account'), findsOneWidget);
+      expect(find.text('Create Verified Account'), findsOneWidget);
+      expect(find.text('Full Name'), findsOneWidget);
+
+      // Switch back to Sign In
+      await tester.tap(find.text('Sign In').first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Welcome Back'), findsOneWidget);
+      expect(find.text('Sign In to EventDock'), findsOneWidget);
+    });
+
+    testWidgets('9. Invalid email like Shibu@05 displays immediate friendly validation error without rate-limiting', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SplitAuthCard(
+              onAuthSuccess: () {},
+              initialRole: AuthRole.individual,
+              initialMode: AuthMode.signIn,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Enter invalid email format Shibu@05
+      await tester.enterText(find.byType(TextField).at(0), 'Shibu@05');
+      await tester.enterText(find.byType(TextField).at(1), 'SecretPass123!');
+      await tester.tap(find.text('Sign In to EventDock'));
+      await tester.pumpAndSettle();
+
+      // Should show clean friendly validation error, not rate limit lockout
+      expect(find.textContaining('Please enter a valid email address'), findsOneWidget);
+      expect(find.textContaining('Security Lockout: Rate limit exceeded'), findsNothing);
+    });
+
+    testWidgets('10. Quick Demo Sign-In triggers immediate authentication', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      bool authSuccessCalled = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SplitAuthCard(
+              onAuthSuccess: () {
+                authSuccessCalled = true;
+              },
+              initialRole: AuthRole.individual,
+              initialMode: AuthMode.signIn,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap Quick Demo Sign-In button
+      final demoBtn = find.text('Quick Demo Sign-In (developer@eventdock.dev)');
+      expect(demoBtn, findsOneWidget);
+      await tester.tap(demoBtn);
+      await tester.pumpAndSettle();
+
+      expect(authSuccessCalled, isTrue);
+    });
   });
 }

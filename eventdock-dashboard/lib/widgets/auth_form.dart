@@ -109,8 +109,9 @@ class _AuthFormState extends State<AuthForm> {
     final email = _emailController.text.trim();
     if (email.isEmpty) return;
 
-    final limit = AuthService().checkRateLimit(email);
-    if (limit.isLocked && limit.remainingSeconds > 0) {
+    // Only check actual brute-force account lockout (>5s), NEVER burst throttle on typing
+    final limit = AuthService().checkRateLimit(email, checkBurst: false);
+    if (limit.isLocked && limit.remainingSeconds > 5) {
       _startCountdown(limit.remainingSeconds);
     }
   }
@@ -149,8 +150,50 @@ class _AuthFormState extends State<AuthForm> {
       _successMessage = null;
     });
 
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
+    );
+
+    if (email.isEmpty) {
+      setState(() => _errorMessage = 'Please enter your email address.');
+      return;
+    }
+    if (!emailRegex.hasMatch(email)) {
+      setState(() => _errorMessage = 'Please enter a valid email address with a domain (e.g. name@domain.com).');
+      return;
+    }
+
+    if (_mode == AuthMode.signUp) {
+      final name = _role == AuthRole.individual
+          ? _nameController.text.trim()
+          : _leadNameController.text.trim();
+
+      if (name.contains('@') && name.contains('.')) {
+        setState(() => _errorMessage = 'It looks like you typed an email address into the Name field. Please check your entries.');
+        return;
+      }
+      if (name.isEmpty) {
+        setState(() => _errorMessage = 'Please enter your full name.');
+        return;
+      }
+      if (_role == AuthRole.organisation &&
+          _orgNameController.text.trim().isEmpty) {
+        setState(() => _errorMessage = 'Please enter your organization or company name.');
+        return;
+      }
+      if (!_passwordValidation.isValid) {
+        setState(() => _errorMessage = 'Please fulfill all password security requirements.');
+        return;
+      }
+    } else if (_mode == AuthMode.signIn) {
+      if (password.isEmpty) {
+        setState(() => _errorMessage = 'Please enter your password.');
+        return;
+      }
+    }
+
     // Check rate limit before dispatching
-    final limit = AuthService().checkRateLimit(email);
+    final limit = AuthService().checkRateLimit(email, checkBurst: true);
     if (limit.isLocked) {
       _startCountdown(limit.remainingSeconds);
       setState(() {
@@ -171,22 +214,9 @@ class _AuthFormState extends State<AuthForm> {
         );
         widget.onAuthSuccess();
       } else if (_mode == AuthMode.signUp) {
-        if (!_passwordValidation.isValid) {
-          throw Exception('Please fulfill all password security requirements.');
-        }
-
         final name = _role == AuthRole.individual
             ? _nameController.text.trim()
             : _leadNameController.text.trim();
-
-        if (name.isEmpty) {
-          throw Exception('Please enter your full name.');
-        }
-
-        if (_role == AuthRole.organisation &&
-            _orgNameController.text.trim().isEmpty) {
-          throw Exception('Please enter your organization or company name.');
-        }
 
         await AuthService().createUserWithEmailAndPassword(
           email: email,
@@ -208,8 +238,8 @@ class _AuthFormState extends State<AuthForm> {
       }
     } catch (e) {
       final msg = e.toString().replaceFirst('Exception: ', '');
-      final limitAfter = AuthService().checkRateLimit(email);
-      if (limitAfter.isLocked && limitAfter.remainingSeconds > 0) {
+      final limitAfter = AuthService().checkRateLimit(email, checkBurst: false);
+      if (limitAfter.isLocked && limitAfter.remainingSeconds > 5) {
         _startCountdown(limitAfter.remainingSeconds);
       }
       setState(() {
@@ -287,6 +317,133 @@ class _AuthFormState extends State<AuthForm> {
                 ),
               ),
               const SizedBox(height: 18),
+
+              // Mode Switcher (Sign In vs Create Account)
+              if (_mode != AuthMode.forgotPassword) ...[
+                Container(
+                  height: 42,
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: AppTheme.cardSecondary,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppTheme.cardBorder, width: 1),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _switchMode(AuthMode.signIn),
+                          borderRadius: BorderRadius.circular(9),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            decoration: BoxDecoration(
+                              color: isSignIn
+                                  ? (AppTheme.isDark ? const Color(0xFF262936) : Colors.white)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(9),
+                              boxShadow: isSignIn
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: AppTheme.isDark ? 0.25 : 0.06),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            alignment: Alignment.center,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.login_rounded,
+                                    size: 15,
+                                    color: isSignIn ? AppTheme.heroOrange : AppTheme.textMuted,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Sign In',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: isSignIn ? FontWeight.w700 : FontWeight.w500,
+                                      color: isSignIn ? AppTheme.textPrimary : AppTheme.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => _switchMode(AuthMode.signUp),
+                          borderRadius: BorderRadius.circular(9),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            decoration: BoxDecoration(
+                              color: isSignUp
+                                  ? (AppTheme.isDark ? const Color(0xFF262936) : Colors.white)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(9),
+                              boxShadow: isSignUp
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: AppTheme.isDark ? 0.25 : 0.06),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            alignment: Alignment.center,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.person_add_outlined,
+                                    size: 15,
+                                    color: isSignUp ? AppTheme.heroOrange : AppTheme.textMuted,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Create Account',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: isSignUp ? FontWeight.w700 : FontWeight.w500,
+                                      color: isSignUp ? AppTheme.textPrimary : AppTheme.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+              if (_mode == AuthMode.forgotPassword) ...[
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () => _switchMode(AuthMode.signIn),
+                    icon: const Icon(Icons.arrow_back_rounded, size: 16),
+                    label: const Text('Back to Sign In'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppTheme.heroOrange,
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
 
               // 2. Dual-Role Segmented Selector
               RoleSelector(selectedRole: _role, onRoleChanged: _switchRole),
@@ -629,6 +786,55 @@ class _AuthFormState extends State<AuthForm> {
                         ),
                 ),
               ),
+
+              // Quick Demo Sign-In for instant evaluation
+              if (isSignIn) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                          setState(() {
+                            _isLoading = true;
+                            _errorMessage = null;
+                          });
+                          try {
+                            _emailController.text = 'developer@eventdock.dev';
+                            _passwordController.text = 'EventDock2026!';
+                            await AuthService().signInWithEmailAndPassword(
+                              email: 'developer@eventdock.dev',
+                              password: 'EventDock2026!',
+                              role: _role,
+                            );
+                            widget.onAuthSuccess();
+                          } catch (e) {
+                            setState(() {
+                              _errorMessage =
+                                  e.toString().replaceFirst('Exception: ', '');
+                            });
+                          } finally {
+                            if (mounted) setState(() => _isLoading = false);
+                          }
+                        },
+                  icon: const Icon(
+                    Icons.bolt_rounded,
+                    size: 16,
+                    color: AppTheme.heroOrange,
+                  ),
+                  label: const Text(
+                    'Quick Demo Sign-In (developer@eventdock.dev)',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.textPrimary,
+                    side: BorderSide(color: AppTheme.cardBorder),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ],
               const SizedBox(height: 22),
 
               // 6. Footer Mode Toggle
@@ -939,14 +1145,17 @@ class _AuthFormState extends State<AuthForm> {
               : AppTheme.textSubtle,
         ),
         const SizedBox(width: 6),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: isSatisfied ? FontWeight.w600 : FontWeight.w400,
-            color: isSatisfied
-                ? (AppTheme.isDark ? const Color(0xFFA7F3D0) : const Color(0xFF065F46))
-                : AppTheme.textMuted,
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isSatisfied ? FontWeight.w600 : FontWeight.w400,
+              color: isSatisfied
+                  ? (AppTheme.isDark ? const Color(0xFFA7F3D0) : const Color(0xFF065F46))
+                  : AppTheme.textMuted,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
