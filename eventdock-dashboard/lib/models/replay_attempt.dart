@@ -27,17 +27,17 @@ class ReplayAttempt {
 
   factory ReplayAttempt.fromJson(Map<String, dynamic> json) {
     return ReplayAttempt(
-      id: json['id'] as String,
-      eventId: json['eventId'] as String,
-      initiatedBy: json['initiatedBy'] as String,
-      destinationUrl: json['destinationUrl'] as String,
-      startedAt: json['startedAt'] as String? ?? '',
-      completedAt: json['completedAt'] as String?,
+      id: (json['id'] ?? '').toString(),
+      eventId: (json['eventId'] ?? '').toString(),
+      initiatedBy: (json['initiatedBy'] ?? '').toString(),
+      destinationUrl: (json['destinationUrl'] ?? '').toString(),
+      startedAt: json['startedAt']?.toString() ?? '',
+      completedAt: json['completedAt']?.toString(),
       responseStatus: (json['responseStatus'] as num?)?.toInt(),
       durationMs: (json['durationMs'] as num?)?.toInt(),
-      outcome: json['outcome'] as String? ?? 'UNKNOWN',
-      safeErrorSummary: json['safeErrorSummary'] as String?,
-      responseSnippet: json['responseSnippet'] as String?,
+      outcome: json['outcome']?.toString() ?? 'UNKNOWN',
+      safeErrorSummary: json['safeErrorSummary']?.toString(),
+      responseSnippet: json['responseSnippet']?.toString(),
     );
   }
 }

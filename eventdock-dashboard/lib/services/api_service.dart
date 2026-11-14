@@ -109,6 +109,28 @@ class ApiService {
     }
   }
 
+  String _parseApiErrorMessage(http.Response res, String fallback) {
+    try {
+      final json = jsonDecode(res.body);
+      if (json is Map<String, dynamic>) {
+        if (json['message'] != null && json['message'].toString().isNotEmpty) {
+          final msg = json['message'].toString();
+          if (json['data'] is Map<String, dynamic>) {
+            final fieldErrors = (json['data'] as Map<String, dynamic>)
+                .entries
+                .map((e) => '${e.key}: ${e.value}')
+                .join(', ');
+            if (fieldErrors.isNotEmpty) {
+              return '$msg ($fieldErrors)';
+            }
+          }
+          return msg;
+        }
+      }
+    } catch (_) {}
+    return '$fallback (HTTP ${res.statusCode})';
+  }
+
   /// Checks whether the real EventDock backend is reachable, trying domain then localhost
   Future<bool> checkConnection() async {
     for (final candidate in candidateUrls) {
@@ -189,8 +211,7 @@ class ApiService {
         _isConnected = true;
         return Project.fromJson(json['data'] as Map<String, dynamic>);
       } else {
-        final json = jsonDecode(res.body);
-        throw Exception(json['message'] ?? 'Failed to create project (HTTP ${res.statusCode})');
+        throw Exception(_parseApiErrorMessage(res, 'Failed to create project'));
       }
     } catch (e) {
       if (_isTestEnvironment()) {
@@ -226,8 +247,7 @@ class ApiService {
       final json = jsonDecode(res.body);
       return Project.fromJson(json['data'] as Map<String, dynamic>);
     } else {
-      final json = jsonDecode(res.body);
-      throw Exception(json['message'] ?? 'Failed to update project (HTTP ${res.statusCode})');
+      throw Exception(_parseApiErrorMessage(res, 'Failed to update project'));
     }
   }
 
@@ -238,7 +258,7 @@ class ApiService {
         .timeout(const Duration(seconds: 5)));
 
     if (res.statusCode != 200 && res.statusCode != 204) {
-      throw Exception('Failed to delete project (HTTP ${res.statusCode})');
+      throw Exception(_parseApiErrorMessage(res, 'Failed to delete project'));
     }
   }
 
@@ -259,7 +279,7 @@ class ApiService {
         _isConnected = true;
         return list.map((e) => ApiKeySummary.fromJson(e as Map<String, dynamic>)).toList();
       } else {
-        throw Exception('Failed to fetch API keys (HTTP ${res.statusCode})');
+        throw Exception(_parseApiErrorMessage(res, 'Failed to fetch API keys'));
       }
     } catch (e) {
       _isConnected = false;
@@ -286,8 +306,7 @@ class ApiService {
       _isConnected = true;
       return GeneratedApiKeyResponse.fromJson(json['data'] as Map<String, dynamic>);
     } else {
-      final json = jsonDecode(res.body);
-      throw Exception(json['message'] ?? 'Failed to generate API key (HTTP ${res.statusCode})');
+      throw Exception(_parseApiErrorMessage(res, 'Failed to generate API key'));
     }
   }
 
@@ -298,7 +317,7 @@ class ApiService {
         .timeout(const Duration(seconds: 5)));
 
     if (res.statusCode != 200 && res.statusCode != 204) {
-      throw Exception('Failed to revoke API key (HTTP ${res.statusCode})');
+      throw Exception(_parseApiErrorMessage(res, 'Failed to revoke API key'));
     }
   }
 
@@ -340,7 +359,7 @@ class ApiService {
           'number': data['number'] as int? ?? page,
         };
       } else {
-        throw Exception('Failed to fetch events (HTTP ${res.statusCode})');
+        throw Exception(_parseApiErrorMessage(res, 'Failed to fetch events'));
       }
     } catch (e) {
       _isConnected = false;
@@ -367,7 +386,7 @@ class ApiService {
       _isConnected = true;
       return DiagnosticEventDetail.fromJson(json['data'] as Map<String, dynamic>);
     } else {
-      throw Exception('Event not found or access denied (HTTP ${res.statusCode})');
+      throw Exception(_parseApiErrorMessage(res, 'Event not found or access denied'));
     }
   }
 
@@ -393,8 +412,7 @@ class ApiService {
       _isConnected = true;
       return ReplayAttempt.fromJson(json['data'] as Map<String, dynamic>);
     } else {
-      final json = jsonDecode(res.body);
-      throw Exception(json['message'] ?? 'Replay execution failed (HTTP ${res.statusCode})');
+      throw Exception(_parseApiErrorMessage(res, 'Replay execution failed'));
     }
   }
 

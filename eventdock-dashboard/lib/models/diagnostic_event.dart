@@ -31,19 +31,19 @@ class DiagnosticEventSummary {
 
   factory DiagnosticEventSummary.fromJson(Map<String, dynamic> json) {
     return DiagnosticEventSummary(
-      id: json['id'] as String,
-      projectId: json['projectId'] as String,
-      requestId: json['requestId'] as String,
-      httpMethod: json['httpMethod'] as String? ?? 'GET',
-      routeTemplate: json['routeTemplate'] as String?,
-      requestUri: json['requestUri'] as String? ?? '/',
+      id: (json['id'] ?? '').toString(),
+      projectId: (json['projectId'] ?? '').toString(),
+      requestId: (json['requestId'] ?? '').toString(),
+      httpMethod: (json['httpMethod'] ?? 'GET').toString(),
+      routeTemplate: json['routeTemplate']?.toString(),
+      requestUri: (json['requestUri'] ?? '/').toString(),
       statusCode: (json['statusCode'] as num?)?.toInt() ?? 500,
-      errorType: json['errorType'] as String?,
-      sanitizedErrorMessage: json['sanitizedErrorMessage'] as String?,
+      errorType: json['errorType']?.toString(),
+      sanitizedErrorMessage: json['sanitizedErrorMessage']?.toString(),
       durationMs: (json['durationMs'] as num?)?.toInt(),
-      occurredAt: json['occurredAt'] as String? ?? '',
-      serviceName: json['serviceName'] as String?,
-      environment: json['environment'] as String?,
+      occurredAt: json['occurredAt']?.toString() ?? '',
+      serviceName: json['serviceName']?.toString(),
+      environment: json['environment']?.toString(),
     );
   }
 }
@@ -91,24 +91,24 @@ class DiagnosticEventDetail {
 
   factory DiagnosticEventDetail.fromJson(Map<String, dynamic> json) {
     return DiagnosticEventDetail(
-      id: json['id'] as String,
-      projectId: json['projectId'] as String,
-      projectName: json['projectName'] as String? ?? 'Project',
-      requestId: json['requestId'] as String,
-      httpMethod: json['httpMethod'] as String? ?? 'GET',
-      routeTemplate: json['routeTemplate'] as String?,
-      requestUri: json['requestUri'] as String? ?? '/',
+      id: (json['id'] ?? '').toString(),
+      projectId: (json['projectId'] ?? '').toString(),
+      projectName: json['projectName']?.toString() ?? 'Project',
+      requestId: (json['requestId'] ?? '').toString(),
+      httpMethod: (json['httpMethod'] ?? 'GET').toString(),
+      routeTemplate: json['routeTemplate']?.toString(),
+      requestUri: (json['requestUri'] ?? '/').toString(),
       statusCode: (json['statusCode'] as num?)?.toInt() ?? 500,
-      errorType: json['errorType'] as String?,
-      sanitizedErrorMessage: json['sanitizedErrorMessage'] as String?,
-      stackTrace: json['stackTrace'] as String?,
+      errorType: json['errorType']?.toString(),
+      sanitizedErrorMessage: json['sanitizedErrorMessage']?.toString(),
+      stackTrace: json['stackTrace']?.toString(),
       durationMs: (json['durationMs'] as num?)?.toInt(),
-      occurredAt: json['occurredAt'] as String? ?? '',
-      serviceName: json['serviceName'] as String?,
-      environment: json['environment'] as String?,
-      metadataJson: json['metadataJson'] as String?,
-      requestBody: json['requestBody'] as String?,
-      responseBody: json['responseBody'] as String?,
+      occurredAt: json['occurredAt']?.toString() ?? '',
+      serviceName: json['serviceName']?.toString(),
+      environment: json['environment']?.toString(),
+      metadataJson: json['metadataJson']?.toString(),
+      requestBody: json['requestBody']?.toString(),
+      responseBody: json['responseBody']?.toString(),
     );
   }
 }

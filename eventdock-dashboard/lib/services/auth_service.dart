@@ -332,7 +332,7 @@ class AuthService extends ChangeNotifier {
     if (cleanEmail == 'developer@eventdock.dev') {
       uid =
           'usr_${cleanEmail.hashCode.abs()}_${DateTime.now().millisecondsSinceEpoch}';
-      idToken = 'token_auth_$uid';
+      idToken = 'dev_token_$uid';
       _isEmailVerified = true;
     } else {
       try {
@@ -480,7 +480,7 @@ class AuthService extends ChangeNotifier {
 
     if (cleanEmail == 'developer@eventdock.dev') {
       uid = 'usr_${cleanEmail.hashCode.abs()}';
-      idToken = 'token_auth_${cleanEmail.hashCode.abs()}';
+      idToken = 'dev_token_${cleanEmail.hashCode.abs()}';
       _isEmailVerified = true;
     } else {
       try {
@@ -717,7 +717,7 @@ class AuthService extends ChangeNotifier {
   /// Google Sign-In
   Future<void> signInWithGoogle({int? cliPort, String? googleEmail}) async {
     if (googleEmail != null && googleEmail.isNotEmpty) {
-      _token = 'dev-token-$googleEmail';
+      _token = 'dev_token_${googleEmail.replaceAll('@', '_').replaceAll('.', '_')}';
       _userEmail = googleEmail;
       _userId = 'dev-user-${googleEmail.hashCode}';
       _fullName = googleEmail.split('@').first;

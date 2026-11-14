@@ -17,12 +17,12 @@ class ApiKeySummary {
 
   factory ApiKeySummary.fromJson(Map<String, dynamic> json) {
     return ApiKeySummary(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      keyPrefix: json['keyPrefix'] as String,
+      id: (json['id'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      keyPrefix: (json['keyPrefix'] ?? '').toString(),
       revoked: json['revoked'] as bool? ?? false,
-      createdAt: json['createdAt'] as String? ?? '',
-      revokedAt: json['revokedAt'] as String?,
+      createdAt: json['createdAt']?.toString() ?? '',
+      revokedAt: json['revokedAt']?.toString(),
     );
   }
 }
@@ -44,11 +44,11 @@ class GeneratedApiKeyResponse {
 
   factory GeneratedApiKeyResponse.fromJson(Map<String, dynamic> json) {
     return GeneratedApiKeyResponse(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      keyPrefix: json['keyPrefix'] as String,
-      rawKey: json['rawKey'] as String,
-      createdAt: json['createdAt'] as String? ?? '',
+      id: (json['id'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      keyPrefix: (json['keyPrefix'] ?? '').toString(),
+      rawKey: (json['rawKey'] ?? '').toString(),
+      createdAt: json['createdAt']?.toString() ?? '',
     );
   }
 }

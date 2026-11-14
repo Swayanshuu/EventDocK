@@ -19,13 +19,13 @@ class Project {
 
   factory Project.fromJson(Map<String, dynamic> json) {
     return Project(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      slug: json['slug'] as String,
-      description: json['description'] as String?,
-      ownerId: json['ownerId'] as String,
+      id: (json['id'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      slug: (json['slug'] ?? '').toString(),
+      description: json['description']?.toString(),
+      ownerId: (json['ownerId'] ?? '').toString(),
       retentionDays: (json['retentionDays'] as num?)?.toInt() ?? 30,
-      createdAt: json['createdAt'] as String? ?? '',
+      createdAt: json['createdAt']?.toString() ?? '',
     );
   }
 }
