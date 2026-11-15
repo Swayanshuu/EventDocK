@@ -40,6 +40,8 @@ Write-Host "[INFO] Repository Root: $repoRoot" -ForegroundColor Gray
 $mvnArgs = @(
     "clean",
     "deploy",
+    "-pl", "eventdock-starter",
+    "-am",
     "-P", "release",
     "--batch-mode"
 )
