@@ -16,6 +16,7 @@ import 'theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DesktopWindowService.initializeDesktopWindow();
+  await AuthService().initialize();
   runApp(const EventDockApp());
 }
 
@@ -87,10 +88,18 @@ class EventDockApp extends StatelessWidget {
 
         // Dedicated login route
         if (path == '/login') {
+          if (AuthService().isAuthenticated) {
+            return MaterialPageRoute(
+              settings: const RouteSettings(name: '/dashboard'),
+              builder: (_) => const DashboardRoot(),
+            );
+          }
           return MaterialPageRoute(
             settings: const RouteSettings(name: '/login'),
-            builder: (_) => AuthScreen(
-              onLoginSuccess: () {},
+            builder: (ctx) => AuthScreen(
+              onLoginSuccess: () {
+                Navigator.pushReplacementNamed(ctx, '/dashboard');
+              },
             ),
           );
         }

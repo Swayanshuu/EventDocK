@@ -103,6 +103,76 @@ class AuthService extends ChangeNotifier {
   AuthRole _currentRole = AuthRole.individual;
   bool _needsOnboarding = false;
   bool _isEmailVerified = true;
+  bool _isInitialized = false;
+  bool get isInitialized => _isInitialized;
+
+  /// Restores persisted user session from Firebase Auth and local/session storage
+  Future<void> initialize() async {
+    if (_isInitialized) return;
+    try {
+      final rawUser = await auth_interop.platformGetRestoredUser();
+      if (rawUser != null && rawUser.isNotEmpty) {
+        final data = jsonDecode(rawUser) as Map<String, dynamic>;
+        final token = data['token'] as String?;
+        if (token != null && token.isNotEmpty) {
+          _token = token;
+          _userEmail = data['email'] as String?;
+          _userId = data['uid'] as String?;
+          _fullName = data['displayName'] as String? ??
+              (_userEmail ?? 'Developer').split('@').first;
+          final roleStr = data['role'] as String?;
+          _currentRole = (roleStr == 'organisation' || roleStr == 'organization')
+              ? AuthRole.organisation
+              : AuthRole.individual;
+          _isEmailVerified = data['emailVerified'] == true;
+
+          final savedOrgName = data['orgName'] as String?;
+          final savedOrgId = data['orgId'] as String?;
+          if (savedOrgName != null && savedOrgName.isNotEmpty) {
+            _currentOrganization = Organization(
+              id: savedOrgId ?? 'org_${_userId ?? "default"}',
+              name: savedOrgName,
+              slug: 'workspace',
+              type: _currentRole == AuthRole.organisation ? 'organization' : 'individual',
+              plan: _currentRole == AuthRole.organisation ? 'Team Pro' : 'Free Developer',
+            );
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('AuthService initialize session restoration error: $e');
+    } finally {
+      _isInitialized = true;
+      notifyListeners();
+    }
+  }
+
+  void _persistSession({
+    required bool rememberMe,
+    String? orgName,
+    String? orgId,
+  }) {
+    if (_token == null || _token!.isEmpty) return;
+    try {
+      final session = {
+        'token': _token,
+        'email': _userEmail,
+        'uid': _userId,
+        'displayName': _fullName,
+        'role': _currentRole.name,
+        'emailVerified': _isEmailVerified,
+        'orgName': orgName ?? _currentOrganization.name,
+        'orgId': orgId ?? _currentOrganization.id,
+        'rememberMe': rememberMe,
+        'expiry': DateTime.now()
+            .add(Duration(days: rememberMe ? 30 : 1))
+            .millisecondsSinceEpoch,
+      };
+      auth_interop.platformSaveSession(jsonEncode(session), rememberMe);
+    } catch (e) {
+      debugPrint('Error saving session: $e');
+    }
+  }
 
   // Local storage for in-memory firestore documents
   final Map<String, Map<String, dynamic>> _firestoreUsers = {};
@@ -269,29 +339,32 @@ class AuthService extends ChangeNotifier {
       final error = data?['error'] as Map<String, dynamic>?;
       final rawMsg = error?['message'] as String? ?? '';
 
-      if (rawMsg.contains('INVALID_EMAIL')) {
+      if (rawMsg.contains('INVALID_EMAIL') || rawMsg.contains('invalid-email')) {
         return 'Please enter a valid email address (e.g. name@domain.com).';
       }
-      if (rawMsg.contains('EMAIL_EXISTS')) {
+      if (rawMsg.contains('EMAIL_EXISTS') || rawMsg.contains('email-already-in-use')) {
         return 'This email address is already registered. Please sign in instead.';
       }
-      if (rawMsg.contains('EMAIL_NOT_FOUND')) {
+      if (rawMsg.contains('EMAIL_NOT_FOUND') || rawMsg.contains('user-not-found')) {
         return 'No account found with this email address. Please sign up first.';
       }
       if (rawMsg.contains('INVALID_PASSWORD') ||
-          rawMsg.contains('INVALID_LOGIN_CREDENTIALS')) {
+          rawMsg.contains('INVALID_LOGIN_CREDENTIALS') ||
+          rawMsg.contains('wrong-password') ||
+          rawMsg.contains('invalid-credential') ||
+          rawMsg.contains('invalid-login-credentials')) {
         return 'Incorrect email or password. Please verify your credentials.';
       }
-      if (rawMsg.contains('USER_DISABLED')) {
+      if (rawMsg.contains('USER_DISABLED') || rawMsg.contains('user-disabled')) {
         return 'This account has been disabled. Please contact support.';
       }
-      if (rawMsg.contains('TOO_MANY_ATTEMPTS_TRY_LATER')) {
+      if (rawMsg.contains('TOO_MANY_ATTEMPTS_TRY_LATER') || rawMsg.contains('too-many-requests')) {
         return 'Too many unsuccessful attempts. Access temporarily blocked. Please try again later.';
       }
-      if (rawMsg.contains('OPERATION_NOT_ALLOWED')) {
+      if (rawMsg.contains('OPERATION_NOT_ALLOWED') || rawMsg.contains('operation-not-allowed')) {
         return 'Email/Password authentication is disabled in your Firebase console.';
       }
-      if (rawMsg.contains('WEAK_PASSWORD')) {
+      if (rawMsg.contains('WEAK_PASSWORD') || rawMsg.contains('weak-password')) {
         return 'Password must be at least 6 characters.';
       }
       if (rawMsg.isNotEmpty) {
@@ -333,8 +406,8 @@ class AuthService extends ChangeNotifier {
     }
     _rateLimiter.registerClick();
 
-    String uid;
-    String idToken;
+    String uid = '';
+    String idToken = '';
 
     // Test bypass for developer test account in unit tests
     if (cleanEmail == 'developer@eventdock.dev') {
@@ -343,38 +416,68 @@ class AuthService extends ChangeNotifier {
       idToken = 'dev_token_$uid';
       _isEmailVerified = true;
     } else {
-      try {
-        final url = Uri.parse(
-          'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$firebaseApiKey',
-        );
-        final resp = await http.post(
-          url,
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            'email': cleanEmail,
-            'password': password,
-            'returnSecureToken': true,
-          }),
-        );
+      bool webSuccess = false;
+      if (kIsWeb) {
+        try {
+          final resJson = await auth_interop.platformSignUpWithEmail(
+            cleanEmail,
+            password,
+            true,
+          );
+          if (resJson != null && resJson.isNotEmpty) {
+            final data = jsonDecode(resJson) as Map<String, dynamic>;
+            if (data.containsKey('error')) {
+              final errCode = data['error'] as String? ?? '';
+              throw Exception(
+                  _parseFirebaseError(errCode, 'Failed to create account.'));
+            } else if (data['token'] != null) {
+              idToken = data['token'] as String;
+              uid = data['uid'] as String;
+              _isEmailVerified = data['emailVerified'] == true;
+              webSuccess = true;
+            }
+          }
+        } catch (e) {
+          if (e is Exception && !e.toString().contains('NoSuchMethodError')) {
+            rethrow;
+          }
+        }
+      }
 
-        if (resp.statusCode != 200) {
+      if (!webSuccess) {
+        try {
+          final url = Uri.parse(
+            'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$firebaseApiKey',
+          );
+          final resp = await http.post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'email': cleanEmail,
+              'password': password,
+              'returnSecureToken': true,
+            }),
+          );
+
+          if (resp.statusCode != 200) {
+            throw Exception(
+              _parseFirebaseError(
+                resp.body,
+                'Failed to create account. Please try again.',
+              ),
+            );
+          }
+
+          final data = jsonDecode(resp.body) as Map<String, dynamic>;
+          idToken = data['idToken'] as String;
+          uid = data['localId'] as String;
+          _isEmailVerified = false;
+        } catch (e) {
+          if (e is Exception) rethrow;
           throw Exception(
-            _parseFirebaseError(
-              resp.body,
-              'Failed to create account. Please try again.',
-            ),
+            'Failed to connect to Firebase authentication service: $e',
           );
         }
-
-        final data = jsonDecode(resp.body) as Map<String, dynamic>;
-        idToken = data['idToken'] as String;
-        uid = data['localId'] as String;
-        _isEmailVerified = false;
-      } catch (e) {
-        if (e is Exception) rethrow;
-        throw Exception(
-          'Failed to connect to Firebase authentication service: $e',
-        );
       }
     }
 
@@ -434,6 +537,13 @@ class AuthService extends ChangeNotifier {
     }
 
     _rateLimiter.recordSuccess(cleanEmail);
+
+    _persistSession(
+      rememberMe: true,
+      orgName: orgName,
+      orgId: _currentOrganization.id,
+    );
+
     notifyListeners();
 
     if (cliPort != null) {
@@ -483,51 +593,75 @@ class AuthService extends ChangeNotifier {
       );
     }
 
-    String uid;
-    String idToken;
+    String uid = '';
+    String idToken = '';
 
     if (cleanEmail == 'developer@eventdock.dev') {
       uid = 'usr_${cleanEmail.hashCode.abs()}';
       idToken = 'dev_token_${cleanEmail.hashCode.abs()}';
       _isEmailVerified = true;
     } else {
-      try {
-        final url = Uri.parse(
-          'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$firebaseApiKey',
-        );
-        final resp = await http.post(
-          url,
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            'email': cleanEmail,
-            'password': password,
-            'returnSecureToken': true,
-          }),
-        );
-
-        if (resp.statusCode != 200) {
-          _rateLimiter.recordFailure(cleanEmail);
-          throw Exception(
-            _parseFirebaseError(resp.body, 'Invalid email or password.'),
+      bool webSuccess = false;
+      if (kIsWeb) {
+        try {
+          final resJson = await auth_interop.platformSignInWithEmail(
+            cleanEmail,
+            password,
+            rememberMe,
           );
+          if (resJson != null && resJson.isNotEmpty) {
+            final data = jsonDecode(resJson) as Map<String, dynamic>;
+            if (data.containsKey('error')) {
+              final errCode = data['error'] as String? ?? '';
+              _rateLimiter.recordFailure(cleanEmail);
+              throw Exception(
+                  _parseFirebaseError(errCode, 'Invalid email or password.'));
+            } else if (data['token'] != null) {
+              idToken = data['token'] as String;
+              uid = data['uid'] as String;
+              _isEmailVerified = data['emailVerified'] == true;
+              webSuccess = true;
+            }
+          }
+        } catch (e) {
+          if (e is Exception && !e.toString().contains('NoSuchMethodError')) {
+            rethrow;
+          }
         }
+      }
 
-        final data = jsonDecode(resp.body) as Map<String, dynamic>;
-        idToken = data['idToken'] as String;
-        uid = data['localId'] as String;
+      if (!webSuccess) {
+        try {
+          final url = Uri.parse(
+            'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=$firebaseApiKey',
+          );
+          final resp = await http.post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'email': cleanEmail,
+              'password': password,
+              'returnSecureToken': true,
+            }),
+          );
 
-        _token = idToken;
-        _userEmail = cleanEmail;
-        _userId = uid;
-        _fullName = cleanEmail.split('@').first;
-        _currentRole = role;
-        _needsOnboarding = false;
+          if (resp.statusCode != 200) {
+            _rateLimiter.recordFailure(cleanEmail);
+            throw Exception(
+              _parseFirebaseError(resp.body, 'Invalid email or password.'),
+            );
+          }
 
-        // Check if user has verified their email in Firebase
-        await checkEmailVerified();
-      } catch (e) {
-        if (e is Exception) rethrow;
-        throw Exception('Failed to sign in: $e');
+          final data = jsonDecode(resp.body) as Map<String, dynamic>;
+          idToken = data['idToken'] as String;
+          uid = data['localId'] as String;
+
+          // Check if user has verified their email in Firebase
+          await checkEmailVerified();
+        } catch (e) {
+          if (e is Exception) rethrow;
+          throw Exception('Failed to sign in: $e');
+        }
       }
     }
 
@@ -540,6 +674,10 @@ class AuthService extends ChangeNotifier {
 
     // Reset rate limiter upon successful authentication
     _rateLimiter.recordSuccess(cleanEmail);
+
+    // Save session for Remember Me & F5 refresh survival
+    _persistSession(rememberMe: rememberMe);
+
     notifyListeners();
 
     if (cliPort != null) {
@@ -730,6 +868,7 @@ class AuthService extends ChangeNotifier {
       _userId = 'dev-user-${googleEmail.hashCode}';
       _fullName = googleEmail.split('@').first;
       _needsOnboarding = false;
+      _persistSession(rememberMe: true);
       notifyListeners();
       if (cliPort != null) {
         await _deliverCliCallback(cliPort);
@@ -738,7 +877,8 @@ class AuthService extends ChangeNotifier {
     }
 
     if (kIsWeb) {
-      final rawResult = await auth_interop.platformGoogleSignIn();
+      final rawResult =
+          await auth_interop.platformGoogleSignIn(rememberMe: true);
       if (rawResult != null && rawResult.isNotEmpty) {
         final data = jsonDecode(rawResult) as Map<String, dynamic>;
         final token = data['token'] as String?;
@@ -746,8 +886,13 @@ class AuthService extends ChangeNotifier {
           _token = token;
           _userEmail = data['email'] as String?;
           _userId = data['uid'] as String?;
-          _fullName = (_userEmail ?? 'developer').split('@').first;
+          _fullName = (data['displayName'] as String? ??
+                  _userEmail ??
+                  'developer')
+              .split('@')
+              .first;
           _needsOnboarding = false;
+          _persistSession(rememberMe: true);
           notifyListeners();
 
           if (cliPort != null) {
@@ -771,10 +916,17 @@ class AuthService extends ChangeNotifier {
     } catch (_) {}
   }
 
+  @visibleForTesting
+  void resetInMemoryStateForTesting() {
+    _token = null;
+    _userEmail = null;
+    _userId = null;
+    _isInitialized = false;
+  }
+
   void signOut() {
-    if (kIsWeb) {
-      auth_interop.platformSignOut();
-    }
+    auth_interop.platformSignOut();
+    auth_interop.platformClearSession();
     _token = null;
     _userEmail = null;
     _userId = null;

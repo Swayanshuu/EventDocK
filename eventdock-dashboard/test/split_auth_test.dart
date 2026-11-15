@@ -319,5 +319,69 @@ void main() {
 
       expect(authSuccessCalled, isTrue);
     });
+
+    testWidgets('11. Remember Me checkbox defaults to checked and toggles cleanly', (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SplitAuthCard(
+              onAuthSuccess: () {},
+              initialRole: AuthRole.individual,
+              initialMode: AuthMode.signIn,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final checkboxFinder = find.byType(Checkbox);
+      expect(checkboxFinder, findsOneWidget);
+      final checkbox = tester.widget<Checkbox>(checkboxFinder);
+      expect(checkbox.value, isTrue);
+
+      // Tap Remember me text or checkbox to toggle
+      await tester.tap(find.text('Remember me'));
+      await tester.pumpAndSettle();
+
+      final updatedCheckbox = tester.widget<Checkbox>(checkboxFinder);
+      expect(updatedCheckbox.value, isFalse);
+    });
+
+    test('12. Session persistence & restoration preserves authenticated state across refresh', () async {
+      final auth = AuthService();
+      auth.signOut();
+      expect(auth.isAuthenticated, isFalse);
+
+      // 1. User signs in with rememberMe = true
+      await auth.signInWithGoogle(googleEmail: 'restored_user@eventdock.dev');
+      expect(auth.isAuthenticated, isTrue);
+      expect(auth.userEmail, 'restored_user@eventdock.dev');
+
+      // 2. Simulate browser reload (F5): memory is cleared without calling signOut()
+      auth.resetInMemoryStateForTesting();
+      expect(auth.isAuthenticated, isFalse);
+
+      // 3. App restarts and calls initialize()
+      await auth.initialize();
+      expect(auth.isAuthenticated, isTrue);
+      expect(auth.userEmail, 'restored_user@eventdock.dev');
+
+      // 4. User explicitly signs out: storage and memory are cleared
+      auth.signOut();
+      expect(auth.isAuthenticated, isFalse);
+      expect(auth.token, isNull);
+
+      // 5. Subsequent initialize() finds no session
+      auth.resetInMemoryStateForTesting();
+      await auth.initialize();
+      expect(auth.isAuthenticated, isFalse);
+    });
   });
 }

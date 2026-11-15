@@ -30,7 +30,7 @@ class _AuthFormState extends State<AuthForm> {
   late AuthRole _role;
   late AuthMode _mode;
   bool _isLoading = false;
-  bool _rememberMe = false;
+  bool _rememberMe = true;
   bool _obscurePassword = true;
   String? _errorMessage;
   String? _successMessage;

@@ -73,8 +73,139 @@
     };
     firebase.initializeApp(firebaseConfig);
 
-    window.eventdockGoogleSignIn = async function() {
+    // Initial auth state tracking for instant restore on refresh
+    let _initialAuthUser = null;
+    let _initialAuthResolved = false;
+    const _initialAuthPromise = new Promise((resolve) => {
+      firebase.auth().onAuthStateChanged((user) => {
+        _initialAuthUser = user;
+        _initialAuthResolved = true;
+        resolve(user);
+      });
+    });
+
+    window.eventdockGetRestoredUser = async function() {
       try {
+        let user = firebase.auth().currentUser || _initialAuthUser;
+        if (!user && !_initialAuthResolved) {
+          user = await Promise.race([
+            _initialAuthPromise,
+            new Promise((r) => setTimeout(() => r(null), 2500))
+          ]);
+        }
+
+        if (user) {
+          const token = await user.getIdToken();
+          let savedMeta = {};
+          try {
+            const raw = localStorage.getItem('eventdock_session') || sessionStorage.getItem('eventdock_session');
+            if (raw) savedMeta = JSON.parse(raw);
+          } catch (_) {}
+
+          return JSON.stringify({
+            token: token,
+            email: user.email,
+            uid: user.uid,
+            displayName: user.displayName || savedMeta.displayName || user.email,
+            emailVerified: user.emailVerified,
+            role: savedMeta.role || 'individual',
+            orgName: savedMeta.orgName,
+            orgId: savedMeta.orgId,
+            rememberMe: savedMeta.rememberMe !== false
+          });
+        }
+
+        // Fallback: check stored session for demo or token sessions
+        const rawStored = localStorage.getItem('eventdock_session') || sessionStorage.getItem('eventdock_session');
+        if (rawStored) {
+          try {
+            const session = JSON.parse(rawStored);
+            if (session && session.token) {
+              if (session.expiry && Date.now() > session.expiry) {
+                localStorage.removeItem('eventdock_session');
+                sessionStorage.removeItem('eventdock_session');
+                return null;
+              }
+              return rawStored;
+            }
+          } catch (_) {}
+        }
+        return null;
+      } catch (err) {
+        console.error('EventDock restore session error:', err);
+        return null;
+      }
+    };
+
+    window.eventdockSaveSession = function(sessionJson, rememberMe) {
+      try {
+        if (rememberMe) {
+          localStorage.setItem('eventdock_session', sessionJson);
+          sessionStorage.removeItem('eventdock_session');
+        } else {
+          sessionStorage.setItem('eventdock_session', sessionJson);
+          localStorage.removeItem('eventdock_session');
+        }
+      } catch (err) {
+        console.error('EventDock save session error:', err);
+      }
+    };
+
+    window.eventdockClearSession = function() {
+      try {
+        localStorage.removeItem('eventdock_session');
+        sessionStorage.removeItem('eventdock_session');
+      } catch (_) {}
+    };
+
+    window.eventdockSignInWithEmail = async function(email, password, rememberMe) {
+      try {
+        const persistence = rememberMe
+          ? firebase.auth.Auth.Persistence.LOCAL
+          : firebase.auth.Auth.Persistence.SESSION;
+        await firebase.auth().setPersistence(persistence);
+        const cred = await firebase.auth().signInWithEmailAndPassword(email, password);
+        const user = cred.user;
+        const token = await user.getIdToken();
+        return JSON.stringify({
+          token: token,
+          email: user.email,
+          uid: user.uid,
+          displayName: user.displayName || user.email,
+          emailVerified: user.emailVerified
+        });
+      } catch (err) {
+        return JSON.stringify({ error: err.code || err.message });
+      }
+    };
+
+    window.eventdockSignUpWithEmail = async function(email, password, rememberMe) {
+      try {
+        const persistence = rememberMe
+          ? firebase.auth.Auth.Persistence.LOCAL
+          : firebase.auth.Auth.Persistence.SESSION;
+        await firebase.auth().setPersistence(persistence);
+        const cred = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        const user = cred.user;
+        const token = await user.getIdToken();
+        return JSON.stringify({
+          token: token,
+          email: user.email,
+          uid: user.uid,
+          displayName: user.displayName || user.email,
+          emailVerified: user.emailVerified
+        });
+      } catch (err) {
+        return JSON.stringify({ error: err.code || err.message });
+      }
+    };
+
+    window.eventdockGoogleSignIn = async function(rememberMe) {
+      try {
+        const persistence = (rememberMe !== false)
+          ? firebase.auth.Auth.Persistence.LOCAL
+          : firebase.auth.Auth.Persistence.SESSION;
+        await firebase.auth().setPersistence(persistence);
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.addScope('email');
         provider.addScope('profile');
@@ -85,7 +216,8 @@
           token: token,
           email: user.email,
           uid: user.uid,
-          displayName: user.displayName || user.email
+          displayName: user.displayName || user.email,
+          emailVerified: user.emailVerified
         });
       } catch (err) {
         console.error('EventDock Firebase Google Sign-In Error:', err);
@@ -99,6 +231,10 @@
       } catch (err) {
         console.error('EventDock Firebase Sign-Out Error:', err);
       }
+      try {
+        localStorage.removeItem('eventdock_session');
+        sessionStorage.removeItem('eventdock_session');
+      } catch (_) {}
     };
 
     window.eventdockDownloadFile = function(filename, content, mimeType) {
