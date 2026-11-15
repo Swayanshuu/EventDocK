@@ -12,6 +12,7 @@ class DiagnosticEventSummary {
   final String occurredAt;
   final String? serviceName;
   final String? environment;
+  final bool resolved;
 
   DiagnosticEventSummary({
     required this.id,
@@ -27,6 +28,7 @@ class DiagnosticEventSummary {
     required this.occurredAt,
     this.serviceName,
     this.environment,
+    this.resolved = false,
   });
 
   factory DiagnosticEventSummary.fromJson(Map<String, dynamic> json) {
@@ -44,6 +46,7 @@ class DiagnosticEventSummary {
       occurredAt: json['occurredAt']?.toString() ?? '',
       serviceName: json['serviceName']?.toString(),
       environment: json['environment']?.toString(),
+      resolved: json['resolved'] == true,
     );
   }
 }
@@ -67,6 +70,7 @@ class DiagnosticEventDetail {
   final String? metadataJson;
   final String? requestBody;
   final String? responseBody;
+  final bool resolved;
 
   DiagnosticEventDetail({
     required this.id,
@@ -87,6 +91,7 @@ class DiagnosticEventDetail {
     this.metadataJson,
     this.requestBody,
     this.responseBody,
+    this.resolved = false,
   });
 
   factory DiagnosticEventDetail.fromJson(Map<String, dynamic> json) {
@@ -109,6 +114,7 @@ class DiagnosticEventDetail {
       metadataJson: json['metadataJson']?.toString(),
       requestBody: json['requestBody']?.toString(),
       responseBody: json['responseBody']?.toString(),
+      resolved: json['resolved'] == true,
     );
   }
 }

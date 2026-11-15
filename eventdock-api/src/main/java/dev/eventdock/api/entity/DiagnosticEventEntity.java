@@ -58,6 +58,10 @@ public class DiagnosticEventEntity {
     @Column(nullable = false, updatable = false)
     private Instant receivedAt;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean resolved = false;
+
     @Column(length = 100)
     private String serviceName;
 

@@ -27,4 +27,5 @@ public class EventSummaryDto {
     private Instant receivedAt;
     private String serviceName;
     private String environment;
+    private Boolean resolved;
 }

@@ -19,4 +19,6 @@ public interface DiagnosticEventRepository extends JpaRepository<DiagnosticEvent
     Optional<DiagnosticEventEntity> findByIdAndProjectId(UUID id, UUID projectId);
 
     long countByProjectId(UUID projectId);
+
+    void deleteAllByProjectId(UUID projectId);
 }

@@ -53,6 +53,8 @@ public class EventController {
     public ResponseEntity<ApiResponse<Page<EventSummaryDto>>> listEvents(
             @PathVariable UUID projectId,
             @RequestParam(required = false) Integer statusCode,
+            @RequestParam(required = false) String statusGroup,
+            @RequestParam(required = false) Boolean resolved,
             @RequestParam(required = false) String method,
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
@@ -61,7 +63,7 @@ public class EventController {
         UUID userId = getAuthenticatedUserId(httpRequest);
         PageRequest pageRequest = PageRequest.of(Math.max(0, page), Math.min(100, Math.max(1, size)), Sort.by("occurredAt").descending());
 
-        Page<EventSummaryDto> result = eventService.listEvents(userId, projectId, statusCode, method, search, pageRequest);
+        Page<EventSummaryDto> result = eventService.listEvents(userId, projectId, statusCode, statusGroup, resolved, method, search, pageRequest);
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
@@ -73,6 +75,37 @@ public class EventController {
         UUID userId = getAuthenticatedUserId(httpRequest);
         EventDetailDto detail = eventService.getEventDetail(userId, eventId);
         return ResponseEntity.ok(ApiResponse.ok(detail));
+    }
+
+    @PatchMapping("/events/{eventId}/resolve")
+    @Operation(summary = "Mark a diagnostic event as resolved or unresolved")
+    public ResponseEntity<ApiResponse<EventDetailDto>> setEventResolved(
+            @PathVariable UUID eventId,
+            @RequestParam(defaultValue = "true") boolean resolved,
+            HttpServletRequest httpRequest) {
+        UUID userId = getAuthenticatedUserId(httpRequest);
+        EventDetailDto detail = eventService.setEventResolved(userId, eventId, resolved);
+        return ResponseEntity.ok(ApiResponse.ok(resolved ? "Event marked as resolved" : "Event reopened", detail));
+    }
+
+    @DeleteMapping("/events/{eventId}")
+    @Operation(summary = "Delete a specific diagnostic event")
+    public ResponseEntity<ApiResponse<Void>> deleteEvent(
+            @PathVariable UUID eventId,
+            HttpServletRequest httpRequest) {
+        UUID userId = getAuthenticatedUserId(httpRequest);
+        eventService.deleteEvent(userId, eventId);
+        return ResponseEntity.ok(ApiResponse.ok("Diagnostic event deleted successfully", null));
+    }
+
+    @DeleteMapping("/projects/{projectId}/events")
+    @Operation(summary = "Delete all diagnostic events for a project")
+    public ResponseEntity<ApiResponse<Void>> deleteAllEvents(
+            @PathVariable UUID projectId,
+            HttpServletRequest httpRequest) {
+        UUID userId = getAuthenticatedUserId(httpRequest);
+        eventService.deleteAllEventsForProject(userId, projectId);
+        return ResponseEntity.ok(ApiResponse.ok("All diagnostic events cleared successfully", null));
     }
 
     private UUID getAuthenticatedUserId(HttpServletRequest request) {

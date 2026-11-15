@@ -8,8 +8,15 @@ import 'replay_modal.dart';
 
 class EventDetailModal extends StatefulWidget {
   final String eventId;
+  final VoidCallback? onEventDeleted;
+  final ValueChanged<bool>? onStatusChanged;
 
-  const EventDetailModal({super.key, required this.eventId});
+  const EventDetailModal({
+    super.key,
+    required this.eventId,
+    this.onEventDeleted,
+    this.onStatusChanged,
+  });
 
   @override
   State<EventDetailModal> createState() => _EventDetailModalState();
@@ -45,6 +52,82 @@ class _EventDetailModalState extends State<EventDetailModal> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _toggleResolved() async {
+    if (_detail == null) return;
+    final nextStatus = !_detail!.resolved;
+    try {
+      final updated = await ApiService().setEventResolved(_detail!.id, nextStatus);
+      setState(() {
+        _detail = updated;
+      });
+      widget.onStatusChanged?.call(nextStatus);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(nextStatus ? 'Marked as resolved' : 'Reopened event'),
+            duration: const Duration(seconds: 2),
+            backgroundColor: nextStatus ? AppTheme.status2xx : AppTheme.cardSecondary,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update resolution: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteEvent() async {
+    if (_detail == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: AppTheme.cardBorder),
+        ),
+        title: Text('Delete Error Event?', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
+        content: Text('Are you sure you want to permanently delete this diagnostic event? This cannot be undone.', style: TextStyle(color: AppTheme.textMuted)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text('Cancel', style: TextStyle(color: AppTheme.textMuted)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.status5xx,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await ApiService().deleteEvent(_detail!.id);
+        widget.onEventDeleted?.call();
+        if (mounted) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Diagnostic event deleted')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to delete event: $e')),
+          );
+        }
+      }
     }
   }
 
@@ -119,18 +202,38 @@ class _EventDetailModalState extends State<EventDetailModal> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: _openReplayModal,
-                            icon: const Icon(Icons.replay_rounded, size: 16),
-                            label: const Text('Replay Request'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primary,
-                              foregroundColor: Colors.black,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: _openReplayModal,
+                              icon: const Icon(Icons.replay_rounded, size: 16),
+                              label: const Text('Replay Request'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primary,
+                                foregroundColor: Colors.black,
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                              ),
                             ),
-                          ),
+                            OutlinedButton.icon(
+                              onPressed: _toggleResolved,
+                              icon: Icon(
+                                _detail!.resolved ? Icons.radio_button_unchecked_rounded : Icons.check_circle_rounded,
+                                size: 16,
+                                color: _detail!.resolved ? AppTheme.status4xx : AppTheme.status2xx,
+                              ),
+                              label: Text(
+                                _detail!.resolved ? 'Reopen' : 'Mark Resolved',
+                                style: TextStyle(color: _detail!.resolved ? AppTheme.status4xx : AppTheme.status2xx),
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: _deleteEvent,
+                              icon: const Icon(Icons.delete_outline_rounded, color: AppTheme.status5xx, size: 20),
+                              tooltip: 'Delete Event',
+                            ),
+                          ],
                         ),
                       ] else ...[
                         Row(
@@ -151,6 +254,30 @@ class _EventDetailModalState extends State<EventDetailModal> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                            OutlinedButton.icon(
+                              onPressed: _toggleResolved,
+                              icon: Icon(
+                                _detail!.resolved ? Icons.radio_button_unchecked_rounded : Icons.check_circle_rounded,
+                                size: 16,
+                                color: _detail!.resolved ? AppTheme.status4xx : AppTheme.status2xx,
+                              ),
+                              label: Text(
+                                _detail!.resolved ? 'Reopen' : 'Mark Resolved',
+                                style: TextStyle(
+                                  color: _detail!.resolved ? AppTheme.status4xx : AppTheme.status2xx,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(
+                                  color: _detail!.resolved
+                                      ? AppTheme.status4xx.withValues(alpha: 0.5)
+                                      : AppTheme.status2xx.withValues(alpha: 0.5),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             ElevatedButton.icon(
                               onPressed: _openReplayModal,
                               icon: const Icon(Icons.replay_rounded, size: 16),
@@ -161,7 +288,13 @@ class _EventDetailModalState extends State<EventDetailModal> {
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: 4),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline_rounded, color: AppTheme.status5xx),
+                              tooltip: 'Delete this event',
+                              onPressed: _deleteEvent,
+                            ),
+                            const SizedBox(width: 4),
                             IconButton(
                               icon: Icon(Icons.close, color: AppTheme.textMuted),
                               onPressed: () => Navigator.pop(context),

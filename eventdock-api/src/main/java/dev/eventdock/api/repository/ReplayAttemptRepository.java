@@ -10,4 +10,8 @@ import java.util.UUID;
 @Repository
 public interface ReplayAttemptRepository extends JpaRepository<ReplayAttemptEntity, UUID> {
     List<ReplayAttemptEntity> findAllByEventIdOrderByStartedAtDesc(UUID eventId);
+
+    void deleteAllByEventId(UUID eventId);
+
+    void deleteAllByEventProjectId(UUID projectId);
 }

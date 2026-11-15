@@ -515,14 +515,18 @@ class ApiService {
   /// Fetch real diagnostic failure events for a project with optional filters and pagination
   Future<Map<String, dynamic>> getEvents(
     String projectId, {
+    String? statusGroup,
     int? statusCode,
+    bool? resolved,
     String? method,
     String? search,
     int page = 0,
     int size = 20,
   }) async {
     var queryParams = '?page=$page&size=$size';
+    if (statusGroup != null && statusGroup.isNotEmpty) queryParams += '&statusGroup=${Uri.encodeComponent(statusGroup)}';
     if (statusCode != null) queryParams += '&statusCode=$statusCode';
+    if (resolved != null) queryParams += '&resolved=$resolved';
     if (method != null && method.isNotEmpty) queryParams += '&method=${method.trim().toUpperCase()}';
     if (search != null && search.isNotEmpty) queryParams += '&search=${Uri.encodeComponent(search.trim())}';
 
@@ -560,6 +564,43 @@ class ApiService {
         };
       }
       throw Exception('Failed to load events: $e');
+    }
+  }
+
+  /// Mark a diagnostic event as resolved or unresolved
+  Future<DiagnosticEventDetail> setEventResolved(String eventId, bool resolved) async {
+    final res = await _requestWithFallback((base) => client
+        .patch(Uri.parse('$base/events/$eventId/resolve?resolved=$resolved'), headers: _headers())
+        .timeout(const Duration(seconds: 5)));
+
+    if (res.statusCode == 200) {
+      final json = jsonDecode(res.body);
+      _isConnected = true;
+      return DiagnosticEventDetail.fromJson(json['data'] as Map<String, dynamic>);
+    } else {
+      throw Exception(_parseApiErrorMessage(res, 'Failed to update event status'));
+    }
+  }
+
+  /// Delete a single diagnostic event
+  Future<void> deleteEvent(String eventId) async {
+    final res = await _requestWithFallback((base) => client
+        .delete(Uri.parse('$base/events/$eventId'), headers: _headers())
+        .timeout(const Duration(seconds: 5)));
+
+    if (res.statusCode != 200 && res.statusCode != 204) {
+      throw Exception(_parseApiErrorMessage(res, 'Failed to delete event'));
+    }
+  }
+
+  /// Clear / delete all diagnostic events for a project
+  Future<void> clearProjectEvents(String projectId) async {
+    final res = await _requestWithFallback((base) => client
+        .delete(Uri.parse('$base/projects/$projectId/events'), headers: _headers())
+        .timeout(const Duration(seconds: 8)));
+
+    if (res.statusCode != 200 && res.statusCode != 204) {
+      throw Exception(_parseApiErrorMessage(res, 'Failed to clear events'));
     }
   }
 

@@ -41,6 +41,9 @@ class EventServiceTest {
     @Mock
     private ProjectService projectService;
 
+    @Mock
+    private dev.eventdock.api.repository.ReplayAttemptRepository replayRepository;
+
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -116,5 +119,62 @@ class EventServiceTest {
         assertThat(detail.getId()).isEqualTo(eventId);
         assertThat(detail.getProjectName()).isEqualTo("LinkPeer");
         assertThat(detail.getStatusCode()).isEqualTo(500);
+    }
+
+    @Test
+    @DisplayName("Should mark event as resolved and return updated status")
+    void testSetEventResolved() {
+        UUID eventId = UUID.randomUUID();
+        DiagnosticEventEntity entity = DiagnosticEventEntity.builder()
+                .id(eventId)
+                .project(project)
+                .requestId("req-xyz")
+                .httpMethod("GET")
+                .requestUri("/posts/404")
+                .statusCode(404)
+                .occurredAt(Instant.now())
+                .resolved(false)
+                .build();
+
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(entity));
+        when(eventRepository.save(any(DiagnosticEventEntity.class))).thenAnswer(i -> i.getArgument(0));
+        doNothing().when(projectService).validateOwnership(userId, project);
+
+        EventDetailDto detail = eventService.setEventResolved(userId, eventId, true);
+
+        assertThat(detail).isNotNull();
+        assertThat(detail.getResolved()).isTrue();
+        verify(eventRepository).save(entity);
+    }
+
+    @Test
+    @DisplayName("Should delete single event and associated replay attempts")
+    void testDeleteEvent() {
+        UUID eventId = UUID.randomUUID();
+        DiagnosticEventEntity entity = DiagnosticEventEntity.builder()
+                .id(eventId)
+                .project(project)
+                .occurredAt(Instant.now())
+                .build();
+
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(entity));
+        doNothing().when(projectService).validateOwnership(userId, project);
+
+        eventService.deleteEvent(userId, eventId);
+
+        verify(replayRepository).deleteAllByEventId(eventId);
+        verify(eventRepository).delete(entity);
+    }
+
+    @Test
+    @DisplayName("Should clear all events for project")
+    void testDeleteAllEventsForProject() {
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+        doNothing().when(projectService).validateOwnership(userId, project);
+
+        eventService.deleteAllEventsForProject(userId, projectId);
+
+        verify(replayRepository).deleteAllByEventProjectId(projectId);
+        verify(eventRepository).deleteAllByProjectId(projectId);
     }
 }

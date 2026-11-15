@@ -32,4 +32,5 @@ public class EventDetailDto {
     private String metadataJson;
     private String requestBody;
     private String responseBody;
+    private Boolean resolved;
 }
