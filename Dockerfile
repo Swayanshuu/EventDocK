@@ -20,7 +20,7 @@ WORKDIR /app
 RUN addgroup -S eventdock && adduser -S eventdock -G eventdock
 USER eventdock:eventdock
 
-COPY --from=builder /workspace/eventdock-api/target/eventdock-api-0.1.0.jar app.jar
+COPY --from=builder /workspace/eventdock-api/target/eventdock-api.jar app.jar
 
 EXPOSE 8080
 
