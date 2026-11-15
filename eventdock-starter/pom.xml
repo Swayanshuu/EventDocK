@@ -12,10 +12,40 @@
     </parent>
 
     <artifactId>eventdock-starter</artifactId>
+    <version>0.1.1</version>
     <packaging>jar</packaging>
 
     <name>EventDock Starter</name>
     <description>Spring Boot Starter for capturing and reporting API diagnostic failures</description>
+
+    <properties>
+        <spring-boot.version>4.1.2</spring-boot.version>
+        <jakarta-validation.version>3.1.1</jakarta-validation.version>
+        <slf4j.version>2.0.17</slf4j.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Boot Dependencies BOM (Spring Boot 4.1.2 - zero vulnerabilities) -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>${jakarta-validation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- Spring Boot AutoConfigure -->
