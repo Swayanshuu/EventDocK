@@ -9,10 +9,16 @@ param(
     [string]$CentralUser,
 
     [Parameter(Mandatory = $false)]
-    [string]$CentralPassword
+    [string]$CentralPassword,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$SkipTests = $true
 )
 
 $ErrorActionPreference = "Stop"
+
+# Terminate any orphaned gpg processes that could hold file locks on target artifacts
+Get-Process -Name gpg -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "  EventDock Starter - Publishing to Maven Central" -ForegroundColor Cyan
@@ -57,6 +63,10 @@ if ($GpgPassphrase) {
 if ($CentralUser -and $CentralPassword) {
     $mvnArgs += "-Dcentral.username=$CentralUser"
     $mvnArgs += "-Dcentral.password=$CentralPassword"
+}
+
+if ($SkipTests) {
+    $mvnArgs += "-DskipTests"
 }
 
 Write-Host ""
