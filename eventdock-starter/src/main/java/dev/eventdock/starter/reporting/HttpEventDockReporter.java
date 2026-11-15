@@ -1,6 +1,8 @@
 package dev.eventdock.starter.reporting;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dev.eventdock.starter.config.EventDockProperties;
 import dev.eventdock.starter.model.DiagnosticEvent;
 import org.slf4j.Logger;
@@ -29,7 +31,7 @@ public class HttpEventDockReporter implements EventDockReporter {
 
     public HttpEventDockReporter(EventDockProperties properties, ObjectMapper objectMapper) {
         this.properties = properties;
-        this.objectMapper = objectMapper != null ? objectMapper : new ObjectMapper();
+        this.objectMapper = configureObjectMapper(objectMapper);
 
         String baseEndpoint = properties.getEndpoint() != null ? properties.getEndpoint().strip() : "https://api.eventdock.swynx.dev";
         if (baseEndpoint.endsWith("/")) {
@@ -96,6 +98,27 @@ public class HttpEventDockReporter implements EventDockReporter {
                     event.getRequestId(), e.getMessage());
             return false;
         }
+    }
+
+    public static ObjectMapper configureObjectMapper(ObjectMapper baseMapper) {
+        ObjectMapper mapper;
+        if (baseMapper != null) {
+            try {
+                mapper = baseMapper.copy();
+            } catch (Exception e) {
+                mapper = baseMapper;
+            }
+        } else {
+            mapper = new ObjectMapper();
+        }
+        mapper.registerModule(new JavaTimeModule());
+        mapper.findAndRegisterModules();
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return mapper;
+    }
+
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
     }
 
     public AsyncEventQueue getAsyncQueue() {

@@ -46,7 +46,7 @@ public class EventDockAutoConfiguration {
     public SensitiveDataRedactor eventDockSensitiveDataRedactor(EventDockProperties properties,
                                                                 ObjectProvider<ObjectMapper> objectMapperProvider) {
         ObjectMapper mapper = objectMapperProvider.getIfAvailable(ObjectMapper::new);
-        return new SensitiveDataRedactor(properties, mapper);
+        return new SensitiveDataRedactor(properties, HttpEventDockReporter.configureObjectMapper(mapper));
     }
 
     @Bean
